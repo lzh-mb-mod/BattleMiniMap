@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+  <tags>
+    <tag language="简体中文" />
+  </tags>
+  <strings>
+    <string id="BattleMiniMap_option_class" text="战场小地图" />
+
+    <string id="BattleMiniMap_map_options" text="地图选项" />
+    <string id="BattleMiniMap_map_width" text="地图宽度" />
+    <string id="BattleMiniMap_map_resolution" text="地图分辨率" />
+  </strings>
+</base>

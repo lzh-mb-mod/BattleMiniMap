@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
+  <strings>
+    <string id="str_battle_mini_map_option_class" text="{=BattleMiniMap_option_class}Battle Mini Map" />
+
+    <string id="str_battle_mini_map_map_options" text="{=BattleMiniMap_map_options}Map options" />
+    <string id="str_battle_mini_map_map_width" text="{=BattleMiniMap_map_width}Map Width" />
+    <string id="str_battle_mini_map_map_resolution" text="{=BattleMiniMap_map_resolution}Map Resolution" />
+  </strings>
+</base>

@@ -1,0 +1,9 @@
+<Prefab>
+  <Variables>
+  </Variables>
+  <VisualDefinitions>
+  </VisualDefinitions>
+  <Window>
+    <BattleMiniMapWidget  WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" />
+  </Window>
+</Prefab>
