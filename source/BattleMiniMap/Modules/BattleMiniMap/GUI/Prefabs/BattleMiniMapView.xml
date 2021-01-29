@@ -18,7 +18,7 @@
         </Widget>
         <BattleMiniMap_CameraMarkerWidget Brush.GlobalAlphaFactor="@AlphaFactor" DataSource="{CameraMarkerLeft}" RotateAngleInRadians="@RotateAngleInRadians" RotateCenter="@RotateCenter" BasePosition="@BasePosition" />
         <BattleMiniMap_CameraMarkerWidget Brush.GlobalAlphaFactor="@AlphaFactor" DataSource="{CameraMarkerRight}" RotateAngleInRadians="@RotateAngleInRadians" RotateCenter="@RotateCenter" BasePosition="@BasePosition" />
-        <BattleMiniMap_BoundaryWidget />
+        <BattleMiniMap_BoundaryWidget Brush.GlobalAlphaFactor="@AlphaFactor" />
       </Children>
     </BattleMiniMap_MapWidget>
   </Window>

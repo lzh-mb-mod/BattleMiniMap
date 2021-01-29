@@ -37,7 +37,7 @@
 
 ## 源代码
 
-源代码应当在本mod的发布包的`source`文件夹内。或者你可以在[github.com](https://github.com/lzh-mb-mod/BattleMiniMap)获取到源代码。
+你可以在[github.com](https://github.com/lzh-mb-mod/BattleMiniMap)获取到源代码。
 
 ## 联系方式
 - 邮箱：

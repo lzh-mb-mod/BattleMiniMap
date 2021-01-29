@@ -35,7 +35,7 @@ This mod does not read or write stuffs to your game save. Installing or removing
 
 ## Source Code
 
-Source code should be available within `source` folder in release of this mod. Or you can get it at [github.com](https://github.com/lzh-mb-mod/BattleMiniMap).
+You can get it at [github.com](https://github.com/lzh-mb-mod/BattleMiniMap).
 
 ## Contact with me
 - Email:

@@ -34,7 +34,7 @@ namespace BattleMiniMap.View.CameraMarker
                                   (BattleMiniMapConfig.Get().WidgetWidth == 0
                                       ? 1
                                       : BattleMiniMapConfig.Get().WidgetWidth);
-            var pen = new Pen(System.Drawing.Color.FromArgb(255, 30, 30, 30), widthOfOnePixel);
+            var pen = new Pen(System.Drawing.Color.FromArgb(255, 30, 30, 30), 2 * widthOfOnePixel);
             graphics.DrawLine(pen, new Point(0, 0), new Point(100, 100));
             return bitmap.CreateTexture();
         }
