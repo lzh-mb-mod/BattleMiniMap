@@ -1,21 +1,12 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-	  <TargetFramework>net472</TargetFramework>
-	  <ProcessorArchitecture>amd64</ProcessorArchitecture>
-	  <LangVersion>8</LangVersion>
-  </PropertyGroup>
+<Project Sdk="Microsoft.NET.Sdk">
 
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+	  <PlatformTarget>x64</PlatformTarget>
+  </PropertyGroup>
 
   <Import Project="$(MSBuildProjectDirectory)\*.props" />
   <Import Project="..\library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.projitems" Label="Shared" />
-  <Import Project="..\library\mission-library\source\MissionSharedLibrary\MissionSharedLibrary.projitems" Label="Shared" />
-  <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.0.4" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\BattleMiniMap.Widgets\BattleMiniMap.Widgets.csproj" />
-    <ProjectReference Include="..\library\mission-library\source\MissionLibrary\MissionLibrary.csproj" />
-  </ItemGroup>
   <ItemGroup>
     <Reference Include="SandBox">
       <HintPath>$(GamePath)Modules\SandBox\bin\Win64_Shipping_Client\SandBox.dll</HintPath>
@@ -28,6 +19,9 @@
     </Reference>
     <Reference Include="SandBox.ViewModelCollection">
       <HintPath>$(GamePath)Modules\SandBox\bin\Win64_Shipping_Client\SandBox.ViewModelCollection.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Numerics.Vectors">
+      <HintPath>$(GamePath)bin\Win64_Shipping_Client\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="TaleWorlds.CampaignSystem">
       <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.CampaignSystem.dll</HintPath>
@@ -126,18 +120,4 @@
       <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.TwoDimension.dll</HintPath>
     </Reference>
   </ItemGroup>
-
-  <Target Name="RemoveModulePackageDir" AfterTargets="BeforeBuild">
-    <Exec Command="rmdir &quot;$(ModulePackagePath)&quot; /s /q" />
-  </Target>
-  
-  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
-    <Exec Command="xcopy &quot;$(TargetDir)MissionLibrary.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
-    <Exec Command="xcopy &quot;$(TargetDir)BattleMiniMap.Widgets.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
-    <Exec Command="xcopy &quot;$(TargetDir)0Harmony.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
-    <Exec Command="xcopy &quot;$(ProjectDir)Modules\.&quot; &quot;$(PackagePath)&quot; /E /C /I /Y /F" />
-    <Exec Command="xcopy &quot;$(ModulePackagePath).&quot; &quot;$(GamePath)Modules\$(ModuleAlias) &quot; /E /C /I /Y /F" />
-  </Target>
-
 </Project>

@@ -6,14 +6,15 @@ using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using Texture = TaleWorlds.TwoDimension.Texture;
 
-namespace BattleMiniMap.View.Map
+namespace BattleMiniMap.View.MapTerrain
 {
-    public class MiniMap
+    public class SimpleMiniMap : IMiniMap
     {
-        public static MiniMap Instance { get; set; }
         public ImageRGBA MapImage { get; private set; }
 
         public Texture MapTexture { get; private set; }
+        public int BitmapWidth { get; private set; }
+        public int BitmapHeight { get; private set; }
 
         public Vec2 MapBoundMin { get; private set; }
         public Vec2 MapBoundMax { get; private set; }
@@ -25,17 +26,15 @@ namespace BattleMiniMap.View.Map
         {
             var scene = mission.Scene;
             var boundaries = mission.Boundaries;
-            Vec2 boundMin = new Vec2(float.MaxValue, float.MaxValue);
-            Vec2 boundMax = new Vec2(float.MinValue, float.MinValue);
+            var boundMin = new Vec2(float.MaxValue, float.MaxValue);
+            var boundMax = new Vec2(float.MinValue, float.MinValue);
             foreach (var boundary in boundaries)
+            foreach (var vec2 in boundary.Value)
             {
-                foreach (var vec2 in boundary.Value)
-                {
-                    boundMin.x = Math.Min(boundMin.x, vec2.x);
-                    boundMin.y = Math.Min(boundMin.y, vec2.y);
-                    boundMax.x = Math.Max(boundMax.x, vec2.x);
-                    boundMax.y = Math.Max(boundMax.y, vec2.y);
-                }
+                boundMin.x = Math.Min(boundMin.x, vec2.x);
+                boundMin.y = Math.Min(boundMin.y, vec2.y);
+                boundMax.x = Math.Max(boundMax.x, vec2.x);
+                boundMax.y = Math.Max(boundMax.y, vec2.y);
             }
 
             if (boundaries.Count == 0)
@@ -43,9 +42,11 @@ namespace BattleMiniMap.View.Map
                 MapBoundMin = new Vec2(0, 0);
                 MapBoundMax = new Vec2(0, 0);
                 MapImage = new ImageRGBA(1, 1);
+                BitmapWidth = BitmapHeight = 1;
                 MapTexture = null;
                 IsEnabled = false;
             }
+
             MapBoundMin = boundMin + new Vec2(-50f, -50f);
             MapBoundMax = boundMax + new Vec2(50f, 50f);
 
@@ -53,9 +54,11 @@ namespace BattleMiniMap.View.Map
             Resolution = BattleMiniMapConfig.Get().Resolution;
             if (Resolution == 0)
                 Resolution = 1;
-            int mapWidth = (int) Math.Abs((MapBoundMax.y - MapBoundMin.y) / Resolution) + 1;
-            int mapHeight = (int) Math.Abs((MapBoundMax.x - MapBoundMin.x) / Resolution) + 1;
-            ImageRGBA newImage = new ImageRGBA(mapWidth, mapHeight);
+            var mapWidth = (int) Math.Abs((MapBoundMax.y - MapBoundMin.y) / Resolution) + 1;
+            var mapHeight = (int) Math.Abs((MapBoundMax.x - MapBoundMin.x) / Resolution) + 1;
+            BitmapWidth = mapWidth;
+            BitmapHeight = mapHeight;
+            var newImage = new ImageRGBA(mapWidth, mapHeight);
             SampleTerrainHeight(scene, newImage, mapWidth, mapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);
             SampleBoundaries(mission, newImage, mapWidth, mapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);
 
@@ -72,31 +75,28 @@ namespace BattleMiniMap.View.Map
             //scene.GetTerrainMinMaxHeight(out var minHeight, out var maxHeight);
             var minHeight = float.MaxValue;
             var maxHeight = float.MinValue;
-            for (int w = 0; w < mapWidth; w++)
+            for (var w = 0; w < mapWidth; w++)
+            for (var h = 0; h < mapHeight; h++)
             {
-                for (int h = 0; h < mapHeight; h++)
-                {
-                    var x = MapToActual(h, resolution, xStart);
-                    var y = MapToActual(w, resolution, yStart);
-                    var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
-                    minHeight = Math.Min(minHeight, terrainHeight);
-                    maxHeight = Math.Max(maxHeight, terrainHeight);
-                }
+                var x = MapToActual(h, resolution, xStart);
+                var y = MapToActual(w, resolution, yStart);
+                var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
+                minHeight = Math.Min(minHeight, terrainHeight);
+                maxHeight = Math.Max(maxHeight, terrainHeight);
             }
-            for (int w = 0; w < mapWidth; w++)
+
+            for (var w = 0; w < mapWidth; w++)
+            for (var h = 0; h < mapHeight; h++)
             {
-                for (int h = 0; h < mapHeight; h++)
-                {
-                    var x = MapToActual(h, resolution, xStart);
-                    var y = MapToActual(w, resolution, yStart);
-                    var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
-                    var factor = (terrainHeight - minHeight) / (Math.Abs(maxHeight - minHeight) + 1);
-                    image.SetRGBA(w, h,
-                        (byte)(factor * (maxR - minR) + minR),
-                        (byte)(factor * (maxG - minG) + minG),
-                        (byte)(factor * (maxB - minB) + minB),
-                        255);
-                }
+                var x = MapToActual(h, resolution, xStart);
+                var y = MapToActual(w, resolution, yStart);
+                var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
+                var factor = (terrainHeight - minHeight) / (Math.Abs(maxHeight - minHeight) + 1);
+                image.SetRGBA(w, h,
+                    (byte) (factor * (maxR - minR) + minR),
+                    (byte) (factor * (maxG - minG) + minG),
+                    (byte) (factor * (maxB - minB) + minB),
+                    255);
             }
         }
 
@@ -105,8 +105,8 @@ namespace BattleMiniMap.View.Map
         {
             foreach (var boundary in mission.Boundaries)
             {
-                Vec2 previousPos = Vec2.Invalid;
-                Vec2 firstPos = Vec2.Invalid;
+                var previousPos = Vec2.Invalid;
+                var firstPos = Vec2.Invalid;
                 int previousPointH = 0, previousPointW = 0;
                 foreach (var vec2 in boundary.Value)
                 {
@@ -135,7 +135,7 @@ namespace BattleMiniMap.View.Map
 
         private static int ActualToMap(float actualPos, float resolution, float actualStart)
         {
-            return (int)((actualPos - actualStart) / resolution);
+            return (int) ((actualPos - actualStart) / resolution);
         }
 
         private static float MapToActual(int mapPos, float resolution, float actualStart)

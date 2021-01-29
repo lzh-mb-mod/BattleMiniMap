@@ -28,9 +28,10 @@ namespace BattleMiniMap
 
         private void Initialize()
         {
-            if (!Initializer.Initialize())
+            if (!Initializer.Initialize(ModuleId))
                 return;
         }
+
         protected override void OnBeforeInitialModuleScreenSetAsRoot()
         {
             base.OnBeforeInitialModuleScreenSetAsRoot();
@@ -43,13 +44,15 @@ namespace BattleMiniMap
         {
             if (!Initializer.SecondInitialize())
                 return false;
-            
+
             Global.GetProvider<AMissionStartingManager>().AddHandler(new MissionStartingHandler());
             var menuClassCollection = AMenuManager.Get().MenuClassCollection;
             AMenuManager.Get().OnMenuClosedEvent += BattleMiniMapConfig.OnMenuClosed;
-            menuClassCollection.AddOptionClass(BattleMiniMapOptionClassFactory.CreateOptionClassProvider(menuClassCollection));
+            menuClassCollection.AddOptionClass(
+                BattleMiniMapOptionClassFactory.CreateOptionClassProvider(menuClassCollection));
             return true;
         }
+
         protected override void OnGameStart(Game game, IGameStarter gameStarterObject)
         {
             base.OnGameStart(game, gameStarterObject);

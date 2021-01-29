@@ -1,11 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
   <strings>
     <string id="str_battle_mini_map_option_class" text="{=BattleMiniMap_option_class}Battle Mini Map" />
 
     <string id="str_battle_mini_map_map_options" text="{=BattleMiniMap_map_options}Map options" />
+    <string id="str_battle_mini_map_show_map" text="{=BattleMiniMap_show_map}Show Map" />
     <string id="str_battle_mini_map_map_width" text="{=BattleMiniMap_map_width}Map Width" />
+
+    <string id="str_battle_mini_map_horizontal_alignment" text="{=BattleMiniMap_horizontal_alignment}Horizontal Alignment" />
+    <string id="str_battle_mini_map_vertical_alignment" text="{=BattleMiniMap_vertical_alignment}Vertical Alignment" />
+    <string id="str_battle_mini_map_position_x" text="{=BattleMiniMap_position_x}Position X" />
+    <string id="str_battle_mini_map_position_y" text="{=BattleMiniMap_position_y}Position Y" />
+
     <string id="str_battle_mini_map_map_resolution" text="{=BattleMiniMap_map_resolution}Map Resolution" />
+    <string id="str_battle_mini_map_opacity" text="{=BattleMiniMap_opacity}Opacity" />
+
+    <string id="str_battle_mini_map_exclude_unwalkable_terrain" text="{=BattleMiniMap_exclude_unwalkable_terrain}Exclude Unwalkable Terrain" />
+
+    <string id="str_battle_min_map_top" text="{=BattleMiniMap_top}Top" />
+    <string id="str_battle_min_map_center" text="{=BattleMiniMap_center}Center" />
+    <string id="str_battle_min_map_bottom" text="{=BattleMiniMap_bottom}Bottom" />
+    <string id="str_battle_min_map_left" text="{=BattleMiniMap_left}Left" />
+    <string id="str_battle_min_map_right" text="{=BattleMiniMap_right}Right" />
   </strings>
 </base>

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
   <tags>
     <tag language="English" />
@@ -8,7 +9,23 @@
     <string id="BattleMiniMap_option_class" text="Battle Mini Map" />
 
     <string id="BattleMiniMap_map_options" text="Map options" />
+    <string id="BattleMiniMap_show_map" text="Show Map" />
     <string id="BattleMiniMap_map_width" text="Map Width" />
+
+    <string id="BattleMiniMap_horizontal_alignment" text="Horizontal Alignment" />
+    <string id="BattleMiniMap_vertical_alignment" text="Vertical Alignment" />
+    <string id="BattleMiniMap_position_x" text="Position X" />
+    <string id="BattleMiniMap_position_y" text="Position Y" />
+
     <string id="BattleMiniMap_map_resolution" text="Map Resolution" />
+    <string id="BattleMiniMap_opacity" text="Opacity" />
+
+    <string id="BattleMiniMap_exclude_unwalkable_terrain" text="Exclude Unwalkable Terrain" />
+
+    <string id="BattleMiniMap_top" text="Top" />
+    <string id="BattleMiniMap_center" text="Center" />
+    <string id="BattleMiniMap_bottom" text="Bottom" />
+    <string id="BattleMiniMap_left" text="Left" />
+    <string id="BattleMiniMap_right" text="Right" />
   </strings>
 </base>

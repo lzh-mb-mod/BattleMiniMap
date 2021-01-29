@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <Module>
-	<Name value = "Battle Mini Map"/>
-	<Id value = "BattleMiniMap"/>
-	<Version value = "v1.0.0"/>
-	<SingleplayerModule value="true"/>
-	<MultiplayerModule value="false"/>
+	<Name value="Battle Mini Map" />
+	<Id value="BattleMiniMap" />
+	<Version value="v1.0.0" />
+	<SingleplayerModule value="true" />
+	<MultiplayerModule value="false" />
 	<DependedModules>
-         <DependedModule Id="Native"/>
-         <DependedModule Id="SandBoxCore"/>
-         <DependedModule Id="Sandbox"/>
-		 <DependedModule Id="StoryMode" />
+		<DependedModule Id="Native" />
+		<DependedModule Id="SandBoxCore" />
+		<DependedModule Id="Sandbox" />
+		<DependedModule Id="StoryMode" />
 	</DependedModules>
 	<SubModules>
 		<SubModule>
-			<Name value = "BattleMiniMapSubModule"/>
-			<DLLName value = "BattleMiniMap.dll"/>
-			<SubModuleClassType value = "BattleMiniMap.BattleMiniMapSubModule"/>
+			<Name value="BattleMiniMapSubModule" />
+			<DLLName value="BattleMiniMap.dll" />
+			<SubModuleClassType value="BattleMiniMap.BattleMiniMapSubModule" />
 			<Tags>
-				<Tag key="DedicatedServerType" value ="none" />
-				<Tag key="IsNoRenderModeElement" value ="false" />
+				<Tag key="DedicatedServerType" value="none" />
+				<Tag key="IsNoRenderModeElement" value="false" />
 			</Tags>
 		</SubModule>
 	</SubModules>
 
-	<Xmls/>
+	<Xmls />
 </Module>

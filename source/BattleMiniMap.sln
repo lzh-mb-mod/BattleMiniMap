@@ -5,10 +5,22 @@ VisualStudioVersion = 16.0.30503.244
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BattleMiniMap", "BattleMiniMap\BattleMiniMap.csproj", "{6AFBAC13-805F-46BA-9FF2-CD34ACF48511}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "BasicSharedLibrary", "library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.shproj", "{035A7C54-5161-4057-BB0D-20D39A607B50}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MissionLibrary", "library\mission-library\source\MissionLibrary\MissionLibrary.csproj", "{BAF7261B-34CF-4D1F-9BAC-4C1EBBD21569}"
+EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "MissionSharedLibrary", "library\mission-library\source\MissionSharedLibrary\MissionSharedLibrary.shproj", "{BB80A10D-E971-4C13-8EA6-F31EF29BA86D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BattleMiniMap.Widgets", "BattleMiniMap.Widgets\BattleMiniMap.Widgets.csproj", "{30980283-FCE8-42B7-B5D5-C4DC9623AD58}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.projitems*{035a7c54-5161-4057-bb0d-20d39a607b50}*SharedItemsImports = 13
+		library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.projitems*{30980283-fce8-42b7-b5d5-c4dc9623ad58}*SharedItemsImports = 5
 		library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.projitems*{6afbac13-805f-46ba-9ff2-cd34acf48511}*SharedItemsImports = 5
 		library\mission-library\source\MissionSharedLibrary\MissionSharedLibrary.projitems*{6afbac13-805f-46ba-9ff2-cd34acf48511}*SharedItemsImports = 5
+		library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.projitems*{baf7261b-34cf-4d1f-9bac-4c1ebbd21569}*SharedItemsImports = 5
+		library\mission-library\source\MissionSharedLibrary\MissionSharedLibrary.projitems*{bb80a10d-e971-4c13-8ea6-f31ef29ba86d}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -19,6 +31,14 @@ Global
 		{6AFBAC13-805F-46BA-9FF2-CD34ACF48511}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6AFBAC13-805F-46BA-9FF2-CD34ACF48511}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6AFBAC13-805F-46BA-9FF2-CD34ACF48511}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAF7261B-34CF-4D1F-9BAC-4C1EBBD21569}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAF7261B-34CF-4D1F-9BAC-4C1EBBD21569}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAF7261B-34CF-4D1F-9BAC-4C1EBBD21569}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAF7261B-34CF-4D1F-9BAC-4C1EBBD21569}.Release|Any CPU.Build.0 = Release|Any CPU
+		{30980283-FCE8-42B7-B5D5-C4DC9623AD58}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30980283-FCE8-42B7-B5D5-C4DC9623AD58}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30980283-FCE8-42B7-B5D5-C4DC9623AD58}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30980283-FCE8-42B7-B5D5-C4DC9623AD58}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -6,10 +6,14 @@ A mod for Mount&Blade II Bannerlord that provides mini map in battle.
 This mod does not read or write stuffs to your game save. Installing or removing this mod has no impact on your game save.
 
 ## Features
-- 
+- Show units position in the minimap.
+
+- Display terrain height in different colors.
 
 ## How to Use
-- 
+- The map is shown by default after installation.
+
+- You can press `L` during a battle to open the mod menu and change the size, position, resolution and opacity of the map.
 ## Troubleshoot
 - If the launcher can not start:
 

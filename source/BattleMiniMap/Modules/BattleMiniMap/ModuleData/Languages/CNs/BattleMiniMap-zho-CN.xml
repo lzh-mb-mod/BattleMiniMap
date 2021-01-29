@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+
+<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
   <tags>
     <tag language="简体中文" />
@@ -8,7 +9,23 @@
     <string id="BattleMiniMap_option_class" text="战场小地图" />
 
     <string id="BattleMiniMap_map_options" text="地图选项" />
+    <string id="BattleMiniMap_show_map" text="显示地图" />
     <string id="BattleMiniMap_map_width" text="地图宽度" />
+
+    <string id="BattleMiniMap_horizontal_alignment" text="水平对齐方向" />
+    <string id="BattleMiniMap_vertical_alignment" text="垂直对齐方向" />
+    <string id="BattleMiniMap_position_x" text="地图坐标X" />
+    <string id="BattleMiniMap_position_y" text="地图坐标Y" />
+
     <string id="BattleMiniMap_map_resolution" text="地图分辨率" />
+    <string id="BattleMiniMap_opacity" text="不透明度" />
+
+    <string id="BattleMiniMap_exclude_unwalkable_terrain" text="排除不可行走地形" />
+
+    <string id="BattleMiniMap_top" text="上" />
+    <string id="BattleMiniMap_center" text="中" />
+    <string id="BattleMiniMap_bottom" text="下" />
+    <string id="BattleMiniMap_left" text="左" />
+    <string id="BattleMiniMap_right" text="右" />
   </strings>
 </base>
