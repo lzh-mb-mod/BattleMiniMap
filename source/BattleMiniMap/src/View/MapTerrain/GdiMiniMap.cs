@@ -134,7 +134,9 @@ namespace BattleMiniMap.View.MapTerrain
                 {
                     var pos = this.MapToWorld(new Point(w, h));
                     var terrainHeight = scene.GetTerrainHeight(pos);
-                    if (scene.GetNavMeshFaceIndex(pos.ToVec3(terrainHeight), true) != -1)
+                    PathFaceRecord faceRecord = PathFaceRecord.NullFaceRecord;
+                    scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
+                    if (faceRecord.IsValid())
                     {
                         image.SetPixel(w, h,
                             terrainHeight >= waterLevel
@@ -145,12 +147,15 @@ namespace BattleMiniMap.View.MapTerrain
                     var groundHeight = waterLevel;
                     scene.GetHeightAtPoint(pos, BodyFlags.CommonCollisionExcludeFlags, ref groundHeight);
                     if (BattleMiniMapConfig.Get().ExcludeUnwalkableTerrain && groundHeight >= waterLevel &&
-                        Math.Abs(groundHeight - terrainHeight) < 0.1f &&
-                        scene.GetNavMeshFaceIndex(pos.ToVec3(groundHeight), true) == -1)
+                        Math.Abs(groundHeight - terrainHeight) < 0.1f)
                     {
-                        image.SetPixel(w, h,
-                            Color.FromArgb(0, 0, 0, 0));
-                        continue;
+                        scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
+                        if (!faceRecord.IsValid())
+                        {
+                            image.SetPixel(w, h,
+                                Color.FromArgb(0, 0, 0, 0));
+                            continue;
+                        }
                     }
 
                     image.SetPixel(w, h,
