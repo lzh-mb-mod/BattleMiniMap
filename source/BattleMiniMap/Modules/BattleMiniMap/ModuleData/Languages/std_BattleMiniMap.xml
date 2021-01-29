@@ -18,7 +18,8 @@
     <string id="BattleMiniMap_position_y" text="Position Y" />
 
     <string id="BattleMiniMap_map_resolution" text="Map Resolution" />
-    <string id="BattleMiniMap_opacity" text="Opacity" />
+    <string id="BattleMiniMap_background_opacity" text="Background Opacity" />
+    <string id="BattleMiniMap_foreground_opacity" text="Foreground Opacity" />
 
     <string id="BattleMiniMap_exclude_unwalkable_terrain" text="Exclude Unwalkable Terrain" />
 

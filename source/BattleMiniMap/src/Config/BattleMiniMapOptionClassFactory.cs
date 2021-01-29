@@ -59,8 +59,11 @@ namespace BattleMiniMap.Config
                     GameTexts.FindText("str_battle_mini_map_map_resolution"), null,
                     () => BattleMiniMapConfig.Get().Resolution,
                     f => { BattleMiniMapConfig.Get().Resolution = f; }, 0.5f, 50, false, true));
-                optionCategory.AddOption(new NumericOptionViewModel(GameTexts.FindText("str_battle_mini_map_opacity"),
-                    null, () => BattleMiniMapConfig.Get().Opacity, f => BattleMiniMapConfig.Get().Opacity = f,
+                optionCategory.AddOption(new NumericOptionViewModel(GameTexts.FindText("str_battle_mini_map_background_opacity"),
+                    null, () => BattleMiniMapConfig.Get().BackgroundOpacity, f => BattleMiniMapConfig.Get().BackgroundOpacity = f,
+                    0, 1, false, true));
+                optionCategory.AddOption(new NumericOptionViewModel(GameTexts.FindText("str_battle_mini_map_foreground_opacity"),
+                    null, () => BattleMiniMapConfig.Get().ForegroundOpacity, f => BattleMiniMapConfig.Get().ForegroundOpacity = f,
                     0, 1, false, true));
                 optionCategory.AddOption(new BoolOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_exclude_unwalkable_terrain"), null,

@@ -56,7 +56,7 @@ namespace BattleMiniMap.View.Map
         public void Update()
         {
             UpdateAgentMarkers();
-            AlphaFactor = BattleMiniMapConfig.Get().Opacity;
+            AlphaFactor = BattleMiniMapConfig.Get().BackgroundOpacity;
             if (!IsEnabled)
                 return;
             CameraMarkerLeft.Update();

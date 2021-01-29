@@ -88,7 +88,7 @@ namespace BattleMiniMap.View.CameraMarker
 
         public void Update()
         {
-            AlphaFactor = BattleMiniMapConfig.Get().Opacity;
+            AlphaFactor = BattleMiniMapConfig.Get().ForegroundOpacity;
             var direction = _missionScreen.CombatCamera.Direction;
             var fov = _missionScreen.CombatCamera.HorizontalFov;
             var right = direction.AsVec2.Normalized().RightVec().ToVec3();

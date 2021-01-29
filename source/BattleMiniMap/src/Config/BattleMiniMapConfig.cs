@@ -27,7 +27,9 @@ namespace BattleMiniMap.Config
 
         public int PositionY { get; set; } = 10;
 
-        public float Opacity { get; set; } = 0.5f;
+        public float BackgroundOpacity { get; set; } = 0.5f;
+
+        public float ForegroundOpacity { get; set; } = 0.8f;
 
         public bool ExcludeUnwalkableTerrain { get; set; } = false;
 
@@ -44,7 +46,8 @@ namespace BattleMiniMap.Config
             VerticalAlignment = other.VerticalAlignment;
             PositionX = other.PositionX;
             PositionY = other.PositionY;
-            Opacity = other.Opacity;
+            BackgroundOpacity = other.BackgroundOpacity;
+            ForegroundOpacity = other.ForegroundOpacity;
             ExcludeUnwalkableTerrain = other.ExcludeUnwalkableTerrain;
         }
 

@@ -87,7 +87,9 @@ namespace BattleMiniMap.View.AgentMarker
 
         public void Update()
         {
-            AlphaFactor = BattleMiniMapConfig.Get().Opacity;
+            AlphaFactor = AgentMarkerType == AgentMarkerType.Dead
+                ? BattleMiniMapConfig.Get().BackgroundOpacity
+                : BattleMiniMapConfig.Get().ForegroundOpacity;
             if (AgentMarkerType == AgentMarkerType.Dead)
                 return;
 

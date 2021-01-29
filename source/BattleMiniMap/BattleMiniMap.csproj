@@ -10,9 +10,6 @@
   <Import Project="..\library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.projitems" Label="Shared" />
   <Import Project="..\library\mission-library\source\MissionSharedLibrary\MissionSharedLibrary.projitems" Label="Shared" />
   <ItemGroup>
-    <PackageReference Include="Lib.Harmony" Version="2.0.4" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\BattleMiniMap.Widgets\BattleMiniMap.Widgets.csproj" />
     <ProjectReference Include="..\library\mission-library\source\MissionLibrary\MissionLibrary.csproj" />
   </ItemGroup>
@@ -138,7 +135,6 @@
     <Exec Command="xcopy &quot;$(TargetPath)&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
     <Exec Command="xcopy &quot;$(TargetDir)MissionLibrary.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
     <Exec Command="xcopy &quot;$(TargetDir)BattleMiniMap.Widgets.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
-    <Exec Command="xcopy &quot;$(TargetDir)0Harmony.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
     <Exec Command="xcopy &quot;$(ProjectDir)Modules\.&quot; &quot;$(PackagePath)&quot; /E /C /I /Y /F" />
     <Exec Command="xcopy &quot;$(ModulePackagePath).&quot; &quot;$(GamePath)Modules\$(ModuleAlias) &quot; /E /C /I /Y /F" />
   </Target>

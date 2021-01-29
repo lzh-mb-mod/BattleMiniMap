@@ -9,7 +9,7 @@ namespace BattleMiniMap.View.AgentMarker.Colors
         {
             if (!agent.IsActive())
             {
-                return new Color(0.3f, 0.3f, 0.3f, 0.4f);
+                return new Color(0.3f, 0.3f, 0.3f, 0.8f);
             }
             if (agent.IsHuman)
             {
