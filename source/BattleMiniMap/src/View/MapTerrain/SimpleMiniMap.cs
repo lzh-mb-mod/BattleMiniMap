@@ -22,21 +22,21 @@ namespace BattleMiniMap.View.MapTerrain
         public float EdgeOpacityFactor { get; set; }
 
         public bool IsEnabled { get; private set; }
+        public bool ExcludeUnwalkableTerrain { get; private set; }
 
-        public void UpdateMapImage(Mission mission)
+        public void InitializeMapRange(Mission mission, bool updateMap = false)
         {
-            var scene = mission.Scene;
             var boundaries = mission.Boundaries;
             var boundMin = new Vec2(float.MaxValue, float.MaxValue);
             var boundMax = new Vec2(float.MinValue, float.MinValue);
             foreach (var boundary in boundaries)
-            foreach (var vec2 in boundary.Value)
-            {
-                boundMin.x = Math.Min(boundMin.x, vec2.x);
-                boundMin.y = Math.Min(boundMin.y, vec2.y);
-                boundMax.x = Math.Max(boundMax.x, vec2.x);
-                boundMax.y = Math.Max(boundMax.y, vec2.y);
-            }
+                foreach (var vec2 in boundary.Value)
+                {
+                    boundMin.x = Math.Min(boundMin.x, vec2.x);
+                    boundMin.y = Math.Min(boundMin.y, vec2.y);
+                    boundMax.x = Math.Max(boundMax.x, vec2.x);
+                    boundMax.y = Math.Max(boundMax.y, vec2.y);
+                }
 
             if (boundaries.Count == 0)
             {
@@ -51,17 +51,30 @@ namespace BattleMiniMap.View.MapTerrain
             MapBoundMin = boundMin + new Vec2(-50f, -50f);
             MapBoundMax = boundMax + new Vec2(50f, 50f);
 
+            if (updateMap)
+                UpdateMapSize(mission, true);
+        }
 
+        public void UpdateMapSize(Mission mission, bool updateMap = false)
+        {
             Resolution = BattleMiniMapConfig.Get().Resolution;
             if (Resolution == 0)
                 Resolution = 1;
-            var mapWidth = (int) Math.Abs((MapBoundMax.y - MapBoundMin.y) / Resolution) + 1;
-            var mapHeight = (int) Math.Abs((MapBoundMax.x - MapBoundMin.x) / Resolution) + 1;
+            var mapWidth = (int)Math.Abs((MapBoundMax.y - MapBoundMin.y) / Resolution) + 1;
+            var mapHeight = (int)Math.Abs((MapBoundMax.x - MapBoundMin.x) / Resolution) + 1;
             BitmapWidth = mapWidth;
             BitmapHeight = mapHeight;
-            var newImage = new ImageRGBA(mapWidth, mapHeight);
-            SampleTerrainHeight(scene, newImage, mapWidth, mapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);
-            SampleBoundaries(mission, newImage, mapWidth, mapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);
+
+            if (updateMap)
+                UpdateMapImage(mission);
+        }
+
+        public void UpdateMapImage(Mission mission)
+        {
+            var scene = mission.Scene;
+            var newImage = new ImageRGBA(BitmapWidth, BitmapHeight);
+            SampleTerrainHeight(scene, newImage, BitmapWidth, BitmapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);
+            SampleBoundaries(mission, newImage, BitmapWidth, BitmapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);
 
             MapImage = newImage;
             MapTexture = MapImage.CreateTexture();
@@ -70,6 +83,11 @@ namespace BattleMiniMap.View.MapTerrain
 
         public void UpdateEdgeOpacity()
         {
+        }
+
+        public int GetEdgeAlpha(int w, int h, float edgeOpacityFactor)
+        {
+            return 255;
         }
 
         private static void SampleTerrainHeight(Scene scene, ImageRGBA image, float mapWidth, float mapHeight,
@@ -81,28 +99,28 @@ namespace BattleMiniMap.View.MapTerrain
             var minHeight = float.MaxValue;
             var maxHeight = float.MinValue;
             for (var w = 0; w < mapWidth; w++)
-            for (var h = 0; h < mapHeight; h++)
-            {
-                var x = MapToActual(h, resolution, xStart);
-                var y = MapToActual(w, resolution, yStart);
-                var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
-                minHeight = Math.Min(minHeight, terrainHeight);
-                maxHeight = Math.Max(maxHeight, terrainHeight);
-            }
+                for (var h = 0; h < mapHeight; h++)
+                {
+                    var x = MapToActual(h, resolution, xStart);
+                    var y = MapToActual(w, resolution, yStart);
+                    var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
+                    minHeight = Math.Min(minHeight, terrainHeight);
+                    maxHeight = Math.Max(maxHeight, terrainHeight);
+                }
 
             for (var w = 0; w < mapWidth; w++)
-            for (var h = 0; h < mapHeight; h++)
-            {
-                var x = MapToActual(h, resolution, xStart);
-                var y = MapToActual(w, resolution, yStart);
-                var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
-                var factor = (terrainHeight - minHeight) / (Math.Abs(maxHeight - minHeight) + 1);
-                image.SetRGBA(w, h,
-                    (byte) (factor * (maxR - minR) + minR),
-                    (byte) (factor * (maxG - minG) + minG),
-                    (byte) (factor * (maxB - minB) + minB),
-                    255);
-            }
+                for (var h = 0; h < mapHeight; h++)
+                {
+                    var x = MapToActual(h, resolution, xStart);
+                    var y = MapToActual(w, resolution, yStart);
+                    var terrainHeight = scene.GetTerrainHeight(new Vec2(x, y));
+                    var factor = (terrainHeight - minHeight) / (Math.Abs(maxHeight - minHeight) + 1);
+                    image.SetRGBA(w, h,
+                        (byte)(factor * (maxR - minR) + minR),
+                        (byte)(factor * (maxG - minG) + minG),
+                        (byte)(factor * (maxB - minB) + minB),
+                        255);
+                }
         }
 
         private static void SampleBoundaries(Mission mission, ImageRGBA image, float mapWidth, float mapHeight,
@@ -140,7 +158,7 @@ namespace BattleMiniMap.View.MapTerrain
 
         private static int ActualToMap(float actualPos, float resolution, float actualStart)
         {
-            return (int) ((actualPos - actualStart) / resolution);
+            return (int)((actualPos - actualStart) / resolution);
         }
 
         private static float MapToActual(int mapPos, float resolution, float actualStart)

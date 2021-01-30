@@ -113,21 +113,24 @@ namespace BattleMiniMap.View.AgentMarker
 
         private void UpdateMarker()
         {
+            AgentMarkerType = _agent.GetAgentMarkerType();
+            if (AgentMarkerType == AgentMarkerType.Dead)
+            {
+                MakeDead();
+                return;
+            }
             var miniMap = MiniMap.Instance;
             if (!miniMap.IsEnabled && !BattleMiniMapConfig.Get().ShowMap)
                 return;
             Position = miniMap.MapToWidget(miniMap.WorldToMapF(_agent.Position.AsVec2));
-            //DirectionAsAngle = -_agent.GetMovementDirection().AsVec2.Normalized().AngleBetween(new Vec2(-1, 0));
-            AgentMarkerType = _agent.GetAgentMarkerType();
             Color = AgentMarkerColorGenerator.GetAgentMarkerColor(_agent);
-            if (AgentMarkerType == AgentMarkerType.Dead)
-            {
-                MakeDead();
-            }
+            //DirectionAsAngle = -_agent.GetMovementDirection().AsVec2.Normalized().AngleBetween(new Vec2(-1, 0));
         }
 
         private void MakeDead()
         {
+            Position = MiniMap.Instance.MapToWidget(MiniMap.Instance.WorldToMapF(_agent.Position.AsVec2));
+            Color = AgentMarkerColorGenerator.GetAgentMarkerColor(_agent);
             _agent = null;
         }
     }

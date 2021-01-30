@@ -48,7 +48,7 @@ namespace BattleMiniMap.View.Boundary
                 var previousPos = Vec2.Invalid;
                 var firstPos = Vec2.Invalid;
                 Point previousPoint = new Point();
-                var pen = new Pen(System.Drawing.Color.FromArgb(255, 179, 30, 9), 2 * widthOfOnePixel);
+                var pen = new Pen(System.Drawing.Color.FromArgb(128, 179, 30, 9), 2 * widthOfOnePixel);
                 foreach (var vec2 in boundary.Value)
                 {
                     if (!previousPos.IsValid)

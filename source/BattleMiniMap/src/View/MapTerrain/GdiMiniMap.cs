@@ -54,15 +54,15 @@ namespace BattleMiniMap.View.MapTerrain
         public Vec2 MapBoundMin { get; private set; }
         public Vec2 MapBoundMax { get; private set; }
         public float Resolution { get; private set; }
-        public float EdgeOpacityFactor { get; set; }
+        public float EdgeOpacityFactor { get; private set; }
 
         public bool IsEnabled { get; private set; }
+        public bool ExcludeUnwalkableTerrain { get; private set; }
 
         public event Action OnTextureSizeChanged;
 
-        public void UpdateMapImage(Mission mission)
+        public void InitializeMapRange(Mission mission, bool updateMap = false)
         {
-            var scene = mission.Scene;
             var boundaries = mission.Boundaries;
             var boundMin = new Vec2(float.MaxValue, float.MaxValue);
             var boundMax = new Vec2(float.MinValue, float.MinValue);
@@ -86,27 +86,49 @@ namespace BattleMiniMap.View.MapTerrain
                 return;
             }
 
+            IsEnabled = true;
             MapBoundMin = boundMin + new Vec2(-50f, -50f);
             MapBoundMax = boundMax + new Vec2(50f, 50f);
 
+            if (updateMap)
+                UpdateMapSize(mission, true);
+        }
+
+        public void UpdateMapSize(Mission mission, bool updateMap = false)
+        {
+            if (!IsEnabled)
+                return;
 
             Resolution = BattleMiniMapConfig.Get().Resolution;
             if (Resolution == 0)
                 Resolution = 1;
-            EdgeOpacityFactor = BattleMiniMapConfig.Get().EdgeOpacityFactor;
             var mapWidth = (int)Math.Abs((MapBoundMax.y - MapBoundMin.y) / Resolution) + 1;
             var mapHeight = (int)Math.Abs((MapBoundMax.x - MapBoundMin.x) / Resolution) + 1;
+            bool changed = BitmapWidth != mapWidth || BitmapHeight != mapHeight;
+
             BitmapWidth = mapWidth;
             BitmapHeight = mapHeight;
-            var bitmap = new Bitmap(mapWidth, mapHeight, PixelFormat.Format32bppArgb);
+            if (changed)
+                OnTextureSizeChanged?.Invoke();
 
-            SampleTerrainHeight(scene, bitmap, mapWidth, mapHeight);
+            if (updateMap)
+                UpdateMapImage(mission);
+        }
+
+        public void UpdateMapImage(Mission mission)
+        {
+            if (!IsEnabled)
+                return;
+
+            var scene = mission.Scene;
+            var bitmap = new Bitmap(BitmapWidth, BitmapHeight, PixelFormat.Format32bppArgb);
+
+            EdgeOpacityFactor = BattleMiniMapConfig.Get().EdgeOpacityFactor;
+            ExcludeUnwalkableTerrain = BattleMiniMapConfig.Get().ExcludeUnwalkableTerrain;
+            SampleTerrainHeight(scene, bitmap, BitmapWidth, BitmapHeight);
 
             MapImage = bitmap;
             MapTexture = MapImage.CreateTexture();
-            IsEnabled = true;
-
-            OnTextureSizeChanged?.Invoke();
         }
 
         public void UpdateEdgeOpacity()
@@ -116,11 +138,14 @@ namespace BattleMiniMap.View.MapTerrain
 
             EdgeOpacityFactor = BattleMiniMapConfig.Get().EdgeOpacityFactor;
             for (var w = 0; w < BitmapWidth; w++)
-            for (var h = 0; h < BitmapHeight; h++)
-            {
-                var color = MapImage.GetPixel(w, h);
-                MapImage.SetPixel(w, h, Color.FromArgb(GetAlpha(BitmapWidth, BitmapHeight, w, h, EdgeOpacityFactor), color));
-            }
+                for (var h = 0; h < BitmapHeight; h++)
+                {
+                    var color = MapImage.GetPixel(w, h);
+                    if (color != Color.FromArgb(0, 0, 0, 0))
+                        MapImage.SetPixel(w, h,
+                            Color.FromArgb(GetEdgeAlpha(w, h, EdgeOpacityFactor), color.R,
+                                color.G, color.B));
+                }
 
             MapTexture = MapImage.CreateTexture();
         }
@@ -148,8 +173,6 @@ namespace BattleMiniMap.View.MapTerrain
             if (waterLevel < minHeight)
                 waterLevel = minHeight;
 
-            var edgeOpacityFactor = BattleMiniMapConfig.Get().EdgeOpacityFactor;
-
             for (var w = 0; w < mapWidth; w++)
                 for (var h = 0; h < mapHeight; h++)
                 {
@@ -159,13 +182,13 @@ namespace BattleMiniMap.View.MapTerrain
                     scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
                     if (faceRecord.IsValid())
                     {
-                        SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, waterLevel, edgeOpacityFactor);
+                        SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, waterLevel, EdgeOpacityFactor);
 
                         continue;
                     }
                     var groundHeight = waterLevel;
                     scene.GetHeightAtPoint(pos, BodyFlags.CommonCollisionExcludeFlags, ref groundHeight);
-                    if (BattleMiniMapConfig.Get().ExcludeUnwalkableTerrain && groundHeight >= waterLevel &&
+                    if (ExcludeUnwalkableTerrain && groundHeight >= waterLevel &&
                         Math.Abs(groundHeight - terrainHeight) < 0.1f)
                     {
                         scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
@@ -177,7 +200,7 @@ namespace BattleMiniMap.View.MapTerrain
                         }
                     }
 
-                    SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, waterLevel, edgeOpacityFactor);
+                    SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, waterLevel, EdgeOpacityFactor);
                 }
         }
 
@@ -186,30 +209,21 @@ namespace BattleMiniMap.View.MapTerrain
             var color = height >= waterLevel
                 ? AboveWater.GetColor((height - waterLevel) / 190)
                 : BelowWater.GetColor((waterLevel - height) / 8);
-            var x = Math.Abs(edgeOpacityFactor - 1) < 0.01f
-                ? 0
-                : MathF.Clamp((Math.Abs((float) w / mapWidth - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor),
-                    0, 1);
-            var y = Math.Abs(edgeOpacityFactor - 1) < 0.01f
-                ? 0
-                : MathF.Clamp(
-                    (Math.Abs((float) h / mapHeight - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor), 0, 1);
-            var alpha = MathF.Sqrt(Math.Max(1 - x * x - y * y, 0));
             image.SetPixel(w, h,
-                Color.FromArgb(GetAlpha(mapWidth, mapHeight, w, h, edgeOpacityFactor), color));
+                Color.FromArgb(Math.Min(GetEdgeAlpha(w, h, edgeOpacityFactor), color.A), color.R, color.G, color.B));
         }
 
-        private int GetAlpha(int mapWidth, int mapHeight, int w, int h, float edgeOpacityFactor)
+        public int GetEdgeAlpha(int w, int h, float edgeOpacityFactor)
         {
             var x = Math.Abs(edgeOpacityFactor - 1) < 0.01f
                 ? 0
-                : MathF.Clamp((Math.Abs((float)w / mapWidth - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor),
+                : MathF.Clamp((Math.Abs((float)w / BitmapWidth - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor),
                     0, 1);
             var y = Math.Abs(edgeOpacityFactor - 1) < 0.01f
                 ? 0
                 : MathF.Clamp(
-                    (Math.Abs((float)h / mapHeight - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor), 0, 1);
-            return (int) (MathF.Sqrt(Math.Max(1 - x * x - y * y, 0)) * 255);
+                    (Math.Abs((float)h / BitmapHeight - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor), 0, 1);
+            return (int)(MathF.Sqrt(Math.Max(1 - x * x - y * y, 0)) * 255);
         }
     }
 }

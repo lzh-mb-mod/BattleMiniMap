@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.0.2] 2020-01-30
+### Fixed
+- Fix several bugs.
+
 ## [v1.0.1] 2021-01-30
 
 ### Fixed
