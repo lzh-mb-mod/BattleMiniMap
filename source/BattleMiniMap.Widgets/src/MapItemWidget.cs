@@ -8,11 +8,13 @@ using TaleWorlds.TwoDimension;
 
 namespace BattleMiniMap.Widgets
 {
-    public abstract class MapItemWidget : ImageWidget
+    public abstract class MapItemWidget : BrushWidget
     {
         protected DrawObject2D CachedMesh;
 
         public abstract Texture Texture { get; }
+
+        public int Layer { get; set; } = 1;
 
         protected MapItemWidget(UIContext context) : base(context)
         {
@@ -57,7 +59,8 @@ namespace BattleMiniMap.Widgets
                 simpleMaterial.CircularMaskingRadius = drawContext.CircularMaskRadius;
                 simpleMaterial.CircularMaskingSmoothingRadius = drawContext.CircularMaskSmoothingRadius;
             }
-            drawContext.Draw(GlobalPosition.X, GlobalPosition.Y, simpleMaterial, CachedMesh, Size.X, Size.Y);
+            //drawContext.Draw(GlobalPosition.X, GlobalPosition.Y, simpleMaterial, CachedMesh, Size.X, Size.Y);
+            twoDimensionContext.Draw(GlobalPosition.X, GlobalPosition.Y, simpleMaterial, CachedMesh, Layer);
         }
 
         protected virtual void UpdateDrawObject2D()

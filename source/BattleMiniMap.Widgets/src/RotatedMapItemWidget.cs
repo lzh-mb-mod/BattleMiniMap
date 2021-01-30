@@ -40,6 +40,7 @@ namespace BattleMiniMap.Widgets
         {
             HorizontalAlignment = HorizontalAlignment.Left;
             VerticalAlignment = VerticalAlignment.Top;
+            Layer = 6;
         }
 
         protected override void UpdateDrawObject2D()
