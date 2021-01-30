@@ -19,6 +19,7 @@ namespace BattleMiniMap.View.MapTerrain
         public Vec2 MapBoundMin { get; private set; }
         public Vec2 MapBoundMax { get; private set; }
         public float Resolution { get; private set; }
+        public float EdgeOpacityFactor { get; set; }
 
         public bool IsEnabled { get; private set; }
 
@@ -65,6 +66,10 @@ namespace BattleMiniMap.View.MapTerrain
             MapImage = newImage;
             MapTexture = MapImage.CreateTexture();
             IsEnabled = true;
+        }
+
+        public void UpdateEdgeOpacity()
+        {
         }
 
         private static void SampleTerrainHeight(Scene scene, ImageRGBA image, float mapWidth, float mapHeight,

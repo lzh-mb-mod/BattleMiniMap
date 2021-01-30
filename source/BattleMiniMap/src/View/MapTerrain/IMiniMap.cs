@@ -13,8 +13,10 @@ namespace BattleMiniMap.View.MapTerrain
         public Vec2 MapBoundMin { get; }
         public Vec2 MapBoundMax { get; }
         public float Resolution { get; }
+        public float EdgeOpacityFactor { get; }
         bool IsEnabled { get; }
         void UpdateMapImage(Mission mission);
+        void UpdateEdgeOpacity();
     }
 
     public static class MiniMap

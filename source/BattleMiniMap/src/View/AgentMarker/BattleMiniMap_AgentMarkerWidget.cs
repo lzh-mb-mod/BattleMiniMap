@@ -11,25 +11,37 @@ namespace BattleMiniMap.View.AgentMarker
 {
     public class BattleMiniMap_AgentMarkerWidget : MapItemWidget
     {
-        private Vec2 _basePosition1;
-
+        private AgentMarkerType _agentMarkerType;
         public override Texture Texture => AgentMarkerType.GetTexture();
 
-        public AgentMarkerType AgentMarkerType { get; set; }
-
-        public Vec2 Center { get; set; }
-        public Vec2 ActualCenter => new Vec2(Center.x * SuggestedWidth, Center.y * SuggestedHeight);
-
-        public Vec2 BasePosition
+        public AgentMarkerType AgentMarkerType
         {
-            get => _basePosition1;
+            get => _agentMarkerType;
             set
             {
-                _basePosition1 = value;
-                PositionXOffset = _basePosition1.x - ActualCenter.x;
-                PositionYOffset = _basePosition1.y - ActualCenter.y;
+                _agentMarkerType = value;
+                switch (value)
+                {
+                    case AgentMarkerType.Dead:
+                        Layer = 2;
+                        break;
+                    case AgentMarkerType.Ranged:
+                    case AgentMarkerType.Melee:
+                        Layer = 5;
+                        break;
+                    case AgentMarkerType.Horse:
+                        Layer = 4;
+                        break;
+                    case AgentMarkerType.Other:
+                        Layer = 3;
+                        break;
+                }
             }
         }
+
+        public Vec2 Center { get; set; }
+
+        public Vec2 BasePosition { get; set; }
 
         public BattleMiniMap_AgentMarkerWidget(UIContext context) : base(context)
         {
@@ -50,8 +62,10 @@ namespace BattleMiniMap.View.AgentMarker
             {
                 var width = BattleMiniMapConfig.Get().WidgetWidth;
 
-                SuggestedWidth = Math.Max(width * 0.02f, 1);
-                SuggestedHeight = Math.Max(width * 0.02f, 1);
+                SuggestedWidth = Math.Max(width * 0.01f, 1);
+                SuggestedHeight = Math.Max(width * 0.01f, 1);
+                PositionXOffset = BasePosition.x - Center.x * SuggestedWidth;
+                PositionYOffset = BasePosition.y - Center.y * SuggestedHeight;
                 IsEnabled = MiniMap.Instance.IsEnabled;
             }
         }

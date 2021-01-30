@@ -15,8 +15,6 @@ namespace BattleMiniMap.Config
         public string ConfigVersion { get; set; } = BinaryVersion.ToString();
 
         public bool ShowMap { get; set; } = true;
-
-        public float Resolution { get; set; } = 1;
         public int WidgetWidth { get; set; } = 400;
 
         public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
@@ -26,6 +24,10 @@ namespace BattleMiniMap.Config
         public int PositionX { get; set; } = 10;
 
         public int PositionY { get; set; } = 10;
+
+        public float Resolution { get; set; } = 1;
+
+        public float EdgeOpacityFactor { get; set; } = 0.5f;
 
         public float BackgroundOpacity { get; set; } = 0.5f;
 
@@ -40,12 +42,13 @@ namespace BattleMiniMap.Config
         {
             ConfigVersion = other.ConfigVersion;
             ShowMap = other.ShowMap;
-            Resolution = other.Resolution;
             WidgetWidth = other.WidgetWidth;
             HorizontalAlignment = other.HorizontalAlignment;
             VerticalAlignment = other.VerticalAlignment;
             PositionX = other.PositionX;
             PositionY = other.PositionY;
+            Resolution = other.Resolution;
+            EdgeOpacityFactor = other.EdgeOpacityFactor;
             BackgroundOpacity = other.BackgroundOpacity;
             ForegroundOpacity = other.ForegroundOpacity;
             ExcludeUnwalkableTerrain = other.ExcludeUnwalkableTerrain;
@@ -59,6 +62,8 @@ namespace BattleMiniMap.Config
         {
             if (Math.Abs(MiniMap.Instance.Resolution - Get().Resolution) > 0.001f)
                 MiniMap.Instance.UpdateMapImage(Mission.Current);
+            if (Math.Abs(MiniMap.Instance.EdgeOpacityFactor - Get().EdgeOpacityFactor) > 0.001f)
+                MiniMap.Instance.UpdateEdgeOpacity();
             Get().Serialize();
         }
     }
