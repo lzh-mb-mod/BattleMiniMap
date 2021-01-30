@@ -19,7 +19,7 @@ namespace BattleMiniMap.View.Map
         {
             base.OnBehaviourInitialize();
 
-            MiniMap.Instance.UpdateMapImage(Mission);
+            MiniMap.Instance.InitializeMapRange(Mission.Current, true);
             _dataSource = new BattleMiniMapViewModel(MissionScreen);
             Mission.Current.Boundaries.CollectionChanged += BoundariesOnCollectionChanged;
         }
@@ -41,8 +41,7 @@ namespace BattleMiniMap.View.Map
             _dataSource.IsEnabled = MiniMap.Instance.IsEnabled && BattleMiniMapConfig.Get().ShowMap;
             if (!MiniMap.Instance.IsEnabled && _boundaryChanged)
             {
-                _boundaryChanged = false;
-                MiniMap.Instance.UpdateMapImage(Mission);
+                MiniMap.Instance.InitializeMapRange(Mission.Current, BattleMiniMapConfig.Get().ShowMap);
             }
 
             if (_timer.Check(true))

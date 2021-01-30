@@ -15,8 +15,12 @@ namespace BattleMiniMap.View.MapTerrain
         public float Resolution { get; }
         public float EdgeOpacityFactor { get; }
         bool IsEnabled { get; }
+        bool ExcludeUnwalkableTerrain { get; }
+        void InitializeMapRange(Mission mission, bool updateMap = false);
+        void UpdateMapSize(Mission mission, bool updateMap = false);
         void UpdateMapImage(Mission mission);
         void UpdateEdgeOpacity();
+        int GetEdgeAlpha(int w, int h, float edgeOpacityFactor);
     }
 
     public static class MiniMap

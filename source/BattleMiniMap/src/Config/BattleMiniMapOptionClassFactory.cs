@@ -74,7 +74,6 @@ namespace BattleMiniMap.Config
                     b =>
                     {
                         BattleMiniMapConfig.Get().ExcludeUnwalkableTerrain = b;
-                        MiniMap.Instance.UpdateMapImage(Mission.Current);
                     }));
                 optionClass.AddOptionCategory(0, optionCategory);
                 return optionClass;

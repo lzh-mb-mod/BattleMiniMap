@@ -61,8 +61,10 @@ namespace BattleMiniMap.Config
         public static void OnMenuClosed()
         {
             if (Math.Abs(MiniMap.Instance.Resolution - Get().Resolution) > 0.001f)
+                MiniMap.Instance.UpdateMapSize(Mission.Current, true);
+            else if (MiniMap.Instance.ExcludeUnwalkableTerrain != Get().ExcludeUnwalkableTerrain)
                 MiniMap.Instance.UpdateMapImage(Mission.Current);
-            if (Math.Abs(MiniMap.Instance.EdgeOpacityFactor - Get().EdgeOpacityFactor) > 0.001f)
+            else if (Math.Abs(MiniMap.Instance.EdgeOpacityFactor - Get().EdgeOpacityFactor) > 0.001f)
                 MiniMap.Instance.UpdateEdgeOpacity();
             Get().Serialize();
         }
