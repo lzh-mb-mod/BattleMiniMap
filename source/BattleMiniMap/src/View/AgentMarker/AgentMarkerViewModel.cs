@@ -85,32 +85,45 @@ namespace BattleMiniMap.View.AgentMarker
             Update();
         }
 
+        public AgentMarkerViewModel(AgentMarkerViewModel other)
+        {
+            MoveFrom(other);
+        }
+
         public void Update()
         {
-            AlphaFactor = AgentMarkerType == AgentMarkerType.Dead
-                ? BattleMiniMapConfig.Get().BackgroundOpacity
-                : BattleMiniMapConfig.Get().ForegroundOpacity;
             if (AgentMarkerType == AgentMarkerType.Dead)
                 return;
 
             UpdateMarker();
+            AlphaFactor = AgentMarkerType == AgentMarkerType.Dead
+                ? BattleMiniMapConfig.Get().BackgroundOpacity
+                : BattleMiniMapConfig.Get().ForegroundOpacity;
+        }
+
+        public void MoveFrom(AgentMarkerViewModel other)
+        {
+            AlphaFactor = other.AlphaFactor;
+            Position = other.Position;
+            DirectionAsAngle = other.DirectionAsAngle;
+            Color = other.Color;
+            AgentMarkerType = other.AgentMarkerType;
+            _agent = other._agent;
         }
 
         private void UpdateMarker()
         {
-            AgentMarkerType = _agent.GetAgentMarkerType();
-            Color = AgentMarkerColorGenerator.GetAgentMarkerColor(_agent);
-            if (AgentMarkerType == AgentMarkerType.Dead)
-            {
-                MakeDead();
-                return;
-            }
-
             var miniMap = MiniMap.Instance;
             if (!miniMap.IsEnabled && !BattleMiniMapConfig.Get().ShowMap)
                 return;
             Position = miniMap.MapToWidget(miniMap.WorldToMapF(_agent.Position.AsVec2));
             //DirectionAsAngle = -_agent.GetMovementDirection().AsVec2.Normalized().AngleBetween(new Vec2(-1, 0));
+            AgentMarkerType = _agent.GetAgentMarkerType();
+            Color = AgentMarkerColorGenerator.GetAgentMarkerColor(_agent);
+            if (AgentMarkerType == AgentMarkerType.Dead)
+            {
+                MakeDead();
+            }
         }
 
         private void MakeDead()

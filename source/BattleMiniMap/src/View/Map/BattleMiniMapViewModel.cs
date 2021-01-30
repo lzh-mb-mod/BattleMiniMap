@@ -79,19 +79,23 @@ namespace BattleMiniMap.View.Map
         {
             int count = AgentMarkerViewModels.Count;
             int lastOne = count - 1;
-            for (int i = 0; i <= lastOne; i++)
+            for (int i = 0; i <= lastOne;)
             {
                 var current = AgentMarkerViewModels[i];
-                if (AgentMarkerViewModels[i].AgentMarkerType == AgentMarkerType.Dead)
+                current.Update();
+                if (current.AgentMarkerType == AgentMarkerType.Dead)
                 {
-                    DeadAgentMarkerViewModels.Add(current);
+                    DeadAgentMarkerViewModels.Add(new AgentMarkerViewModel(current));
                     if (i < lastOne)
                     {
-                        AgentMarkerViewModels[i] = AgentMarkerViewModels[lastOne];
+                        current.MoveFrom(AgentMarkerViewModels[lastOne]);
                     }
                     --lastOne;
                 }
-                current.Update();
+                else
+                {
+                    ++i;
+                }
             }
 
             if (lastOne < count - 1)
