@@ -5,6 +5,8 @@
 ### Fixed
 - Fix compatibility with Bannerlord e1.5.7
 
+- Fix the bug that agent marker may disappear.
+
 ### Changed
 - Seperate background and foreground opacity.
 
