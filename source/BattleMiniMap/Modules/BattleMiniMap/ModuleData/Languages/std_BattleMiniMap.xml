@@ -10,6 +10,8 @@
 
     <string id="BattleMiniMap_map_options" text="Map options" />
     <string id="BattleMiniMap_show_map" text="Show Map" />
+    <string id="BattleMiniMap_enable_toggle_map_long_press_key" text="Enable the Toggle Map (Long Press) key" />
+    <string id="BattleMiniMap_show_map_when_commanding" text="Show Map When Commanding" />
     <string id="BattleMiniMap_map_width" text="Map Width" />
 
     <string id="BattleMiniMap_horizontal_alignment" text="Horizontal Alignment" />
@@ -30,5 +32,11 @@
     <string id="BattleMiniMap_bottom" text="Bottom" />
     <string id="BattleMiniMap_left" text="Left" />
     <string id="BattleMiniMap_right" text="Right" />
+
+    <string id="BattleMiniMap_hotkey_category" text="Battle Mini Map Hot Key" />
+    <string id="BattleMiniMap_toggle_map" text="Toggle Map" />
+    <string id="BattleMiniMap_toggle_map_hint" text="Show or hide the map." />
+    <string id="BattleMiniMapHotKey_toggle_map_long_press" text="Toggle Map (Long Press)" />
+    <string id="BattleMiniMapHotKey_toggle_map_long_press_hint" text="Long press the key to show or hide the map." />
   </strings>
 </base>

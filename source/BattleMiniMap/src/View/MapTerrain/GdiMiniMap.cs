@@ -35,6 +35,8 @@ namespace BattleMiniMap.View.MapTerrain
                 Color.FromArgb(255, 250, 130, 240),
                 Color.FromArgb(255, 255, 190, 255),
                 Color.FromArgb(255, 255, 220, 255),
+
+
             });
 
         public static ColorGenerator BelowWater = new ColorGenerator(new Color[]
@@ -56,7 +58,7 @@ namespace BattleMiniMap.View.MapTerrain
         public float Resolution { get; private set; }
         public float EdgeOpacityFactor { get; private set; }
 
-        public bool IsEnabled { get; private set; }
+        public bool IsValid { get; private set; }
         public bool ExcludeUnwalkableTerrain { get; private set; }
 
         public event Action OnTextureSizeChanged;
@@ -82,11 +84,11 @@ namespace BattleMiniMap.View.MapTerrain
                 MapImage = new Bitmap(1, 1);
                 BitmapWidth = BitmapHeight = 1;
                 MapTexture = null;
-                IsEnabled = false;
+                IsValid = false;
                 return;
             }
 
-            IsEnabled = true;
+            IsValid = true;
             MapBoundMin = boundMin + new Vec2(-50f, -50f);
             MapBoundMax = boundMax + new Vec2(50f, 50f);
 
@@ -96,7 +98,7 @@ namespace BattleMiniMap.View.MapTerrain
 
         public void UpdateMapSize(Mission mission, bool updateMap = false)
         {
-            if (!IsEnabled)
+            if (!IsValid)
                 return;
 
             Resolution = BattleMiniMapConfig.Get().Resolution;
@@ -117,7 +119,7 @@ namespace BattleMiniMap.View.MapTerrain
 
         public void UpdateMapImage(Mission mission)
         {
-            if (!IsEnabled)
+            if (!IsValid)
                 return;
 
             var scene = mission.Scene;
@@ -133,7 +135,7 @@ namespace BattleMiniMap.View.MapTerrain
 
         public void UpdateEdgeOpacity()
         {
-            if (!IsEnabled)
+            if (!IsValid)
                 return;
 
             EdgeOpacityFactor = BattleMiniMapConfig.Get().EdgeOpacityFactor;

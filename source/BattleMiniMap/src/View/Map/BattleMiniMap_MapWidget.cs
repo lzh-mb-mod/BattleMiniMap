@@ -25,7 +25,7 @@ namespace BattleMiniMap.View.Map
                 var config = BattleMiniMapConfig.Get();
                 SuggestedWidth = config.WidgetWidth;
                 SuggestedHeight = height / (float) width * SuggestedWidth;
-                IsEnabled = MiniMap.Instance.IsEnabled;
+                IsEnabled = MiniMap.Instance.IsValid;
 
                 HorizontalAlignment = config.HorizontalAlignment;
                 VerticalAlignment = config.VerticalAlignment;

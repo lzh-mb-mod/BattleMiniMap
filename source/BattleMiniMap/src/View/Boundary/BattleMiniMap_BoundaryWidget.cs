@@ -43,7 +43,7 @@ namespace BattleMiniMap.View.Boundary
 
                 SuggestedWidth = BattleMiniMapConfig.Get().WidgetWidth;
                 SuggestedHeight = height / (float)width * SuggestedWidth;
-                IsEnabled = MiniMap.Instance.IsEnabled;
+                IsEnabled = MiniMap.Instance.IsValid;
             }
             else
             {

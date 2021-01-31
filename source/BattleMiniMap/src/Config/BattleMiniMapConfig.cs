@@ -1,13 +1,16 @@
-﻿using MissionSharedLibrary.Config;
+﻿using BattleMiniMap.View.MapTerrain;
+using MissionSharedLibrary.Config;
 using System;
 using System.IO;
-using BattleMiniMap.View.Map;
-using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap.Config
 {
+    public enum KeyMode
+    {
+        Toggle, LongPress, Count
+    }
 
     public class BattleMiniMapConfig : MissionConfigBase<BattleMiniMapConfig>
     {
@@ -15,6 +18,10 @@ namespace BattleMiniMap.Config
         public string ConfigVersion { get; set; } = BinaryVersion.ToString();
 
         public bool ShowMap { get; set; } = true;
+
+        public bool EnableToggleMapLongPressKey { get; set; } = true;
+
+        public bool ShowMapWhenCommanding { get; set; } = false;
         public int WidgetWidth { get; set; } = 400;
 
         public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
@@ -42,6 +49,8 @@ namespace BattleMiniMap.Config
         {
             ConfigVersion = other.ConfigVersion;
             ShowMap = other.ShowMap;
+            EnableToggleMapLongPressKey = other.EnableToggleMapLongPressKey;
+            ShowMapWhenCommanding = other.ShowMapWhenCommanding;
             WidgetWidth = other.WidgetWidth;
             HorizontalAlignment = other.HorizontalAlignment;
             VerticalAlignment = other.VerticalAlignment;

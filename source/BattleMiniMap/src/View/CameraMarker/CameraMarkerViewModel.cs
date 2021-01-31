@@ -1,11 +1,7 @@
 ﻿using BattleMiniMap.Config;
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using BattleMiniMap.View.Image;
 using BattleMiniMap.View.MapTerrain;
+using System;
 using TaleWorlds.Library;
-using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Screen;
 
 namespace BattleMiniMap.View.CameraMarker
@@ -88,7 +84,7 @@ namespace BattleMiniMap.View.CameraMarker
 
         public void Update()
         {
-            AlphaFactor = BattleMiniMapConfig.Get().ForegroundOpacity;
+            AlphaFactor = BattleMiniMapConfig.Get().ForegroundOpacity * MiniMap.FadeInOutAlphaFactor;
             var direction = _missionScreen.CombatCamera.Direction;
             var fov = _missionScreen.CombatCamera.HorizontalFov;
             var right = direction.AsVec2.Normalized().RightVec().ToVec3();
