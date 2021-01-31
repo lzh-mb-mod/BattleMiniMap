@@ -1,9 +1,11 @@
-﻿using BattleMiniMap.Config;
+﻿using System.Collections.Specialized;
+using BattleMiniMap.Config;
+using BattleMiniMap.Config.HotKey;
 using BattleMiniMap.View.MapTerrain;
-using System.Collections.Specialized;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.View;
 using TaleWorlds.MountAndBlade.View.Missions;
 
 namespace BattleMiniMap.View.Map
@@ -13,7 +15,8 @@ namespace BattleMiniMap.View.Map
         private BattleMiniMapViewModel _dataSource;
         private GauntletLayer _layer;
         private MissionTimer _timer;
-        private bool _boundaryChanged = false;
+        private bool _boundaryChanged;
+        private bool _isOrderViewOpened;
 
         public override void OnBehaviourInitialize()
         {
@@ -22,6 +25,7 @@ namespace BattleMiniMap.View.Map
             MiniMap.Instance.InitializeMapRange(Mission.Current, true);
             _dataSource = new BattleMiniMapViewModel(MissionScreen);
             Mission.Current.Boundaries.CollectionChanged += BoundariesOnCollectionChanged;
+            Game.Current.EventManager.RegisterEvent<MissionPlayerToggledOrderViewEvent>(OnOrderViewToggled);
         }
 
         public override void OnMissionScreenInitialize()
@@ -38,14 +42,40 @@ namespace BattleMiniMap.View.Map
         {
             base.OnMissionScreenTick(dt);
 
-            _dataSource.IsEnabled = MiniMap.Instance.IsEnabled && BattleMiniMapConfig.Get().ShowMap;
-            if (!MiniMap.Instance.IsEnabled && _boundaryChanged)
+            if (_boundaryChanged)
             {
-                MiniMap.Instance.InitializeMapRange(Mission.Current, BattleMiniMapConfig.Get().ShowMap);
+                _boundaryChanged = false;
+                if (!MiniMap.Instance.IsValid)
+                {
+                    MiniMap.Instance.InitializeMapRange(Mission.Current, true);
+                }
             }
 
+            bool toggleMapKeyDown = false;
+            var toggleMapLongPressKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMapLongPress);
+            var toggleMapKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMap);
+            if (BattleMiniMapConfig.Get().EnableToggleMapLongPressKey)
+            {
+                if (Input.IsKeyDown(toggleMapLongPressKey))
+                {
+                    toggleMapKeyDown = true;
+                }
+            }
+
+            if (!BattleMiniMapConfig.Get().EnableToggleMapLongPressKey || toggleMapKey != toggleMapLongPressKey)
+            {
+                if (Input.IsKeyPressed(toggleMapKey))
+                {
+                    BattleMiniMapConfig.Get().ShowMap = !BattleMiniMapConfig.Get().ShowMap;
+                }
+            }
+
+            _dataSource.UpdateEnabled(dt, MiniMap.Instance.IsValid &&
+                                          ((BattleMiniMapConfig.Get().ShowMap ^ toggleMapKeyDown) ||
+                                           _isOrderViewOpened && BattleMiniMapConfig.Get().ShowMapWhenCommanding));
+            
             if (_timer.Check(true))
-                _dataSource.Update();
+                _dataSource.UpdateData();
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner)
@@ -63,11 +93,17 @@ namespace BattleMiniMap.View.Map
             _dataSource.OnFinalize();
             _layer = null;
             Mission.Current.Boundaries.CollectionChanged -= BoundariesOnCollectionChanged;
+            Game.Current.EventManager.UnregisterEvent<MissionPlayerToggledOrderViewEvent>(OnOrderViewToggled);
         }
 
         private void BoundariesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             _boundaryChanged = true;
+        }
+
+        private void OnOrderViewToggled(MissionPlayerToggledOrderViewEvent obj)
+        {
+            _isOrderViewOpened = obj.IsOrderEnabled;
         }
     }
 }

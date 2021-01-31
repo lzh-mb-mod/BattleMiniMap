@@ -10,6 +10,8 @@
 
     <string id="BattleMiniMap_map_options" text="地图选项" />
     <string id="BattleMiniMap_show_map" text="显示地图" />
+    <string id="BattleMiniMap_enable_toggle_map_long_press_key" text="启用长按切换地图按键" />
+    <string id="BattleMiniMap_show_map_when_commanding" text="指挥时显示地图" />
     <string id="BattleMiniMap_map_width" text="地图宽度" />
 
     <string id="BattleMiniMap_horizontal_alignment" text="水平对齐方向" />
@@ -30,5 +32,11 @@
     <string id="BattleMiniMap_bottom" text="下" />
     <string id="BattleMiniMap_left" text="左" />
     <string id="BattleMiniMap_right" text="右" />
+
+    <string id="BattleMiniMap_hotkey_category" text="战场小地图按键" />
+    <string id="BattleMiniMap_toggle_map" text="切换地图" />
+    <string id="BattleMiniMap_toggle_map_hint" text="显示或隐藏地图。" />
+    <string id="BattleMiniMapHotKey_toggle_map_long_press" text="切换地图（长按）" />
+    <string id="BattleMiniMapHotKey_toggle_map_long_press_hint" text="长按来显示或隐藏地图。" />
   </strings>
 </base>

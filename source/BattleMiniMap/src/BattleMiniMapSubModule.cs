@@ -1,4 +1,5 @@
 ﻿using BattleMiniMap.Config;
+using BattleMiniMap.Config.HotKey;
 using BattleMiniMap.Logic;
 using MissionLibrary;
 using MissionLibrary.Controller;
@@ -46,6 +47,7 @@ namespace BattleMiniMap
                 return false;
 
             Global.GetProvider<AMissionStartingManager>().AddHandler(new MissionStartingHandler());
+            BattleMiniMapGameKeyCategory.RegisterGameKeyCategory();
             var menuClassCollection = AMenuManager.Get().MenuClassCollection;
             AMenuManager.Get().OnMenuClosedEvent += BattleMiniMapConfig.OnMenuClosed;
             menuClassCollection.AddOptionClass(

@@ -32,7 +32,7 @@ namespace BattleMiniMap.View.CameraMarker
 
                 SuggestedWidth = Math.Max(width * 0.1f, 1);
                 SuggestedHeight = Math.Max(width * 0.1f, 1);
-                IsEnabled = MiniMap.Instance.IsEnabled;
+                IsEnabled = MiniMap.Instance.IsValid;
             }
             else
             {

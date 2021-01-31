@@ -96,9 +96,9 @@ namespace BattleMiniMap.View.AgentMarker
                 return;
 
             UpdateMarker();
-            AlphaFactor = AgentMarkerType == AgentMarkerType.Dead
+            AlphaFactor = (AgentMarkerType == AgentMarkerType.Dead
                 ? BattleMiniMapConfig.Get().BackgroundOpacity
-                : BattleMiniMapConfig.Get().ForegroundOpacity;
+                : BattleMiniMapConfig.Get().ForegroundOpacity) * MiniMap.FadeInOutAlphaFactor;
         }
 
         public void MoveFrom(AgentMarkerViewModel other)
@@ -120,7 +120,7 @@ namespace BattleMiniMap.View.AgentMarker
                 return;
             }
             var miniMap = MiniMap.Instance;
-            if (!miniMap.IsEnabled && !BattleMiniMapConfig.Get().ShowMap)
+            if (!miniMap.IsValid && !BattleMiniMapConfig.Get().ShowMap)
                 return;
             Position = miniMap.MapToWidget(miniMap.WorldToMapF(_agent.Position.AsVec2));
             Color = AgentMarkerColorGenerator.GetAgentMarkerColor(_agent);

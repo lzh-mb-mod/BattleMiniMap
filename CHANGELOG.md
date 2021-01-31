@@ -1,5 +1,15 @@
 # Changelog
 
+## [v1.0.3] - 2020-01-31
+
+### Added
+- Add hot key for show and hide the map.
+
+- Add fade in/out effect.
+
+### Fixed
+- Fix several bugs.
+
 ## [v1.0.2] 2020-01-30
 ### Fixed
 - Fix several bugs.

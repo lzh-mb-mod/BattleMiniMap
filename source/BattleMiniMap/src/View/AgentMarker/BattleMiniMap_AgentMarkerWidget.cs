@@ -66,7 +66,7 @@ namespace BattleMiniMap.View.AgentMarker
                 SuggestedHeight = Math.Max(width * 0.01f, 1);
                 PositionXOffset = BasePosition.x - Center.x * SuggestedWidth;
                 PositionYOffset = BasePosition.y - Center.y * SuggestedHeight;
-                IsEnabled = MiniMap.Instance.IsEnabled;
+                IsEnabled = MiniMap.Instance.IsValid;
             }
         }
     }

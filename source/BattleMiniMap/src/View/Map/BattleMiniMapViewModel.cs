@@ -2,6 +2,7 @@
 using BattleMiniMap.Config;
 using BattleMiniMap.View.AgentMarker;
 using BattleMiniMap.View.CameraMarker;
+using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Screen;
@@ -53,10 +54,46 @@ namespace BattleMiniMap.View.Map
             DeadAgentMarkerViewModels = new MBBindingList<AgentMarkerViewModel>();
         }
 
-        public void Update()
+        public void UpdateEnabled(float dt, bool isEnabled)
+        {
+            bool isFadingCompleted = MiniMap.IsFadingCompleted();
+            if (IsEnabled)
+            {
+                if (isEnabled)
+                {
+                    if (MiniMap.IsFadingOut())
+                    {
+                        MiniMap.SetFadeIn();
+                    }
+                }
+                else
+                {
+                    if (isFadingCompleted)
+                    {
+                        IsEnabled = false;
+                    }
+                    else if (!MiniMap.IsFadingOut())
+                    {
+                        MiniMap.SetFadeOut();
+                    }
+                }
+            }
+            else
+            {
+                if (isEnabled)
+                {
+                    IsEnabled = true;
+                    MiniMap.SetFadeIn();
+                }
+            }
+
+            MiniMap.UpdateFading(dt);
+            AlphaFactor = BattleMiniMapConfig.Get().BackgroundOpacity * MiniMap.FadeInOutAlphaFactor;
+        }
+
+        public void UpdateData()
         {
             UpdateAgentMarkers();
-            AlphaFactor = BattleMiniMapConfig.Get().BackgroundOpacity;
             if (!IsEnabled)
                 return;
             CameraMarkerLeft.Update();

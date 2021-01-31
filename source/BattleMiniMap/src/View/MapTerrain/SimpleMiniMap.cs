@@ -21,7 +21,7 @@ namespace BattleMiniMap.View.MapTerrain
         public float Resolution { get; private set; }
         public float EdgeOpacityFactor { get; set; }
 
-        public bool IsEnabled { get; private set; }
+        public bool IsValid { get; private set; }
         public bool ExcludeUnwalkableTerrain { get; private set; }
 
         public void InitializeMapRange(Mission mission, bool updateMap = false)
@@ -45,7 +45,7 @@ namespace BattleMiniMap.View.MapTerrain
                 MapImage = new ImageRGBA(1, 1);
                 BitmapWidth = BitmapHeight = 1;
                 MapTexture = null;
-                IsEnabled = false;
+                IsValid = false;
             }
 
             MapBoundMin = boundMin + new Vec2(-50f, -50f);
@@ -78,7 +78,7 @@ namespace BattleMiniMap.View.MapTerrain
 
             MapImage = newImage;
             MapTexture = MapImage.CreateTexture();
-            IsEnabled = true;
+            IsValid = true;
         }
 
         public void UpdateEdgeOpacity()
