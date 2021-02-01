@@ -1,9 +1,17 @@
 # Changelog
 
+## [v1.0.4] - 2020-02-01
+
+### Improved
+- Improve performance in large battle.
+
+### Changed
+- Slightly reduce saturation of the map color
+
 ## [v1.0.3] - 2020-01-31
 
 ### Added
-- Add hot key for show and hide the map.
+- Add hot key for showing/hiding the map.
 
 - Add fade in/out effect.
 

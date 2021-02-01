@@ -17,18 +17,18 @@ namespace BattleMiniMap.View.CameraMarker
         private float _rotateAngleInRadians;
         private Vec2 _rotateCenter;
         private Vec2 _basePosition;
-        private float _alphaFactor;
+        private float _foregroundAlphaFactor;
 
         [DataSourceProperty]
-        public float AlphaFactor
+        public float ForegroundAlphaFactor
         {
-            get => _alphaFactor;
+            get => _foregroundAlphaFactor;
             set
             {
-                if (Math.Abs(_alphaFactor - value) < 0.01f)
+                if (Math.Abs(_foregroundAlphaFactor - value) < 0.01f)
                     return;
-                _alphaFactor = value;
-                OnPropertyChanged(nameof(AlphaFactor));
+                _foregroundAlphaFactor = value;
+                OnPropertyChanged(nameof(ForegroundAlphaFactor));
             }
         }
 
@@ -84,7 +84,7 @@ namespace BattleMiniMap.View.CameraMarker
 
         public void Update()
         {
-            AlphaFactor = BattleMiniMapConfig.Get().ForegroundOpacity * MiniMap.FadeInOutAlphaFactor;
+            ForegroundAlphaFactor = BattleMiniMapConfig.Get().ForegroundOpacity * MiniMap.FadeInOutAlphaFactor;
             var direction = _missionScreen.CombatCamera.Direction;
             var fov = _missionScreen.CombatCamera.HorizontalFov;
             var right = direction.AsVec2.Normalized().RightVec().ToVec3();

@@ -4,21 +4,13 @@
   <VisualDefinitions>
   </VisualDefinitions>
   <Window>
-    <BattleMiniMap_MapWidget Brush.GlobalAlphaFactor="@AlphaFactor" IsVisible="@IsEnabled">
+    <BattleMiniMap_MapWidget Brush.GlobalAlphaFactor="@BackgroundAlphaFactor" IsVisible="@IsEnabled">
       <Children>
-        <Widget DataSource="{DeadAgentMarkerViewModels}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" HorizontalAlignment="Left" VerticalAlignment="Top">
-          <ItemTemplate>
-            <BattleMiniMap_AgentMarkerWidget Brush.GlobalAlphaFactor="@AlphaFactor" BasePosition="@Position" AgentMarkerType="@AgentMarkerType" Brush.GlobalColor="@Color" />
-          </ItemTemplate>
-        </Widget>
-        <Widget DataSource="{AgentMarkerViewModels}" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
-          <ItemTemplate>
-            <BattleMiniMap_AgentMarkerWidget Brush.GlobalAlphaFactor="@AlphaFactor" BasePosition="@Position" AgentMarkerType="@AgentMarkerType" Brush.GlobalColor="@Color" />
-          </ItemTemplate>
-        </Widget>
-        <BattleMiniMap_CameraMarkerWidget Brush.GlobalAlphaFactor="@AlphaFactor" DataSource="{CameraMarkerLeft}" RotateAngleInRadians="@RotateAngleInRadians" RotateCenter="@RotateCenter" BasePosition="@BasePosition" />
-        <BattleMiniMap_CameraMarkerWidget Brush.GlobalAlphaFactor="@AlphaFactor" DataSource="{CameraMarkerRight}" RotateAngleInRadians="@RotateAngleInRadians" RotateCenter="@RotateCenter" BasePosition="@BasePosition" />
-        <BattleMiniMap_BoundaryWidget Brush.GlobalAlphaFactor="@AlphaFactor" />
+        <BattleMiniMap_AgentMarkerCollectionWidget Brush.GlobalAlphaFactor="@BackgroundAlphaFactor" AgentMakers="@DeadAgentMarkerViewModels" />
+        <BattleMiniMap_AgentMarkerCollectionWidget Brush.GlobalAlphaFactor="@ForegroundAlphaFactor" AgentMakers="@AgentMarkerViewModels" />
+        <BattleMiniMap_CameraMarkerWidget Brush.GlobalAlphaFactor="@ForegroundAlphaFactor" DataSource="{CameraMarkerLeft}" RotateAngleInRadians="@RotateAngleInRadians" RotateCenter="@RotateCenter" BasePosition="@BasePosition" />
+        <BattleMiniMap_CameraMarkerWidget Brush.GlobalAlphaFactor="@ForegroundAlphaFactor" DataSource="{CameraMarkerRight}" RotateAngleInRadians="@RotateAngleInRadians" RotateCenter="@RotateCenter" BasePosition="@BasePosition" />
+        <BattleMiniMap_BoundaryWidget Brush.GlobalAlphaFactor="@BackgroundAlphaFactor" />
       </Children>
     </BattleMiniMap_MapWidget>
   </Window>

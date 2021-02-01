@@ -15,28 +15,26 @@ namespace BattleMiniMap.View.MapTerrain
     {
         public static ColorGenerator AboveWater = new ColorGenerator(new Color[]
             {
-                Color.FromArgb(255, 0, 90, 0),
-                Color.FromArgb(255, 0, 158, 0),
-                Color.FromArgb(255, 0, 225, 0),
-                Color.FromArgb(255, 105, 235, 60),
-                Color.FromArgb(255, 165, 230, 90),
-                Color.FromArgb(255, 180, 200, 100),
-                Color.FromArgb(255, 250, 180, 0),
-                Color.FromArgb(255, 202, 135, 0),
-                Color.FromArgb(255, 187, 108, 0),
-                Color.FromArgb(255, 169, 84, 0),
-                Color.FromArgb(255, 145, 61, 40),
-                Color.FromArgb(255, 125, 51, 90),
-                Color.FromArgb(255, 125, 40, 120),
-                Color.FromArgb(255, 145, 40, 130),
-                Color.FromArgb(255, 165, 60, 150),
-                Color.FromArgb(255, 190, 80, 180),
-                Color.FromArgb(255, 220, 100, 200),
-                Color.FromArgb(255, 250, 130, 240),
-                Color.FromArgb(255, 255, 190, 255),
-                Color.FromArgb(255, 255, 220, 255),
-
-
+                Color.FromArgb(255, 60, 90, 60),
+                Color.FromArgb(255, 80, 130, 80),
+                Color.FromArgb(255, 105, 150, 80),
+                Color.FromArgb(255, 130, 170, 80),
+                Color.FromArgb(255, 160, 180, 90),
+                Color.FromArgb(255, 200, 180, 90),
+                Color.FromArgb(255, 230, 180, 90),
+                Color.FromArgb(255, 202, 135, 80),
+                Color.FromArgb(255, 187, 108, 80),
+                Color.FromArgb(255, 169, 84, 80),
+                Color.FromArgb(255, 145, 80, 70),
+                Color.FromArgb(255, 125, 80, 90),
+                Color.FromArgb(255, 105, 80, 120),
+                Color.FromArgb(255, 125, 80, 120),
+                Color.FromArgb(255, 145, 90, 150),
+                Color.FromArgb(255, 160, 90, 180),
+                Color.FromArgb(255, 180, 100, 200),
+                Color.FromArgb(255, 180, 120, 220),
+                Color.FromArgb(255, 200, 150, 240),
+                Color.FromArgb(255, 220, 190, 240),
             });
 
         public static ColorGenerator BelowWater = new ColorGenerator(new Color[]
