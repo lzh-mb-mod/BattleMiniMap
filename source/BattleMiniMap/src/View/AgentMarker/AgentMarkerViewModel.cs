@@ -10,24 +10,24 @@ namespace BattleMiniMap.View.AgentMarker
     public class AgentMarkerViewModel : ViewModel
     {
         private Vec2 _position;
-        private float _directionAsAngle;
+        //private float _directionAsAngle;
         private Color _color;
         private AgentMarkerType _agentMarkerType;
         private Agent _agent;
-        private float _alphaFactor;
+        //private float _alphaFactor;
 
-        [DataSourceProperty]
-        public float AlphaFactor
-        {
-            get => _alphaFactor;
-            set
-            {
-                if (Math.Abs(_alphaFactor - value) < 0.01f)
-                    return;
-                _alphaFactor = value;
-                OnPropertyChanged(nameof(AlphaFactor));
-            }
-        }
+        //[DataSourceProperty]
+        //public float BackgroundAlphaFactor
+        //{
+        //    get => _alphaFactor;
+        //    set
+        //    {
+        //        if (Math.Abs(_alphaFactor - value) < 0.01f)
+        //            return;
+        //        _alphaFactor = value;
+        //        OnPropertyChanged(nameof(BackgroundAlphaFactor));
+        //    }
+        //}
 
         [DataSourceProperty]
         public Vec2 Position
@@ -42,16 +42,16 @@ namespace BattleMiniMap.View.AgentMarker
             }
         }
 
-        [DataSourceProperty]
-        public float DirectionAsAngle
-        {
-            get => _directionAsAngle;
-            set
-            {
-                _directionAsAngle = value;
-                OnPropertyChanged(nameof(DirectionAsAngle));
-            }
-        }
+        //[DataSourceProperty]
+        //public float DirectionAsAngle
+        //{
+        //    get => _directionAsAngle;
+        //    set
+        //    {
+        //        _directionAsAngle = value;
+        //        OnPropertyChanged(nameof(DirectionAsAngle));
+        //    }
+        //}
 
         [DataSourceProperty]
         public Color Color
@@ -92,20 +92,20 @@ namespace BattleMiniMap.View.AgentMarker
 
         public void Update()
         {
-            if (AgentMarkerType == AgentMarkerType.Dead)
+            if (AgentMarkerType == AgentMarkerType.Inactive)
                 return;
 
             UpdateMarker();
-            AlphaFactor = (AgentMarkerType == AgentMarkerType.Dead
-                ? BattleMiniMapConfig.Get().BackgroundOpacity
-                : BattleMiniMapConfig.Get().ForegroundOpacity) * MiniMap.FadeInOutAlphaFactor;
+            //BackgroundAlphaFactor = (AgentMarkerType == AgentMarkerType.Inactive
+            //    ? BattleMiniMapConfig.Get().BackgroundOpacity
+            //    : BattleMiniMapConfig.Get().ForegroundOpacity) * MiniMap.FadeInOutAlphaFactor;
         }
 
         public void MoveFrom(AgentMarkerViewModel other)
         {
-            AlphaFactor = other.AlphaFactor;
+            //BackgroundAlphaFactor = other.BackgroundAlphaFactor;
             Position = other.Position;
-            DirectionAsAngle = other.DirectionAsAngle;
+            //DirectionAsAngle = other.DirectionAsAngle;
             Color = other.Color;
             AgentMarkerType = other.AgentMarkerType;
             _agent = other._agent;
@@ -114,7 +114,7 @@ namespace BattleMiniMap.View.AgentMarker
         private void UpdateMarker()
         {
             AgentMarkerType = _agent.GetAgentMarkerType();
-            if (AgentMarkerType == AgentMarkerType.Dead)
+            if (AgentMarkerType == AgentMarkerType.Inactive)
             {
                 MakeDead();
                 return;

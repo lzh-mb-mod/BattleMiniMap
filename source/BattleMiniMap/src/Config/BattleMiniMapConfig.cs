@@ -21,7 +21,7 @@ namespace BattleMiniMap.Config
 
         public bool EnableToggleMapLongPressKey { get; set; } = true;
 
-        public bool ShowMapWhenCommanding { get; set; } = false;
+        public bool ShowMapWhenCommanding { get; set; } = true;
         public int WidgetWidth { get; set; } = 400;
 
         public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;

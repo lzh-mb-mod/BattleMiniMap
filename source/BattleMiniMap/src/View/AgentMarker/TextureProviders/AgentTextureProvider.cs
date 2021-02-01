@@ -7,15 +7,14 @@ namespace BattleMiniMap.View.AgentMarker.TextureProviders
    {
        private static readonly IAgentTextureProvider[] AgentTextureProviders = new IAgentTextureProvider[]
        {
-           new MeleeAgentTextureProvider(),
-           new RangedAgentTextureProvider(),
+           new HumanAgentTextureProvider(),
            new HorseAgentTextureProvider(),
            new OtherAgentTextureProvider(),
            new DeadAgentTextureProvider()
        };
-        public static Texture GetTexture(this AgentMarkerType agentMarkerType)
+        public static Texture GetTexture(this AgentMarkerTextureType agentMarkerType)
         {
-            if (agentMarkerType < 0 || agentMarkerType >= AgentMarkerType.Count)
+            if (agentMarkerType < 0 || agentMarkerType >= AgentMarkerTextureType.Count)
                 throw new ArgumentOutOfRangeException(nameof(agentMarkerType));
 
             return AgentTextureProviders[(int)agentMarkerType].GetTexture();

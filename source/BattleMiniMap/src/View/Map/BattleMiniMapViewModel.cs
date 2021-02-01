@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using BattleMiniMap.Config;
 using BattleMiniMap.View.AgentMarker;
 using BattleMiniMap.View.CameraMarker;
@@ -11,19 +12,33 @@ namespace BattleMiniMap.View.Map
 {
     public class BattleMiniMapViewModel : ViewModel
     {
-        private float _alphaFactor;
+        private float _backgroundAlphaFactor;
         private bool _isEnabled;
+        private float _foregroundAlphaFactor;
 
         [DataSourceProperty]
-        public float AlphaFactor
+        public float BackgroundAlphaFactor
         {
-            get => _alphaFactor;
+            get => _backgroundAlphaFactor;
             set
             {
-                if (Math.Abs(_alphaFactor - value) < 0.01f)
+                if (Math.Abs(_backgroundAlphaFactor - value) < 0.01f)
                     return;
-                _alphaFactor = value;
-                OnPropertyChanged(nameof(AlphaFactor));
+                _backgroundAlphaFactor = value;
+                OnPropertyChanged(nameof(BackgroundAlphaFactor));
+            }
+        }
+
+        [DataSourceProperty]
+        public float ForegroundAlphaFactor
+        {
+            get => _foregroundAlphaFactor;
+            set
+            {
+                if (Math.Abs(_foregroundAlphaFactor - value) < 0.01f)
+                    return;
+                _foregroundAlphaFactor = value;
+                OnPropertyChanged(nameof(ForegroundAlphaFactor));
             }
         }
 
@@ -43,15 +58,15 @@ namespace BattleMiniMap.View.Map
         public CameraMarkerViewModel CameraMarkerLeft { get; }
         public CameraMarkerViewModel CameraMarkerRight { get; }
 
-        public MBBindingList<AgentMarkerViewModel> AgentMarkerViewModels { get; }
-        public MBBindingList<AgentMarkerViewModel> DeadAgentMarkerViewModels { get; }
+        public List<AgentMarkerViewModel> AgentMarkerViewModels { get; }
+        public List<AgentMarkerViewModel> DeadAgentMarkerViewModels { get; }
 
         public BattleMiniMapViewModel(MissionScreen missionScreen)
         {
             CameraMarkerLeft = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Left);
             CameraMarkerRight = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Right);
-            AgentMarkerViewModels = new MBBindingList<AgentMarkerViewModel>();
-            DeadAgentMarkerViewModels = new MBBindingList<AgentMarkerViewModel>();
+            AgentMarkerViewModels = new List<AgentMarkerViewModel>();
+            DeadAgentMarkerViewModels = new List<AgentMarkerViewModel>();
         }
 
         public void UpdateEnabled(float dt, bool isEnabled)
@@ -88,7 +103,8 @@ namespace BattleMiniMap.View.Map
             }
 
             MiniMap.UpdateFading(dt);
-            AlphaFactor = BattleMiniMapConfig.Get().BackgroundOpacity * MiniMap.FadeInOutAlphaFactor;
+            BackgroundAlphaFactor = BattleMiniMapConfig.Get().BackgroundOpacity * MiniMap.FadeInOutAlphaFactor;
+            ForegroundAlphaFactor = BattleMiniMapConfig.Get().ForegroundOpacity * MiniMap.FadeInOutAlphaFactor;
         }
 
         public void UpdateData()
@@ -120,7 +136,7 @@ namespace BattleMiniMap.View.Map
             {
                 var current = AgentMarkerViewModels[i];
                 current.Update();
-                if (current.AgentMarkerType == AgentMarkerType.Dead)
+                if (current.AgentMarkerType == AgentMarkerType.Inactive)
                 {
                     DeadAgentMarkerViewModels.Add(new AgentMarkerViewModel(current));
                     if (i < lastOne)

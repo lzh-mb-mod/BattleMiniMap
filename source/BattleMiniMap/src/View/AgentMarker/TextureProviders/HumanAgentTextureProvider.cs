@@ -5,7 +5,7 @@ using TaleWorlds.TwoDimension;
 
 namespace BattleMiniMap.View.AgentMarker.TextureProviders
 {
-    public class RangedAgentTextureProvider : IAgentTextureProvider
+    public class HumanAgentTextureProvider : IAgentTextureProvider
     {
         private Texture _texture;
         public Texture GetTexture()
@@ -35,7 +35,7 @@ namespace BattleMiniMap.View.AgentMarker.TextureProviders
 
         private void Fill(Graphics graphics, Brush brush)
         {
-            graphics.FillEllipse(brush, 12, 12, 26, 26);
+            graphics.FillEllipse(brush, 7, 7, 36, 36);
             //graphics.FillPolygon(brush, new Point[]
             //{
             //    new Point(50, 0),
