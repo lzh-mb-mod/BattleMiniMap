@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Linq;
 using BattleMiniMap.Config;
 using BattleMiniMap.View.Image;
 using TaleWorlds.Engine;
@@ -158,6 +159,10 @@ namespace BattleMiniMap.View.MapTerrain
             // g = 255 * sin(height)
             // b = 255 * (1 - cos(height))
             //scene.GetTerrainMinMaxHeight(out var minHeight, out var maxHeight);
+            AboveWater = new ColorGenerator(BattleMiniMapConfig.Get().AboveWater
+                .Select(color => Color.FromArgb(color.Alpha, color.Red, color.Green, color.Blue)).ToArray());
+            BelowWater = new ColorGenerator(BattleMiniMapConfig.Get().BelowWater
+                .Select(color => Color.FromArgb(color.Alpha, color.Red, color.Green, color.Blue)).ToArray());
             var waterLevel = scene.GetWaterLevel();
             var minHeight = float.MaxValue;
             var maxHeight = float.MinValue;

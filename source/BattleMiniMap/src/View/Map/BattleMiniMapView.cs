@@ -4,6 +4,7 @@ using BattleMiniMap.Config.HotKey;
 using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
+using TaleWorlds.InputSystem;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View;
 using TaleWorlds.MountAndBlade.View.Missions;
@@ -49,6 +50,12 @@ namespace BattleMiniMap.View.Map
                 {
                     MiniMap.Instance.InitializeMapRange(Mission.Current, true);
                 }
+            }
+
+            if (Input.IsKeyPressed(InputKey.F))
+            {
+                BattleMiniMapConfig.Get().Deserialize();
+                MiniMap.Instance?.UpdateMapImage(Mission);
             }
 
             bool toggleMapKeyDown = false;
