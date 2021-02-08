@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.0.5] - 2020-02-08
+### Fixed
+- Fix wrong agent marker position caused by ui scaling.
+
 ## [v1.0.4] - 2020-02-01
 
 ### Improved
