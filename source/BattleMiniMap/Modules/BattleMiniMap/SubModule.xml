@@ -3,14 +3,14 @@
 <Module>
 	<Name value="Battle Mini Map" />
 	<Id value="BattleMiniMap" />
-	<Version value="v1.0.5" />
+	<Version value="v1.0.6" />
 	<SingleplayerModule value="true" />
 	<MultiplayerModule value="false" />
 	<DependedModules>
-		<DependedModule Id="Native"  DependentVersion="e1.5.7" />
-		<DependedModule Id="SandBoxCore"  DependentVersion="e1.5.7" />
-		<DependedModule Id="Sandbox"  DependentVersion="e1.5.7" />
-		<DependedModule Id="StoryMode"  DependentVersion="e1.5.7" />
+		<DependedModule Id="Native"  DependentVersion="e1.5.8" />
+		<DependedModule Id="SandBoxCore"  DependentVersion="e1.5.8" />
+		<DependedModule Id="Sandbox"  DependentVersion="e1.5.8" />
+		<DependedModule Id="StoryMode"  DependentVersion="e1.5.8" />
 	</DependedModules>
 	<SubModules>
 		<SubModule>

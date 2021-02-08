@@ -65,6 +65,10 @@ namespace BattleMiniMap.Config
                     GameTexts.FindText("str_battle_mini_map_map_resolution"), null,
                     () => BattleMiniMapConfig.Get().Resolution,
                     f => { BattleMiniMapConfig.Get().Resolution = f; }, 0.5f, 50, false, true));
+                optionCategory.AddOption(new NumericOptionViewModel(
+                    GameTexts.FindText("str_battle_mini_map_agent_marker_scale"), null,
+                    () => BattleMiniMapConfig.Get().AgentMarkerScale,
+                    f => BattleMiniMapConfig.Get().AgentMarkerScale = f, 0.2f, 5f, false, true));
                 optionCategory.AddOption(new NumericOptionViewModel(GameTexts.FindText("str_battle_mini_map_edge_opacity_factor"),
                     null, () => BattleMiniMapConfig.Get().EdgeOpacityFactor, f => BattleMiniMapConfig.Get().EdgeOpacityFactor = f,
                     0, 1, false, true));

@@ -41,9 +41,10 @@ namespace BattleMiniMap.View.AgentMarker
         {
             base.OnRender(twoDimensionContext, drawContext);
 
+            var config = BattleMiniMapConfig.Get();
             var size = Widgets.Utility.GetSize(this);
-            var width = Math.Max(size.x * 0.01f, 1);
-            var height = Math.Max(size.x * 0.01f, 1);
+            var width = Math.Max(size.x * 0.01f * config.AgentMarkerScale, 1);
+            var height = Math.Max(size.x * 0.01f * config.AgentMarkerScale, 1);
             UpdateDrawObject2D(width, height);
             var materials = new SimpleMaterial[(int)AgentMarkerType.Count];
             var globalPosition = Widgets.Utility.GetGlobalPosition(this);

@@ -1,5 +1,9 @@
 # Changelog
 
+## [v1.0.6] - 2020-02-08
+### Added
+- Add an option to adjust the size of agent marker.
+
 ## [v1.0.5] - 2020-02-08
 ### Fixed
 - Fix wrong agent marker position caused by ui scaling.
