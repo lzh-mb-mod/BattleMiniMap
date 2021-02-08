@@ -4,6 +4,8 @@ using System.Linq;
 using BattleMiniMap.Config;
 using BattleMiniMap.View.AgentMarker.Colors;
 using BattleMiniMap.View.AgentMarker.TextureProviders;
+using BattleMiniMap.View.MapTerrain;
+using TaleWorlds.Engine.Screens;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.TwoDimension;
@@ -16,10 +18,24 @@ namespace BattleMiniMap.View.AgentMarker
 
         public BattleMiniMap_AgentMarkerCollectionWidget(UIContext context) : base(context)
         {
-            WidthSizePolicy = HeightSizePolicy = SizePolicy.StretchToParent;
+            WidthSizePolicy = HeightSizePolicy = SizePolicy.Fixed;
         }
 
         public List<AgentMarkerViewModel> AgentMakers { get; set; }
+
+        public override void UpdateBrushes(float dt)
+        {
+            base.UpdateBrushes(dt);
+
+            if (MiniMap.Instance != null)
+            {
+                var width = MiniMap.Instance.BitmapWidth;
+                var height = MiniMap.Instance.BitmapHeight;
+                var config = BattleMiniMapConfig.Get();
+                SuggestedWidth = config.WidgetWidth;
+                SuggestedHeight = height / (float) width * SuggestedWidth;
+            }
+        }
 
         protected override void OnRender(TwoDimensionContext twoDimensionContext, TwoDimensionDrawContext drawContext)
         {
@@ -35,7 +51,7 @@ namespace BattleMiniMap.View.AgentMarker
             foreach (var agentMaker in AgentMakers)
             {
                 var type = agentMaker.AgentMarkerType;
-                twoDimensionContext.Draw(globalPosition.x + agentMaker.Position.x - width * 0.5f, globalPosition.y + agentMaker.Position.y - height * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
+                twoDimensionContext.Draw(globalPosition.x + agentMaker.Position.x * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1) - width * 0.5f, globalPosition.y + agentMaker.Position.y * ScaledSuggestedHeight / Math.Max(SuggestedHeight, 1) - height * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
             }
         }
 
