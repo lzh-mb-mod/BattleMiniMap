@@ -20,6 +20,7 @@
     <string id="BattleMiniMap_position_y" text="地图坐标Y" />
 
     <string id="BattleMiniMap_map_resolution" text="地图分辨率" />
+    <string id="BattleMiniMap_agent_marker_scale" text="士兵标记缩放倍率" />
     <string id="BattleMiniMap_edge_opacity_factor" text="边缘不透明度" />
 
     <string id="BattleMiniMap_background_opacity" text="背景不透明度" />

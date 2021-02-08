@@ -34,6 +34,8 @@ namespace BattleMiniMap.Config
 
         public float Resolution { get; set; } = 1;
 
+        public float AgentMarkerScale { get; set; } = 1;
+
         public float EdgeOpacityFactor { get; set; } = 0.5f;
 
         public float BackgroundOpacity { get; set; } = 0.5f;
@@ -57,6 +59,7 @@ namespace BattleMiniMap.Config
             PositionX = other.PositionX;
             PositionY = other.PositionY;
             Resolution = other.Resolution;
+            AgentMarkerScale = other.AgentMarkerScale;
             EdgeOpacityFactor = other.EdgeOpacityFactor;
             BackgroundOpacity = other.BackgroundOpacity;
             ForegroundOpacity = other.ForegroundOpacity;
