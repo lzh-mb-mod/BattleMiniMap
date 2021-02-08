@@ -6,7 +6,7 @@
 - Improve performance in large battle.
 
 ### Changed
-- Slightly reduce saturation of the map color
+- Slightly reduce saturation of the map color.
 
 ## [v1.0.3] - 2020-01-31
 
