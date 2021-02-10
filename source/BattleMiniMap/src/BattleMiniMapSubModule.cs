@@ -19,7 +19,6 @@ namespace BattleMiniMap
         {
             base.OnSubModuleLoad();
 
-
             Initialize();
             Module.CurrentModule.GlobalTextManager.LoadGameTexts(
                 BasePath.Name + $"Modules/{ModuleId}/ModuleData/module_strings.xml");
