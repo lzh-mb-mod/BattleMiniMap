@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using BattleMiniMap.View.AgentMarker.Colors;
-using BattleMiniMap.View.AgentMarker.TextureProviders;
+﻿using BattleMiniMap.View.AgentMarkers.Colors;
+using BattleMiniMap.View.AgentMarkers.TextureProviders;
+using System;
 using TaleWorlds.MountAndBlade;
 
-namespace BattleMiniMap.View.AgentMarker
+namespace BattleMiniMap.View.AgentMarkers
 {
     public enum AgentMarkerType
     {

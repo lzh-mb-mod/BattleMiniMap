@@ -1,8 +1,6 @@
-﻿using System.Collections.Specialized;
-using BattleMiniMap.Config;
+﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.GauntletUI;
-using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap.View.Map
 {

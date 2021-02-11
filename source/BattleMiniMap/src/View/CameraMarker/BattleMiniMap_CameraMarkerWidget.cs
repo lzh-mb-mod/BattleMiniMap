@@ -1,7 +1,7 @@
-﻿using System;
-using BattleMiniMap.Config;
+﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
 using BattleMiniMap.Widgets;
+using System;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.TwoDimension;
 

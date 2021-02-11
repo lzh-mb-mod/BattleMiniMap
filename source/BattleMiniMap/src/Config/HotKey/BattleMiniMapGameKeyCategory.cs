@@ -1,6 +1,6 @@
-﻿using System;
-using MissionLibrary.HotKey;
+﻿using MissionLibrary.HotKey;
 using MissionSharedLibrary.HotKey.Category;
+using System;
 using TaleWorlds.InputSystem;
 
 namespace BattleMiniMap.Config.HotKey

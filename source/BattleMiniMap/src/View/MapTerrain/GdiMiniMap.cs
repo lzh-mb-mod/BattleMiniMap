@@ -1,9 +1,11 @@
-﻿using System;
+﻿using BattleMiniMap.Config;
+using BattleMiniMap.View.DeadAgentMarkers;
+using BattleMiniMap.View.Image;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using BattleMiniMap.Config;
-using BattleMiniMap.View.Image;
 using TaleWorlds.Engine;
+using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using Color = System.Drawing.Color;
@@ -45,9 +47,20 @@ namespace BattleMiniMap.View.MapTerrain
             Color.FromArgb(255, 26, 125, 198),
             Color.FromArgb(255, 48, 96, 198),
         });
+
+        private Texture _mapTexture;
         public Bitmap MapImage { get; private set; }
 
-        public Texture MapTexture { get; private set; }
+        public Texture MapTexture
+        {
+            get => _mapTexture;
+            private set
+            {
+                (_mapTexture?.PlatformTexture as EngineTexture)?.Texture.Release();
+                _mapTexture = value;
+            }
+        }
+
         public int BitmapWidth { get; private set; }
         public int BitmapHeight { get; private set; }
 
@@ -83,6 +96,7 @@ namespace BattleMiniMap.View.MapTerrain
                 BitmapWidth = BitmapHeight = 1;
                 MapTexture = null;
                 IsValid = false;
+                BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Initialize();
                 return;
             }
 
@@ -92,6 +106,7 @@ namespace BattleMiniMap.View.MapTerrain
 
             if (updateMap)
                 UpdateMapSize(mission, true);
+            BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Initialize();
         }
 
         public void UpdateMapSize(Mission mission, bool updateMap = false)

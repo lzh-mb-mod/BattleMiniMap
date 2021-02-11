@@ -1,14 +1,10 @@
-﻿using BattleMiniMap.Config;
-using BattleMiniMap.View.Image;
+﻿using BattleMiniMap.View.Image;
 using System.Drawing;
 using System.Drawing.Imaging;
-using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.Engine;
-using TaleWorlds.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Screen;
-using TaleWorlds.TwoDimension;
 using Texture = TaleWorlds.TwoDimension.Texture;
 
 namespace BattleMiniMap.View.CameraMarker
@@ -30,11 +26,7 @@ namespace BattleMiniMap.View.CameraMarker
         {
             var bitmap = new Bitmap(100, 100, PixelFormat.Format32bppArgb);
             var graphics = Graphics.FromImage(bitmap);
-            var widthOfOnePixel = (float)MiniMap.Instance.BitmapWidth /
-                                  (BattleMiniMapConfig.Get().WidgetWidth == 0
-                                      ? 1
-                                      : BattleMiniMapConfig.Get().WidgetWidth);
-            var pen = new Pen(System.Drawing.Color.FromArgb(255, 30, 30, 30), 2 * widthOfOnePixel);
+            var pen = new Pen(System.Drawing.Color.FromArgb(255, 30, 30, 30), 2);
             graphics.DrawLine(pen, new Point(0, 0), new Point(100, 100));
             return bitmap.CreateTexture();
         }
