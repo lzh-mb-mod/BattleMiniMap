@@ -1,7 +1,7 @@
-﻿using System.Collections.Specialized;
-using BattleMiniMap.Config;
+﻿using BattleMiniMap.Config;
 using BattleMiniMap.Config.HotKey;
 using BattleMiniMap.View.MapTerrain;
+using System.Collections.Specialized;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.MountAndBlade;

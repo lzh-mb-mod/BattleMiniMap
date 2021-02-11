@@ -1,8 +1,7 @@
-﻿using BattleMiniMap.View;
+﻿using BattleMiniMap.View.Map;
 using MissionLibrary.Controller;
 using MissionSharedLibrary.Controller;
 using System.Collections.Generic;
-using BattleMiniMap.View.Map;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Missions;
 

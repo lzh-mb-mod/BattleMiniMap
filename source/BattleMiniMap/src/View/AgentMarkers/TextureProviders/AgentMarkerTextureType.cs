@@ -1,4 +1,4 @@
-﻿namespace BattleMiniMap.View.AgentMarker.TextureProviders
+﻿namespace BattleMiniMap.View.AgentMarkers.TextureProviders
 {
     public enum AgentMarkerTextureType
     {

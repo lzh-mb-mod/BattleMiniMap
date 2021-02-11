@@ -1,6 +1,6 @@
-﻿using System.Drawing;
-using BattleMiniMap.Config;
+﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
+using System.Drawing;
 using TaleWorlds.Library;
 
 namespace BattleMiniMap

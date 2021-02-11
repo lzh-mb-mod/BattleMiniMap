@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using BattleMiniMap.Config;
-using BattleMiniMap.View.AgentMarker.Colors;
-using BattleMiniMap.View.AgentMarker.TextureProviders;
+﻿using BattleMiniMap.Config;
+using BattleMiniMap.View.AgentMarkers.Colors;
+using BattleMiniMap.View.AgentMarkers.TextureProviders;
 using BattleMiniMap.View.MapTerrain;
-using TaleWorlds.Engine.Screens;
+using System;
+using System.Collections.Generic;
 using TaleWorlds.GauntletUI;
-using TaleWorlds.Library;
 using TaleWorlds.TwoDimension;
 
-namespace BattleMiniMap.View.AgentMarker
+namespace BattleMiniMap.View.AgentMarkers
 {
     public class BattleMiniMap_AgentMarkerCollectionWidget : BrushWidget
     {
@@ -21,7 +18,7 @@ namespace BattleMiniMap.View.AgentMarker
             WidthSizePolicy = HeightSizePolicy = SizePolicy.Fixed;
         }
 
-        public List<AgentMarkerViewModel> AgentMakers { get; set; }
+        public List<AgentMarker> AgentMakers { get; set; }
 
         public override void UpdateBrushes(float dt)
         {
@@ -52,7 +49,7 @@ namespace BattleMiniMap.View.AgentMarker
             foreach (var agentMaker in AgentMakers)
             {
                 var type = agentMaker.AgentMarkerType;
-                twoDimensionContext.Draw(globalPosition.x + agentMaker.Position.x * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1) - width * 0.5f, globalPosition.y + agentMaker.Position.y * ScaledSuggestedHeight / Math.Max(SuggestedHeight, 1) - height * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
+                twoDimensionContext.Draw(globalPosition.x + agentMaker.PositionInWidget.x * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1) - width * 0.5f, globalPosition.y + agentMaker.PositionInWidget.y * ScaledSuggestedHeight / Math.Max(SuggestedHeight, 1) - height * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
             }
         }
 

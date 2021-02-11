@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.0.7] - 2020-02-11
+### Improved
+- Optimize performance of corpse markers in large battle.
+
+### Changed
+- Change marker colors.
+
 ## [v1.0.6] - 2020-02-08
 ### Added
 - Add an option to adjust the size of agent marker.

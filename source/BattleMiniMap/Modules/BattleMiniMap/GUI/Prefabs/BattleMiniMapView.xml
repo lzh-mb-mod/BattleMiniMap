@@ -6,6 +6,7 @@
   <Window>
     <BattleMiniMap_MapWidget Brush.GlobalAlphaFactor="@BackgroundAlphaFactor" IsVisible="@IsEnabled">
       <Children>
+        <BattleMiniMap_DeadAgentMarkerCollectionWidget Brush.GlobalAlphaFactor="@BackgroundAlphaFactor" />
         <BattleMiniMap_AgentMarkerCollectionWidget Brush.GlobalAlphaFactor="@BackgroundAlphaFactor" AgentMakers="@DeadAgentMarkerViewModels" />
         <BattleMiniMap_AgentMarkerCollectionWidget Brush.GlobalAlphaFactor="@ForegroundAlphaFactor" AgentMakers="@AgentMarkerViewModels" />
         <BattleMiniMap_CameraMarkerWidget Brush.GlobalAlphaFactor="@ForegroundAlphaFactor" DataSource="{CameraMarkerLeft}" RotateAngleInRadians="@RotateAngleInRadians" RotateCenter="@RotateCenter" BasePosition="@BasePosition" />
