@@ -61,14 +61,14 @@ namespace BattleMiniMap.View.Map
         public CameraMarkerViewModel CameraMarkerRight { get; }
 
         public List<AgentMarker> AgentMarkerViewModels { get; }
-        public List<AgentMarker> DeadAgentMarkerViewModels { get; set; }
+        //public List<AgentMarker> DeadAgentMarkerViewModels { get; set; }
 
         public BattleMiniMapViewModel(MissionScreen missionScreen)
         {
             CameraMarkerLeft = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Left);
             CameraMarkerRight = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Right);
             AgentMarkerViewModels = new List<AgentMarker>();
-            DeadAgentMarkerViewModels = new List<AgentMarker>();
+            //DeadAgentMarkerViewModels = new List<AgentMarker>();
             _timer = new BasicTimer(MBCommon.TimeType.Application);
         }
 
@@ -125,10 +125,10 @@ namespace BattleMiniMap.View.Map
             {
                 AgentMarkerViewModels.Add(new AgentMarker(agent));
             }
-            else
-            {
-                DeadAgentMarkerViewModels.Add(new AgentMarker(agent));
-            }
+            //else
+            //{
+            //    DeadAgentMarkerViewModels.Add(new AgentMarker(agent));
+            //}
         }
 
         private void UpdateAgentMarkers()
@@ -141,7 +141,7 @@ namespace BattleMiniMap.View.Map
                 current.Update();
                 if (current.AgentMarkerType == AgentMarkerType.Inactive)
                 {
-                    DeadAgentMarkerViewModels.Add(new AgentMarker(current));
+                    //DeadAgentMarkerViewModels.Add(new AgentMarker(current));
                     if (i < lastOne)
                     {
                         current.MoveFrom(AgentMarkerViewModels[lastOne]);
@@ -164,17 +164,17 @@ namespace BattleMiniMap.View.Map
 
             if (BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.IsGeneratingTexture)
                 BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Update();
-            else
-            {
-                if (DeadAgentMarkerViewModels.Count > 50 ||
-                    DeadAgentMarkerViewModels.Count > 0 && _timer.ElapsedTime > 1f)
-                {
-                    _timer.Reset();
-                    BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(
-                        DeadAgentMarkerViewModels);
-                    DeadAgentMarkerViewModels = new List<AgentMarker>();
-                }
-            }
+            //else
+            //{
+            //    if (DeadAgentMarkerViewModels.Count > 50 ||
+            //        DeadAgentMarkerViewModels.Count > 0 && _timer.ElapsedTime > 1f)
+            //    {
+            //        _timer.Reset();
+            //        BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(
+            //            DeadAgentMarkerViewModels);
+            //        DeadAgentMarkerViewModels = new List<AgentMarker>();
+            //    }
+            //}
         }
     }
 }

@@ -37,7 +37,7 @@ namespace BattleMiniMap.View.Boundary
             {
                 if (_textureToBeReleased == value)
                     return;
-                (_textureToBeReleased?.PlatformTexture as EngineTexture)?.Texture.Release();
+                //(_textureToBeReleased?.PlatformTexture as EngineTexture)?.Texture.Release();
                 _textureToBeReleased = value;
             }
         }

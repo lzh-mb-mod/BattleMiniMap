@@ -56,7 +56,7 @@ namespace BattleMiniMap.View.MapTerrain
             get => _mapTexture;
             private set
             {
-                (_mapTexture?.PlatformTexture as EngineTexture)?.Texture.Release();
+                //(_mapTexture?.PlatformTexture as EngineTexture)?.Texture.Release();
                 _mapTexture = value;
             }
         }
@@ -193,9 +193,7 @@ namespace BattleMiniMap.View.MapTerrain
                 {
                     var pos = this.MapToWorld(new Point(w, h));
                     var terrainHeight = scene.GetTerrainHeight(pos);
-                    PathFaceRecord faceRecord = PathFaceRecord.NullFaceRecord;
-                    scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
-                    if (faceRecord.IsValid())
+                    if (scene.GetNavMeshFaceIndex(pos.ToVec3(terrainHeight), true) != -1)
                     {
                         SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, waterLevel, EdgeOpacityFactor);
 
@@ -204,15 +202,11 @@ namespace BattleMiniMap.View.MapTerrain
                     var groundHeight = waterLevel;
                     scene.GetHeightAtPoint(pos, BodyFlags.CommonCollisionExcludeFlags, ref groundHeight);
                     if (ExcludeUnwalkableTerrain && groundHeight >= waterLevel &&
-                        Math.Abs(groundHeight - terrainHeight) < 0.1f)
+                        Math.Abs(groundHeight - terrainHeight) < 0.1f &&
+                        scene.GetNavMeshFaceIndex(pos.ToVec3(groundHeight), true) == -1)
                     {
-                        scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
-                        if (!faceRecord.IsValid())
-                        {
-                            image.SetPixel(w, h,
-                                Color.FromArgb(0, 0, 0, 0));
-                            continue;
-                        }
+                        image.SetPixel(w, h, Color.FromArgb(0, 0, 0, 0));
+                        continue;
                     }
 
                     SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, waterLevel, EdgeOpacityFactor);
