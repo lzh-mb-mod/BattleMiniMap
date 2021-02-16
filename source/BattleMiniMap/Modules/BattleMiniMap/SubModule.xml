@@ -3,7 +3,7 @@
 <Module>
 	<Name value="Battle Mini Map" />
 	<Id value="BattleMiniMap" />
-	<Version value="v1.0.7" />
+	<Version value="v1.0.8" />
 	<SingleplayerModule value="true" />
 	<MultiplayerModule value="false" />
 	<DependedModules>

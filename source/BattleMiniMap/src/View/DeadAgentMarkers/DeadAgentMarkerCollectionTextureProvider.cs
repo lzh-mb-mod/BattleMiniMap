@@ -98,15 +98,16 @@ namespace BattleMiniMap.View.DeadAgentMarkers
             if (_deadAgentMarkerCollectionBitmap == null)
                 return;
 
+            var bitmapWidth = _deadAgentMarkerCollectionBitmap.Width;
+            var scale = BattleMiniMapConfig.Get().AgentMarkerScale;
             _createTextureTask = Task.Run(() =>
             {
                 try
                 {
                     var scale = (float) _deadAgentMarkerCollectionBitmap.Width /
                                 Math.Max(MiniMap.Instance.BitmapWidth, 1);
-                    var config = BattleMiniMapConfig.Get();
-                    var width = Math.Max(_deadAgentMarkerCollectionBitmap.Width * 0.01f * config.AgentMarkerScale, 1);
-                    var height = Math.Max(_deadAgentMarkerCollectionBitmap.Width * 0.01f * config.AgentMarkerScale, 1);
+                    var width = Math.Max(bitmapWidth * 0.01f * scale, 1);
+                    var height = Math.Max(bitmapWidth * 0.01f * scale, 1);
                     var types = agentMarkers.First().AgentMarkerType.GetColorAndTextureType();
                     var color = types.Item1.GetColor();
                     var bitmap = types.Item2.GetBitmap();

@@ -5,6 +5,7 @@ using BattleMiniMap.View.DeadAgentMarkers;
 using BattleMiniMap.View.MapTerrain;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Screen;
@@ -17,6 +18,7 @@ namespace BattleMiniMap.View.Map
         private bool _isEnabled;
         private float _foregroundAlphaFactor;
         private readonly BasicTimer _timer;
+        private List<AgentMarker> _deadAgentMarkerViewModels;
 
         [DataSourceProperty]
         public float BackgroundAlphaFactor
@@ -61,7 +63,19 @@ namespace BattleMiniMap.View.Map
         public CameraMarkerViewModel CameraMarkerRight { get; }
 
         public List<AgentMarker> AgentMarkerViewModels { get; }
-        public List<AgentMarker> DeadAgentMarkerViewModels { get; set; }
+
+        [DataSourceProperty]
+        public List<AgentMarker> DeadAgentMarkerViewModels
+        {
+            get => _deadAgentMarkerViewModels;
+            set
+            {
+                if (_deadAgentMarkerViewModels == value)
+                    return;
+                _deadAgentMarkerViewModels = value;
+                OnPropertyChanged(nameof(DeadAgentMarkerViewModels));
+            }
+        }
 
         public BattleMiniMapViewModel(MissionScreen missionScreen)
         {
@@ -141,10 +155,10 @@ namespace BattleMiniMap.View.Map
                 current.Update();
                 if (current.AgentMarkerType == AgentMarkerType.Inactive)
                 {
-                    DeadAgentMarkerViewModels.Add(new AgentMarker(current));
+                    DeadAgentMarkerViewModels.Add(current);
                     if (i < lastOne)
                     {
-                        current.MoveFrom(AgentMarkerViewModels[lastOne]);
+                        AgentMarkerViewModels[i] = AgentMarkerViewModels[lastOne];
                     }
                     --lastOne;
                 }
@@ -167,7 +181,7 @@ namespace BattleMiniMap.View.Map
             else
             {
                 if (DeadAgentMarkerViewModels.Count > 50 ||
-                    DeadAgentMarkerViewModels.Count > 0 && _timer.ElapsedTime > 1f)
+                    DeadAgentMarkerViewModels.Count > 0 && _timer.ElapsedTime > 10f)
                 {
                     _timer.Reset();
                     BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(
