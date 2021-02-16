@@ -1,11 +1,15 @@
 # Changelog
 
+## [v1.0.8] - 2020-02-16
+### Fixed
+- Fix the problem that the game may get stuck when updating corpse markers.
+
 ## [v1.0.7] - 2020-02-11
 ### Improved
 - Optimize performance of corpse markers in large battle.
 
 ### Changed
-- Change marker colors.
+- Adjust marker colors.
 
 ## [v1.0.6] - 2020-02-08
 ### Added
