@@ -2,7 +2,7 @@
 
 ## [v1.0.8] - 2020-02-16
 ### Fixed
-- Fix the problem that the game may get stuck when updating corpse markers.
+- Adjust the shape of corpse marker.
 
 ## [v1.0.7] - 2020-02-11
 ### Improved
