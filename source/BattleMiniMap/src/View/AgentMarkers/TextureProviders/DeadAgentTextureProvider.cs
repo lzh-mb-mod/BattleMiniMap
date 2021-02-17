@@ -24,8 +24,8 @@ namespace BattleMiniMap.View.AgentMarkers.TextureProviders
             var bitmap = new Bitmap(100, 100, PixelFormat.Format32bppArgb);
             var graphics = Graphics.FromImage(bitmap);
             var pen = new Pen(Color.FromArgb(255, 255, 255, 255), 20);
-            graphics.DrawLine(pen, 0, 0, 100, 100);
-            graphics.DrawLine(pen, 100, 0, 0, 100);
+            graphics.DrawLine(pen, 10, 10, 90, 90);
+            graphics.DrawLine(pen, 90, 10, 10, 90);
             return bitmap;
         }
 
