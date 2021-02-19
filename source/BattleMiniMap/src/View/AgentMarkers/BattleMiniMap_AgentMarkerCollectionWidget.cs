@@ -57,8 +57,8 @@ namespace BattleMiniMap.View.AgentMarkers
         {
             var types = type.GetColorAndTextureType();
             var material = Widgets.Utility.CreateMaterial(drawContext, this);
-            material.Texture = types.Item2.GetTexture();
-            material.Color *= types.Item1.GetColor();
+            material.Texture = types.TextureType.GetTexture();
+            material.Color *= types.ColorType.GetColor();
             return material;
         }
 

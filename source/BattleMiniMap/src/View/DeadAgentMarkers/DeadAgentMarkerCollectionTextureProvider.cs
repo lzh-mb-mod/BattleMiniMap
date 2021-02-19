@@ -109,8 +109,8 @@ namespace BattleMiniMap.View.DeadAgentMarkers
                     var width = Math.Max(bitmapWidth * 0.01f * scale, 1);
                     var height = Math.Max(bitmapWidth * 0.01f * scale, 1);
                     var types = agentMarkers.First().AgentMarkerType.GetColorAndTextureType();
-                    var color = types.Item1.GetColor();
-                    var bitmap = types.Item2.GetBitmap();
+                    var color = types.ColorType.GetColor();
+                    var bitmap = types.TextureType.GetBitmap();
                     var imageAttributes = new ImageAttributes();
                     float[][] colorMatrixElements =
                     {

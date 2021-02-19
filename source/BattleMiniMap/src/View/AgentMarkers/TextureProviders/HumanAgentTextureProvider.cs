@@ -47,7 +47,7 @@ namespace BattleMiniMap.View.AgentMarkers.TextureProviders
 
         private void Fill(Graphics graphics, Brush brush)
         {
-            graphics.FillEllipse(brush, 7, 7, 36, 36);
+            graphics.FillEllipse(brush, 9, 9, 32, 32);
             //graphics.FillPolygon(brush, new Point[]
             //{
             //    new Point(50, 0),

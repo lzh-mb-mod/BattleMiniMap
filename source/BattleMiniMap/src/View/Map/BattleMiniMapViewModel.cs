@@ -5,7 +5,6 @@ using BattleMiniMap.View.DeadAgentMarkers;
 using BattleMiniMap.View.MapTerrain;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Screen;
@@ -127,8 +126,10 @@ namespace BattleMiniMap.View.Map
         public void UpdateData()
         {
             UpdateAgentMarkers();
-            if (!IsEnabled)
-                return;
+        }
+
+        public void UpdateCamera()
+        {
             CameraMarkerLeft.Update();
             CameraMarkerRight.Update();
         }
@@ -147,47 +148,55 @@ namespace BattleMiniMap.View.Map
 
         private void UpdateAgentMarkers()
         {
-            int count = AgentMarkerViewModels.Count;
-            int lastOne = count - 1;
-            for (int i = 0; i <= lastOne;)
+            try
             {
-                var current = AgentMarkerViewModels[i];
-                current.Update();
-                if (current.AgentMarkerType == AgentMarkerType.Inactive)
+                int count = AgentMarkerViewModels.Count;
+                int lastOne = count - 1;
+                for (int i = 0; i <= lastOne;)
                 {
-                    DeadAgentMarkerViewModels.Add(current);
-                    if (i < lastOne)
+                    var current = AgentMarkerViewModels[i];
+                    current.Update();
+                    if (current.AgentMarkerType == AgentMarkerType.Inactive)
                     {
-                        AgentMarkerViewModels[i] = AgentMarkerViewModels[lastOne];
+                        DeadAgentMarkerViewModels.Add(current);
+                        if (i < lastOne)
+                        {
+                            AgentMarkerViewModels[i] = AgentMarkerViewModels[lastOne];
+                        }
+
+                        --lastOne;
                     }
-                    --lastOne;
+                    else
+                    {
+                        ++i;
+                    }
                 }
+
+                if (lastOne < count - 1)
+                {
+                    for (int i = count - 1; i > lastOne; i--)
+                    {
+                        AgentMarkerViewModels.RemoveAt(i);
+                    }
+                }
+
+                if (BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.IsGeneratingTexture)
+                    BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Update();
                 else
                 {
-                    ++i;
+                    if (DeadAgentMarkerViewModels.Count > 50 ||
+                        DeadAgentMarkerViewModels.Count > 0 && _timer.ElapsedTime > 10f)
+                    {
+                        _timer.Reset();
+                        BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(
+                            DeadAgentMarkerViewModels);
+                        DeadAgentMarkerViewModels = new List<AgentMarker>();
+                    }
                 }
             }
-
-            if (lastOne < count - 1)
+            catch (Exception e)
             {
-                for (int i = count - 1; i > lastOne ; i--)
-                {
-                    AgentMarkerViewModels.RemoveAt(i);
-                }
-            }
-
-            if (BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.IsGeneratingTexture)
-                BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Update();
-            else
-            {
-                if (DeadAgentMarkerViewModels.Count > 50 ||
-                    DeadAgentMarkerViewModels.Count > 0 && _timer.ElapsedTime > 10f)
-                {
-                    _timer.Reset();
-                    BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(
-                        DeadAgentMarkerViewModels);
-                    DeadAgentMarkerViewModels = new List<AgentMarker>();
-                }
+                MissionSharedLibrary.Utilities.Utility.DisplayMessageForced(e.ToString());
             }
         }
     }

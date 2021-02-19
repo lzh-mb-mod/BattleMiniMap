@@ -50,6 +50,7 @@ namespace BattleMiniMap.View.AgentMarkers
                 MakeDead();
                 return;
             }
+
             var miniMap = MiniMap.Instance;
             if (!miniMap.IsValid && !BattleMiniMapConfig.Get().ShowMap)
                 return;
