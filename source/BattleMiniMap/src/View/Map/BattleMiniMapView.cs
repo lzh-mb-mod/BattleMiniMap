@@ -73,7 +73,9 @@ namespace BattleMiniMap.View.Map
             _dataSource.UpdateEnabled(dt, MiniMap.Instance.IsValid &&
                                           ((BattleMiniMapConfig.Get().ShowMap ^ toggleMapKeyDown) ||
                                            _isOrderViewOpened && BattleMiniMapConfig.Get().ShowMapWhenCommanding));
-            
+
+            _dataSource.UpdateCamera();
+
             if (_timer.Check(true))
                 _dataSource.UpdateData();
         }
