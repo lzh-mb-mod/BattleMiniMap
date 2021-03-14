@@ -17,7 +17,8 @@ namespace BattleMiniMap.View.Map
         private bool _isEnabled;
         private float _foregroundAlphaFactor;
         private readonly BasicTimer _timer;
-        private List<AgentMarker> _deadAgentMarkerViewModels;
+        private AgentMarkerCollection _deadAgentMarkers;
+        private AgentMarkerCollection _deadAgentMarkersBackup;
 
         [DataSourceProperty]
         public float BackgroundAlphaFactor
@@ -61,18 +62,18 @@ namespace BattleMiniMap.View.Map
         public CameraMarkerViewModel CameraMarkerLeft { get; }
         public CameraMarkerViewModel CameraMarkerRight { get; }
 
-        public List<AgentMarker> AgentMarkerViewModels { get; }
+        public AgentMarkerCollection AgentMarkers { get; private set; }
 
         [DataSourceProperty]
-        public List<AgentMarker> DeadAgentMarkerViewModels
+        public AgentMarkerCollection DeadAgentMarkers
         {
-            get => _deadAgentMarkerViewModels;
+            get => _deadAgentMarkers;
             set
             {
-                if (_deadAgentMarkerViewModels == value)
+                if (_deadAgentMarkers == value)
                     return;
-                _deadAgentMarkerViewModels = value;
-                OnPropertyChanged(nameof(DeadAgentMarkerViewModels));
+                _deadAgentMarkers = value;
+                OnPropertyChanged(nameof(DeadAgentMarkers));
             }
         }
 
@@ -80,8 +81,18 @@ namespace BattleMiniMap.View.Map
         {
             CameraMarkerLeft = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Left);
             CameraMarkerRight = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Right);
-            AgentMarkerViewModels = new List<AgentMarker>();
-            DeadAgentMarkerViewModels = new List<AgentMarker>();
+            AgentMarkers = new AgentMarkerCollection
+            {
+                AgentMarkers = new List<AgentMarker>()
+            };
+            DeadAgentMarkers = new AgentMarkerCollection
+            {
+                AgentMarkers = new List<AgentMarker>()
+            };
+            _deadAgentMarkersBackup = new AgentMarkerCollection
+            {
+                AgentMarkers = new List<AgentMarker>()
+            };
             _timer = new BasicTimer(MBCommon.TimeType.Application);
         }
 
@@ -138,11 +149,11 @@ namespace BattleMiniMap.View.Map
         {
             if (agent.IsActive())
             {
-                AgentMarkerViewModels.Add(new AgentMarker(agent));
+                AgentMarkers.Add(agent);
             }
             else
             {
-                DeadAgentMarkerViewModels.Add(new AgentMarker(agent));
+                DeadAgentMarkers.Add(new AgentMarker(agent));
             }
         }
 
@@ -150,18 +161,18 @@ namespace BattleMiniMap.View.Map
         {
             try
             {
-                int count = AgentMarkerViewModels.Count;
+                int count = AgentMarkers.CountOfAgentMarkers;
                 int lastOne = count - 1;
                 for (int i = 0; i <= lastOne;)
                 {
-                    var current = AgentMarkerViewModels[i];
+                    var current = AgentMarkers.AgentMarkers[i];
                     current.Update();
                     if (current.AgentMarkerType == AgentMarkerType.Inactive)
                     {
-                        DeadAgentMarkerViewModels.Add(current);
+                        DeadAgentMarkers.Add(current);
                         if (i < lastOne)
                         {
-                            AgentMarkerViewModels[i] = AgentMarkerViewModels[lastOne];
+                            AgentMarkers.AgentMarkers[i].CopyFrom(AgentMarkers.AgentMarkers[lastOne]);
                         }
 
                         --lastOne;
@@ -176,21 +187,26 @@ namespace BattleMiniMap.View.Map
                 {
                     for (int i = count - 1; i > lastOne; i--)
                     {
-                        AgentMarkerViewModels.RemoveAt(i);
+                        AgentMarkers.AgentMarkers[i].Clear();
                     }
+
+                    AgentMarkers.CountOfAgentMarkers = lastOne + 1;
                 }
 
                 if (BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.IsGeneratingTexture)
                     BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Update();
                 else
                 {
-                    if (DeadAgentMarkerViewModels.Count > 50 ||
-                        DeadAgentMarkerViewModels.Count > 0 && _timer.ElapsedTime > 10f)
+                    if (DeadAgentMarkers.CountOfAgentMarkers > 50 ||
+                        DeadAgentMarkers.CountOfAgentMarkers > 0 && _timer.ElapsedTime > 10f)
                     {
                         _timer.Reset();
-                        BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(
-                            DeadAgentMarkerViewModels);
-                        DeadAgentMarkerViewModels = new List<AgentMarker>();
+                        var backup = _deadAgentMarkersBackup;
+                        backup.CountOfAgentMarkers = 0;
+                        _deadAgentMarkersBackup = DeadAgentMarkers;
+                        BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(DeadAgentMarkers
+                            .AgentMarkers);
+                        DeadAgentMarkers = backup;
                     }
                 }
             }

@@ -18,7 +18,7 @@ namespace BattleMiniMap.View.AgentMarkers
             WidthSizePolicy = HeightSizePolicy = SizePolicy.Fixed;
         }
 
-        public List<AgentMarker> AgentMakers { get; set; }
+        public AgentMarkerCollection AgentMakers { get; set; }
 
         public override void UpdateBrushes(float dt)
         {
@@ -46,8 +46,9 @@ namespace BattleMiniMap.View.AgentMarkers
             var materials = new SimpleMaterial[(int)AgentMarkerType.Count];
             var globalPosition = Widgets.Utility.GetGlobalPosition(this);
             
-            foreach (var agentMaker in AgentMakers)
+            for(int i = 0; i < AgentMakers.CountOfAgentMarkers; ++i)
             {
+                var agentMaker = AgentMakers.AgentMarkers[i];
                 var type = agentMaker.AgentMarkerType;
                 twoDimensionContext.Draw(globalPosition.x + agentMaker.PositionInWidget.x * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1) - width * 0.5f, globalPosition.y + agentMaker.PositionInWidget.y * ScaledSuggestedHeight / Math.Max(SuggestedHeight, 1) - height * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
             }

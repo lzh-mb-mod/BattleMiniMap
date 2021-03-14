@@ -23,7 +23,7 @@ namespace BattleMiniMap.View.AgentMarkers
 
         public AgentMarker(AgentMarker other)
         {
-            MoveFrom(other);
+            CopyFrom(other);
         }
 
         public void Update()
@@ -34,12 +34,23 @@ namespace BattleMiniMap.View.AgentMarkers
             UpdateMarker();
         }
 
-        public void MoveFrom(AgentMarker other)
+        public void CopyFrom(AgentMarker other)
         {
             PositionInMap = other.PositionInMap;
             PositionInWidget = other.PositionInWidget;
             AgentMarkerType = other.AgentMarkerType;
             _agent = other._agent;
+        }
+
+        public void SetAgent(Agent agent)
+        {
+            _agent = agent;
+            UpdateMarker();
+        }
+
+        public void Clear()
+        {
+            _agent = null;
         }
 
         private void UpdateMarker()
