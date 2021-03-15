@@ -1,8 +1,10 @@
 # Changelog
 
-## [v1.0.8] - 2020-02-16
+## [v1.0.8] - 2020-03-15
 ### Fixed
 - Adjust the shape of corpse marker.
+
+- Keep compatible with Bannerlord e1.5.9.
 
 ## [v1.0.7] - 2020-02-11
 ### Improved
