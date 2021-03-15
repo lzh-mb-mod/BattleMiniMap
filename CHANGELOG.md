@@ -6,6 +6,8 @@
 
 - Keep compatible with Bannerlord e1.5.9.
 
+- Add support for hot key sequence.
+
 ## [v1.0.7] - 2020-02-11
 ### Improved
 - Optimize performance of corpse markers in large battle.

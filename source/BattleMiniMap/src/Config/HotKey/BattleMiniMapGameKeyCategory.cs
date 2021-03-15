@@ -1,6 +1,8 @@
 ﻿using MissionLibrary.HotKey;
+using MissionSharedLibrary.Config.HotKey;
 using MissionSharedLibrary.HotKey.Category;
 using System;
+using System.Collections.Generic;
 using TaleWorlds.InputSystem;
 
 namespace BattleMiniMap.Config.HotKey
@@ -26,16 +28,23 @@ namespace BattleMiniMap.Config.HotKey
         {
             var result = new GameKeyCategory(CategoryId,
                 (int)GameKeyEnum.NumberOfGameKeyEnums, GameKeyConfig.Get());
-            result.AddGameKey(new GameKey((int)GameKeyEnum.ToggleMap, nameof(GameKeyEnum.ToggleMap),
-                CategoryId, InputKey.M, CategoryId));
-            result.AddGameKey(new GameKey((int)GameKeyEnum.ToggleMapLongPress, nameof(GameKeyEnum.ToggleMapLongPress),
-                CategoryId, InputKey.LeftAlt, CategoryId));
+            result.AddGameKeySequence(new GameKeySequence((int) GameKeyEnum.ToggleMap, nameof(GameKeyEnum.ToggleMap),
+                CategoryId, new List<InputKey>
+                {
+                    InputKey.M
+                }));
+            result.AddGameKeySequence(new GameKeySequence((int) GameKeyEnum.ToggleMapLongPress,
+                nameof(GameKeyEnum.ToggleMapLongPress),
+                CategoryId, new List<InputKey>
+                {
+                    InputKey.LeftAlt
+                }));
             return result;
         }
 
-        public static InputKey GetKey(GameKeyEnum key)
+        public static IGameKeySequence GetKey(GameKeyEnum key)
         {
-            return Category?.GetKey((int) key) ?? InputKey.Invalid;
+            return Category?.GetGameKeySequence((int) key);
         }
     }
 }

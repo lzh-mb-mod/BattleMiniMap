@@ -54,20 +54,13 @@ namespace BattleMiniMap.View.Map
             bool toggleMapKeyDown = false;
             var toggleMapLongPressKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMapLongPress);
             var toggleMapKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMap);
-            if (BattleMiniMapConfig.Get().EnableToggleMapLongPressKey)
+            if (BattleMiniMapConfig.Get().EnableToggleMapLongPressKey && toggleMapLongPressKey.IsKeyDown(Input))
             {
-                if (Input.IsKeyDown(toggleMapLongPressKey))
-                {
-                    toggleMapKeyDown = true;
-                }
+                toggleMapKeyDown = true;
             }
-
-            if (!BattleMiniMapConfig.Get().EnableToggleMapLongPressKey || toggleMapKey != toggleMapLongPressKey)
+            else if(toggleMapKey.IsKeyPressed(Input))
             {
-                if (Input.IsKeyPressed(toggleMapKey))
-                {
-                    BattleMiniMapConfig.Get().ShowMap = !BattleMiniMapConfig.Get().ShowMap;
-                }
+                BattleMiniMapConfig.Get().ShowMap = !BattleMiniMapConfig.Get().ShowMap;
             }
 
             _dataSource.UpdateEnabled(dt, MiniMap.Instance.IsValid &&
