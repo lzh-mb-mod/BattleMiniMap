@@ -6,7 +6,7 @@ using MissionLibrary.Controller;
 using MissionLibrary.View;
 using MissionSharedLibrary;
 using TaleWorlds.Core;
-using TaleWorlds.Library;
+using TaleWorlds.ModuleManager;
 using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap
@@ -21,9 +21,9 @@ namespace BattleMiniMap
 
             Initialize();
             Module.CurrentModule.GlobalTextManager.LoadGameTexts(
-                BasePath.Name + $"Modules/{ModuleId}/ModuleData/module_strings.xml");
+                ModuleHelper.GetXmlPath(ModuleId, "module_strings"));
             Module.CurrentModule.GlobalTextManager.LoadGameTexts(
-                BasePath.Name + $"Modules/{ModuleId}/ModuleData/MissionLibrary.xml");
+                ModuleHelper.GetXmlPath(ModuleId, "MissionLibrary"));
         }
 
         private void Initialize()
@@ -58,8 +58,8 @@ namespace BattleMiniMap
         {
             base.OnGameStart(game, gameStarterObject);
 
-            game.GameTextManager.LoadGameTexts(BasePath.Name + $"Modules/{ModuleId}/ModuleData/module_strings.xml");
-            game.GameTextManager.LoadGameTexts(BasePath.Name + $"Modules/{ModuleId}/ModuleData/MissionLibrary.xml");
+            game.GameTextManager.LoadGameTexts(ModuleHelper.GetXmlPath(ModuleId, "module_strings"));
+            game.GameTextManager.LoadGameTexts(ModuleHelper.GetXmlPath(ModuleId, "MissionLibrary"));
         }
     }
 }

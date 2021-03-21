@@ -14,21 +14,21 @@ namespace BattleMiniMap.View.AgentMarkers.Colors
             switch (colorType)
             {
                 case AgentMarkerColorType.Inactive:
-                    return new Color(0.5f, 0.4f, 0.4f, 0.8f);
+                    return new Color(0.45f, 0.4f, 0.4f, 0.8f);
                 case AgentMarkerColorType.PlayerTeam:
-                    return new Color(0.25f, 0.60f, 0.94f);
+                    return new Color(0.19f, 0.45f, 0.70f);
                 case AgentMarkerColorType.PlayerTeamEscaping:
-                    return new Color(0.66f, 0.8f, 0.94f);
+                    return new Color(0.50f, 0.60f, 0.70f);
                 case AgentMarkerColorType.PlayerAlly:
                     return new Color(0.25f, 0.75f, 0.38f);
                 case AgentMarkerColorType.PlayerAllyTeamEscaping:
-                    return new Color(0.72f, 0.90f, 0.76f);
+                    return new Color(0.54f, 0.68f, 0.57f);
                 case AgentMarkerColorType.PlayerEnemy:
-                    return new Color(0.91f, 0.18f, 0.32f);
+                    return new Color(0.68f, 0.14f, 0.24f);
                 case AgentMarkerColorType.PlayerEnemyTeamEscaping:
-                    return new Color(0.91f, 0.55f, 0.62f);
+                    return new Color(0.68f, 0.41f, 0.47f);
                 case AgentMarkerColorType.Human:
-                    return new Color(0.8f, 0.8f, 0.2f);
+                    return new Color(0.7f, 0.7f, 0.18f);
                 case AgentMarkerColorType.Horse:
                     return new Color(0.3f, 0.3f, 0.2f);
                 case AgentMarkerColorType.Other:

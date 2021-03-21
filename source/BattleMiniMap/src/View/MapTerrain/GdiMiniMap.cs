@@ -1,6 +1,7 @@
 ﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.DeadAgentMarkers;
 using BattleMiniMap.View.Image;
+using BattleMiniMap.View.MapTerrain.ColorConfigs;
 using System;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -15,38 +16,11 @@ namespace BattleMiniMap.View.MapTerrain
 {
     public class GdiMiniMap : IMiniMap
     {
-        public static ColorGenerator AboveWater = new ColorGenerator(new Color[]
-            {
-                Color.FromArgb(255, 60, 90, 60),
-                Color.FromArgb(255, 80, 130, 80),
-                Color.FromArgb(255, 105, 150, 80),
-                Color.FromArgb(255, 130, 170, 80),
-                Color.FromArgb(255, 160, 180, 90),
-                Color.FromArgb(255, 200, 180, 90),
-                Color.FromArgb(255, 230, 180, 90),
-                Color.FromArgb(255, 202, 135, 80),
-                Color.FromArgb(255, 187, 108, 80),
-                Color.FromArgb(255, 169, 84, 80),
-                Color.FromArgb(255, 145, 80, 70),
-                Color.FromArgb(255, 125, 80, 90),
-                Color.FromArgb(255, 105, 80, 120),
-                Color.FromArgb(255, 125, 80, 120),
-                Color.FromArgb(255, 145, 90, 150),
-                Color.FromArgb(255, 160, 90, 180),
-                Color.FromArgb(255, 180, 100, 200),
-                Color.FromArgb(255, 180, 120, 220),
-                Color.FromArgb(255, 200, 150, 240),
-                Color.FromArgb(255, 220, 190, 240),
-            });
+        public static TerrainColorConfig ColorConfig = TerrainColorConfig.LowSaturation4;
 
-        public static ColorGenerator BelowWater = new ColorGenerator(new Color[]
-        {
-            Color.FromArgb(255, 202, 248, 255),
-            Color.FromArgb(255, 99, 248, 255),
-            Color.FromArgb(255, 73, 182, 255),
-            Color.FromArgb(255, 26, 125, 198),
-            Color.FromArgb(255, 48, 96, 198),
-        });
+        public static ColorGenerator AboveWater = ColorConfig.TerrainColor;
+
+        public static ColorGenerator BelowWater = ColorConfig.WaterColor;
 
         private Texture _mapTexture;
         public Bitmap MapImage { get; private set; }
@@ -188,6 +162,8 @@ namespace BattleMiniMap.View.MapTerrain
             if (waterLevel < minHeight)
                 waterLevel = minHeight;
 
+            maxHeight = Math.Min(maxHeight - waterLevel, 120);
+
             for (var w = 0; w < mapWidth; w++)
                 for (var h = 0; h < mapHeight; h++)
                 {
@@ -197,7 +173,7 @@ namespace BattleMiniMap.View.MapTerrain
                     scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
                     if (faceRecord.IsValid())
                     {
-                        SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, waterLevel, EdgeOpacityFactor);
+                        SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, waterLevel, maxHeight, EdgeOpacityFactor);
 
                         continue;
                     }
@@ -215,14 +191,14 @@ namespace BattleMiniMap.View.MapTerrain
                         }
                     }
 
-                    SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, waterLevel, EdgeOpacityFactor);
+                    SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, waterLevel, maxHeight, EdgeOpacityFactor);
                 }
         }
 
-        private void SetPixel(Bitmap image, int mapWidth, int mapHeight, int w, int h, float height, float waterLevel, float edgeOpacityFactor)
+        private void SetPixel(Bitmap image, int mapWidth, int mapHeight, int w, int h, float height, float waterLevel, float maxHeight, float edgeOpacityFactor)
         {
             var color = height >= waterLevel
-                ? AboveWater.GetColor((height - waterLevel) / 190)
+                ? AboveWater.GetColor((height - waterLevel) / maxHeight)
                 : BelowWater.GetColor((waterLevel - height) / 8);
             image.SetPixel(w, h,
                 Color.FromArgb(Math.Min(GetEdgeAlpha(w, h, edgeOpacityFactor), color.A), color.R, color.G, color.B));
