@@ -30,7 +30,7 @@ namespace BattleMiniMap.View.Boundary
 
         private void BoundariesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            TextureProvider.Clear();
+            TextureProvider?.Clear();
         }
 
         protected override void OnUpdate(float dt)
