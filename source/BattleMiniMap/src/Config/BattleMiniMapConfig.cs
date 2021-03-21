@@ -38,9 +38,9 @@ namespace BattleMiniMap.Config
 
         public float EdgeOpacityFactor { get; set; } = 0.5f;
 
-        public float BackgroundOpacity { get; set; } = 0.5f;
+        public float BackgroundOpacity { get; set; } = 0.7f;
 
-        public float ForegroundOpacity { get; set; } = 0.8f;
+        public float ForegroundOpacity { get; set; } = 0.5f;
 
         public bool ExcludeUnwalkableTerrain { get; set; } = false;
 

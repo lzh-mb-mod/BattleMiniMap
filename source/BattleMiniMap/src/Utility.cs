@@ -50,6 +50,13 @@ namespace BattleMiniMap
                 MapFToWorld(point.x, miniMap.Resolution, miniMap.MapBoundMin.y));
         }
 
+        public static float MapFToWidget(this IMiniMap miniMap, float f)
+        {
+            var config = BattleMiniMapConfig.Get();
+            var scale = (float)config.WidgetWidth / miniMap.BitmapWidth;
+            return f * scale;
+        }
+
         public static Vec2 MapToWidget(this IMiniMap miniMap, Vec2 p)
         {
             var config = BattleMiniMapConfig.Get();

@@ -3,7 +3,6 @@ using BattleMiniMap.View.AgentMarkers.Colors;
 using BattleMiniMap.View.AgentMarkers.TextureProviders;
 using BattleMiniMap.View.MapTerrain;
 using System;
-using System.Collections.Generic;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.TwoDimension;
 
@@ -12,6 +11,7 @@ namespace BattleMiniMap.View.AgentMarkers
     public class BattleMiniMap_AgentMarkerCollectionWidget : BrushWidget
     {
         private DrawObject2D _cachedMesh;
+        private float _agentMarkerSize;
 
         public BattleMiniMap_AgentMarkerCollectionWidget(UIContext context) : base(context)
         {
@@ -20,9 +20,10 @@ namespace BattleMiniMap.View.AgentMarkers
 
         public AgentMarkerCollection AgentMakers { get; set; }
 
-        public override void UpdateBrushes(float dt)
+
+        protected override void OnUpdate(float dt)
         {
-            base.UpdateBrushes(dt);
+            base.OnUpdate(dt);
 
             if (MiniMap.Instance != null)
             {
@@ -30,7 +31,11 @@ namespace BattleMiniMap.View.AgentMarkers
                 var height = MiniMap.Instance.BitmapHeight;
                 var config = BattleMiniMapConfig.Get();
                 SuggestedWidth = config.WidgetWidth;
-                SuggestedHeight = height / (float) width * SuggestedWidth;
+                SuggestedHeight = height / (float)width * SuggestedWidth;
+                //var size = Utility.WorldToMapF(10, MiniMap.Instance.Resolution, 0);
+                //_agentMarkerSize = Math.Max(MiniMap.Instance.MapFToWidget(size) * config.AgentMarkerScale, 1);
+                var size = Widgets.Utility.GetSize(this);
+                _agentMarkerSize = Math.Max(size.x * 0.01f * config.AgentMarkerScale, 1);
             }
         }
 
@@ -38,19 +43,16 @@ namespace BattleMiniMap.View.AgentMarkers
         {
             base.OnRender(twoDimensionContext, drawContext);
 
-            var config = BattleMiniMapConfig.Get();
-            var size = Widgets.Utility.GetSize(this);
-            var width = Math.Max(size.x * 0.01f * config.AgentMarkerScale, 1);
-            var height = Math.Max(size.x * 0.01f * config.AgentMarkerScale, 1);
-            UpdateDrawObject2D(width, height);
+            var size = _agentMarkerSize;
+            UpdateDrawObject2D(size, size);
             var materials = new SimpleMaterial[(int)AgentMarkerType.Count];
             var globalPosition = Widgets.Utility.GetGlobalPosition(this);
-            
-            for(int i = 0; i < AgentMakers.CountOfAgentMarkers; ++i)
+
+            for (int i = 0; i < AgentMakers.CountOfAgentMarkers; ++i)
             {
                 var agentMaker = AgentMakers.AgentMarkers[i];
                 var type = agentMaker.AgentMarkerType;
-                twoDimensionContext.Draw(globalPosition.x + agentMaker.PositionInWidget.x * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1) - width * 0.5f, globalPosition.y + agentMaker.PositionInWidget.y * ScaledSuggestedHeight / Math.Max(SuggestedHeight, 1) - height * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
+                twoDimensionContext.Draw(globalPosition.x + agentMaker.PositionInWidget.x * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1) - size * 0.5f, globalPosition.y + agentMaker.PositionInWidget.y * ScaledSuggestedHeight / Math.Max(SuggestedHeight, 1) - size * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
             }
         }
 
