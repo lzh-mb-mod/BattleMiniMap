@@ -1,28 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <Module>
-	<Name value="Battle Mini Map" />
-	<Id value="BattleMiniMap" />
-	<Version value="v1.0.11" />
-	<SingleplayerModule value="true" />
-	<MultiplayerModule value="false" />
-	<DependedModules>
-		<DependedModule Id="Native"  DependentVersion="e1.6.0" />
-		<DependedModule Id="SandBoxCore"  DependentVersion="e1.6.0" />
-		<DependedModule Id="Sandbox"  DependentVersion="e1.6.0" />
-		<DependedModule Id="StoryMode"  DependentVersion="e1.6.0" />
-	</DependedModules>
-	<SubModules>
-		<SubModule>
-			<Name value="BattleMiniMapSubModule" />
-			<DLLName value="BattleMiniMap.dll" />
-			<SubModuleClassType value="BattleMiniMap.BattleMiniMapSubModule" />
-			<Tags>
-				<Tag key="DedicatedServerType" value="none" />
-				<Tag key="IsNoRenderModeElement" value="false" />
-			</Tags>
-		</SubModule>
-	</SubModules>
+  <Name value="Battle Mini Map" />
+  <Id value="BattleMiniMap" />
+  <Version value="v1.0.12" />
+  <SingleplayerModule value="true" />
+  <MultiplayerModule value="false" />
+  <DependedModules>
+    <DependedModule Id="Native" DependentVersion="e1.6.1" />
+    <DependedModule Id="SandBoxCore" DependentVersion="e1.6.1" />
+    <DependedModule Id="Sandbox" DependentVersion="e1.6.1" />
+    <DependedModule Id="CustomBattle" DependentVersion="e1.6.1"/>
+    <DependedModule Id="StoryMode" DependentVersion="e1.6.1" />
+  </DependedModules>
+  <SubModules>
+    <SubModule>
+      <Name value="BattleMiniMapSubModule" />
+      <DLLName value="BattleMiniMap.dll" />
+      <SubModuleClassType value="BattleMiniMap.BattleMiniMapSubModule" />
+      <Tags>
+        <Tag key="DedicatedServerType" value="none" />
+        <Tag key="IsNoRenderModeElement" value="false" />
+      </Tags>
+    </SubModule>
+  </SubModules>
 
-	<Xmls />
+  <Xmls />
 </Module>
