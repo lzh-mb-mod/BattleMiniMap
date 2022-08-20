@@ -16,7 +16,6 @@ namespace BattleMiniMap.View.Map
         private float _backgroundAlphaFactor;
         private bool _isEnabled;
         private float _foregroundAlphaFactor;
-        private readonly BasicTimer _timer;
         //private AgentMarkerCollection _deadAgentMarkers;
         //private AgentMarkerCollection _deadAgentMarkersBackup;
 
@@ -93,7 +92,6 @@ namespace BattleMiniMap.View.Map
             //{
             //    AgentMarkers = new List<AgentMarker>()
             //};
-            _timer = new BasicTimer(MBCommon.TimeType.Application);
         }
 
         public void UpdateEnabled(float dt, bool isEnabled)

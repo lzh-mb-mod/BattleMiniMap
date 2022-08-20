@@ -168,7 +168,7 @@ namespace BattleMiniMap.View.AgentMarkers
 
         private static AgentMarkerType GetHumanMarkerType(Agent agent)
         {
-            if (agent.Team == null)
+            if (agent.Team == null || !agent.Team.IsValid)
             {
                 if (Mission.Current.MainAgent != null)
                 {

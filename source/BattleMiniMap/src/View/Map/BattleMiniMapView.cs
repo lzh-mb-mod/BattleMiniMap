@@ -18,9 +18,9 @@ namespace BattleMiniMap.View.Map
         private bool _boundaryChanged;
         private bool _isOrderViewOpened;
 
-        public override void OnBehaviourInitialize()
+        public override void OnBehaviorInitialize()
         {
-            base.OnBehaviourInitialize();
+            base.OnBehaviorInitialize();
 
             MiniMap.Instance.InitializeMapRange(Mission.Current, true);
             _dataSource = new BattleMiniMapViewModel(MissionScreen);

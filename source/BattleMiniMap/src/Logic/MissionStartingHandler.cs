@@ -11,14 +11,14 @@ namespace BattleMiniMap.Logic
     {
         public override void OnCreated(MissionView entranceView)
         {
-            var list = new List<MissionBehaviour>
+            var list = new List<MissionBehavior>
             {
                 new BattleMiniMapView()
             };
 
 
-            foreach (var missionBehaviour in list)
-                MissionStartingManager.AddMissionBehaviour(entranceView, missionBehaviour);
+            foreach (var missionBehavior in list)
+                MissionStartingManager.AddMissionBehavior(entranceView, missionBehavior);
         }
 
         public override void OnPreMissionTick(MissionView entranceView, float dt)
