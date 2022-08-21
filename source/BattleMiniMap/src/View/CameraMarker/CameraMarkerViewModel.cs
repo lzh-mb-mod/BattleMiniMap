@@ -2,7 +2,7 @@
 using BattleMiniMap.View.MapTerrain;
 using System;
 using TaleWorlds.Library;
-using TaleWorlds.MountAndBlade.View.Screen;
+using TaleWorlds.MountAndBlade.View.Screens;
 
 namespace BattleMiniMap.View.CameraMarker
 {

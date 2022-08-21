@@ -4,6 +4,7 @@ using BattleMiniMap.View.AgentMarkers.TextureProviders;
 using BattleMiniMap.View.MapTerrain;
 using System;
 using TaleWorlds.GauntletUI;
+using TaleWorlds.GauntletUI.BaseTypes;
 using TaleWorlds.TwoDimension;
 
 namespace BattleMiniMap.View.AgentMarkers

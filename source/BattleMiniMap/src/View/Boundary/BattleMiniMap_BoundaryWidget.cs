@@ -2,6 +2,7 @@
 using BattleMiniMap.View.MapTerrain;
 using System.Collections.Specialized;
 using TaleWorlds.GauntletUI;
+using TaleWorlds.GauntletUI.BaseTypes;
 using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap.View.Boundary

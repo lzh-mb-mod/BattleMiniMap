@@ -1,40 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<base xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:xsd="http://www.w3.org/2001/XMLSchema" type="string">
-  <strings>
-    <string id="str_battle_mini_map_option_class" text="{=BattleMiniMap_option_class}Battle Mini Map" />
+<strings>
+  <string id="str_battle_mini_map_option_class" text="{=BattleMiniMap_option_class}Battle Mini Map" />
 
-    <string id="str_battle_mini_map_map_options" text="{=BattleMiniMap_map_options}Map options" />
-    <string id="str_battle_mini_map_show_map" text="{=BattleMiniMap_show_map}Show Map" />
-    <string id="str_battle_mini_map_enable_toggle_map_long_press_key" text="{=BattleMiniMap_enable_toggle_map_long_press_key}Enable the Toggle Map (Long Press) key" />
-    <string id="str_battle_mini_map_show_map_when_commanding" text="{=BattleMiniMap_show_map_when_commanding}Show Map When Commanding" />
-    <string id="str_battle_mini_map_map_width" text="{=BattleMiniMap_map_width}Map Width" />
+  <string id="str_battle_mini_map_map_options" text="{=BattleMiniMap_map_options}Map options" />
+  <string id="str_battle_mini_map_show_map" text="{=BattleMiniMap_show_map}Show Map" />
+  <string id="str_battle_mini_map_enable_toggle_map_long_press_key" text="{=BattleMiniMap_enable_toggle_map_long_press_key}Enable the Toggle Map (Long Press) key" />
+  <string id="str_battle_mini_map_show_map_when_commanding" text="{=BattleMiniMap_show_map_when_commanding}Show Map When Commanding" />
+  <string id="str_battle_mini_map_map_width" text="{=BattleMiniMap_map_width}Map Width" />
 
-    <string id="str_battle_mini_map_horizontal_alignment" text="{=BattleMiniMap_horizontal_alignment}Horizontal Alignment" />
-    <string id="str_battle_mini_map_vertical_alignment" text="{=BattleMiniMap_vertical_alignment}Vertical Alignment" />
-    <string id="str_battle_mini_map_position_x" text="{=BattleMiniMap_position_x}Position X" />
-    <string id="str_battle_mini_map_position_y" text="{=BattleMiniMap_position_y}Position Y" />
+  <string id="str_battle_mini_map_horizontal_alignment" text="{=BattleMiniMap_horizontal_alignment}Horizontal Alignment" />
+  <string id="str_battle_mini_map_vertical_alignment" text="{=BattleMiniMap_vertical_alignment}Vertical Alignment" />
+  <string id="str_battle_mini_map_position_x" text="{=BattleMiniMap_position_x}Position X" />
+  <string id="str_battle_mini_map_position_y" text="{=BattleMiniMap_position_y}Position Y" />
 
-    <string id="str_battle_mini_map_map_resolution" text="{=BattleMiniMap_map_resolution}Map Resolution" />
-    <string id="str_battle_mini_map_agent_marker_scale" text="{=BattleMiniMap_agent_marker_scale}Agent Marker Scale" />
-    <string id="str_battle_mini_map_edge_opacity_factor" text="{=BattleMiniMap_edge_opacity_factor}Edge Opacity Factor" />
+  <string id="str_battle_mini_map_map_resolution" text="{=BattleMiniMap_map_resolution}Map Resolution" />
+  <string id="str_battle_mini_map_agent_marker_scale" text="{=BattleMiniMap_agent_marker_scale}Agent Marker Scale" />
+  <string id="str_battle_mini_map_edge_opacity_factor" text="{=BattleMiniMap_edge_opacity_factor}Edge Opacity Factor" />
 
-    <string id="str_battle_mini_map_background_opacity" text="{=BattleMiniMap_background_opacity}Background Opacity" />
-    <string id="str_battle_mini_map_foreground_opacity" text="{=BattleMiniMap_foreground_opacity}Foreground Opacity" />
+  <string id="str_battle_mini_map_background_opacity" text="{=BattleMiniMap_background_opacity}Background Opacity" />
+  <string id="str_battle_mini_map_foreground_opacity" text="{=BattleMiniMap_foreground_opacity}Foreground Opacity" />
 
-    <string id="str_battle_mini_map_exclude_unwalkable_terrain" text="{=BattleMiniMap_exclude_unwalkable_terrain}Exclude Unwalkable Terrain" />
+  <string id="str_battle_mini_map_exclude_unwalkable_terrain" text="{=BattleMiniMap_exclude_unwalkable_terrain}Exclude Unwalkable Terrain" />
 
-    <string id="str_battle_min_map_top" text="{=BattleMiniMap_top}Top" />
-    <string id="str_battle_min_map_center" text="{=BattleMiniMap_center}Center" />
-    <string id="str_battle_min_map_bottom" text="{=BattleMiniMap_bottom}Bottom" />
-    <string id="str_battle_min_map_left" text="{=BattleMiniMap_left}Left" />
-    <string id="str_battle_min_map_right" text="{=BattleMiniMap_right}Right" />
+  <string id="str_battle_min_map_top" text="{=BattleMiniMap_top}Top" />
+  <string id="str_battle_min_map_center" text="{=BattleMiniMap_center}Center" />
+  <string id="str_battle_min_map_bottom" text="{=BattleMiniMap_bottom}Bottom" />
+  <string id="str_battle_min_map_left" text="{=BattleMiniMap_left}Left" />
+  <string id="str_battle_min_map_right" text="{=BattleMiniMap_right}Right" />
 
-    <string id="str_key_category_name.BattleMiniMapHotKey" text="{=BattleMiniMap_hotkey_category}Battle Mini Map Hot Key" />
-    <string id="str_key_name.BattleMiniMapHotKey_Up" text="{=BattleMiniMap_toggle_map}Toggle Map" />
-    <string id="str_key_description.BattleMiniMapHotKey_Up" text="{=BattleMiniMap_toggle_map_hint}Show or hide the map." />
-    <string id="str_key_name.BattleMiniMapHotKey_Down" text="{=BattleMiniMapHotKey_toggle_map_long_press}Toggle Map (Long Press)" />
-    <string id="str_key_description.BattleMiniMapHotKey_Down" text="{=BattleMiniMapHotKey_toggle_map_long_press_hint}Long press the key to show or hide the map." />
-  </strings>
-</base>
+  <string id="str_key_category_name.BattleMiniMapHotKey" text="{=BattleMiniMap_hotkey_category}Battle Mini Map Hot Key" />
+  <string id="str_key_name.BattleMiniMapHotKey_Up" text="{=BattleMiniMap_toggle_map}Toggle Map" />
+  <string id="str_key_description.BattleMiniMapHotKey_Up" text="{=BattleMiniMap_toggle_map_hint}Show or hide the map." />
+  <string id="str_key_name.BattleMiniMapHotKey_Down" text="{=BattleMiniMapHotKey_toggle_map_long_press}Toggle Map (Long Press)" />
+  <string id="str_key_description.BattleMiniMapHotKey_Down" text="{=BattleMiniMapHotKey_toggle_map_long_press_hint}Long press the key to show or hide the map." />
+</strings>

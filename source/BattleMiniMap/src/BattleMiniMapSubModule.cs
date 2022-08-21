@@ -19,11 +19,8 @@ namespace BattleMiniMap
         {
             base.OnSubModuleLoad();
 
+            Module.CurrentModule.GlobalTextManager.LoadGameTexts();
             Initialize();
-            Module.CurrentModule.GlobalTextManager.LoadGameTexts(
-                ModuleHelper.GetXmlPath(ModuleId, "module_strings"));
-            Module.CurrentModule.GlobalTextManager.LoadGameTexts(
-                ModuleHelper.GetXmlPath(ModuleId, "MissionLibrary"));
         }
 
         private void Initialize()
@@ -58,8 +55,7 @@ namespace BattleMiniMap
         {
             base.OnGameStart(game, gameStarterObject);
 
-            game.GameTextManager.LoadGameTexts(ModuleHelper.GetXmlPath(ModuleId, "module_strings"));
-            game.GameTextManager.LoadGameTexts(ModuleHelper.GetXmlPath(ModuleId, "MissionLibrary"));
+            game.GameTextManager.LoadGameTexts();
         }
     }
 }

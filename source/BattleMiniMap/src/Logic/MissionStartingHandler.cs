@@ -3,7 +3,7 @@ using MissionLibrary.Controller;
 using MissionSharedLibrary.Controller;
 using System.Collections.Generic;
 using TaleWorlds.MountAndBlade;
-using TaleWorlds.MountAndBlade.View.Missions;
+using TaleWorlds.MountAndBlade.View.MissionViews;
 
 namespace BattleMiniMap.Logic
 {

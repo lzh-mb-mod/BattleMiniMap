@@ -1,13 +1,12 @@
 ﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.AgentMarkers;
 using BattleMiniMap.View.CameraMarker;
-using BattleMiniMap.View.DeadAgentMarkers;
 using BattleMiniMap.View.MapTerrain;
 using System;
 using System.Collections.Generic;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
-using TaleWorlds.MountAndBlade.View.Screen;
+using TaleWorlds.MountAndBlade.View.Screens;
 
 namespace BattleMiniMap.View.Map
 {

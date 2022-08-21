@@ -1,6 +1,7 @@
 ﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.GauntletUI;
+using TaleWorlds.GauntletUI.BaseTypes;
 
 namespace BattleMiniMap.View.Map
 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
 using TaleWorlds.GauntletUI;
+using TaleWorlds.GauntletUI.BaseTypes;
 using TaleWorlds.Library;
 using TaleWorlds.TwoDimension;
 

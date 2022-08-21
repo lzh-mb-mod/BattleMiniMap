@@ -6,7 +6,7 @@ using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View;
-using TaleWorlds.MountAndBlade.View.Missions;
+using TaleWorlds.MountAndBlade.View.MissionViews;
 
 namespace BattleMiniMap.View.Map
 {
