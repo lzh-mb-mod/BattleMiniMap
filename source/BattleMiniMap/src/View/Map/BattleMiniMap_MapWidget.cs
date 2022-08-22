@@ -86,9 +86,8 @@ namespace BattleMiniMap.View.Map
                     direction.AngleBetween(-Vec2.Forward));
 
                 CircularClipEnabled = true;
-                var s = MathF.Min(size.x, size.y);
-                CircularClipRadius = 0.8f * s;
-                CircularClipSmoothingRadius = 0.2f * s;
+                CircularClipRadius = 0.4f * size.x;
+                CircularClipSmoothingRadius = 0.1f * size.x;
 
                 var globalPosition = Widgets.Utility.GetGlobalPosition(this);
                 var material = Widgets.Utility.CreateMaterial(drawContext, this);
