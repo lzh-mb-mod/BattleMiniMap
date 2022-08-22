@@ -1,5 +1,4 @@
 ﻿using BattleMiniMap.Config;
-using BattleMiniMap.View.DeadAgentMarkers;
 using BattleMiniMap.View.Image;
 using BattleMiniMap.View.MapTerrain.ColorConfigs;
 using System;
@@ -70,7 +69,6 @@ namespace BattleMiniMap.View.MapTerrain
                 BitmapWidth = BitmapHeight = 1;
                 MapTexture = null;
                 IsValid = false;
-                BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Initialize();
                 return;
             }
 
@@ -80,7 +78,6 @@ namespace BattleMiniMap.View.MapTerrain
 
             if (updateMap)
                 UpdateMapSize(mission, true);
-            BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Initialize();
         }
 
         public void UpdateMapSize(Mission mission, bool updateMap = false)
@@ -182,7 +179,6 @@ namespace BattleMiniMap.View.MapTerrain
                     PathFaceRecord faceRecord = PathFaceRecord.NullFaceRecord;
                     scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
                     var groundHeight = terrainHeight;
-                    ;
                     if (faceRecord.IsValid() || !scene.GetHeightAtPoint(pos, BodyFlags.CommonCollisionExcludeFlags, ref groundHeight))
                     {
                         SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, waterLevel, maxHeight, EdgeOpacityFactor);
@@ -216,15 +212,20 @@ namespace BattleMiniMap.View.MapTerrain
 
         public int GetEdgeAlpha(int w, int h, float edgeOpacityFactor)
         {
-            var x = Math.Abs(edgeOpacityFactor - 1) < 0.01f
-                ? 0
-                : MathF.Clamp((Math.Abs((float)w / BitmapWidth - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor),
-                    0, 1);
-            var y = Math.Abs(edgeOpacityFactor - 1) < 0.01f
-                ? 0
-                : MathF.Clamp(
-                    (Math.Abs((float)h / BitmapHeight - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor), 0, 1);
-            return (int)(MathF.Sqrt(Math.Max(1 - x * x - y * y, 0)) * 255);
+            //var x = Math.Abs(edgeOpacityFactor - 1) < 0.01f
+            //    ? 0
+            //    : MathF.Clamp((Math.Abs((float)w / BitmapWidth - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor),
+            //        0, 1);
+            //var y = Math.Abs(edgeOpacityFactor - 1) < 0.01f
+            //    ? 0
+            //    : MathF.Clamp(
+            //        (Math.Abs((float)h / BitmapHeight - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor), 0, 1);
+            //return (int)(MathF.Sqrt(Math.Max(1 - x * x - y * y, 0)) * 255);
+            edgeOpacityFactor = MathF.Clamp(edgeOpacityFactor, 0, 1);
+            var factor = edgeOpacityFactor * 2 + 2;
+            var x = MathF.Clamp(Math.Abs((float)w / BitmapWidth - 0.5f) * 2, 0, 1);
+            var y = MathF.Clamp(Math.Abs((float)h / BitmapHeight - 0.5f) * 2, 0, 1);
+            return (int)(MathF.Pow(MathF.Max(1 - MathF.Pow(x, factor) - MathF.Pow(y, factor), 0f), 1 / (factor + 2)) * 255);
         }
     }
 }

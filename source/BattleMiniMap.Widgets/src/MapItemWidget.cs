@@ -71,33 +71,7 @@ namespace BattleMiniMap.Widgets
 
         protected DrawObject2D CreateDrawObject2D()
         {
-            DrawObject2D polygonCoordinates = DrawObject2D.CreateTriangleTopologyMeshWithPolygonCoordinates(new List<Vector2>()
-            {
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, Size.Y),
-                new Vector2(Size.X, Size.Y),
-                new Vector2(Size.X, 0.0f)
-            });
-            polygonCoordinates.DrawObjectType = DrawObjectType.Quad;
-            polygonCoordinates.TextureCoordinates[0] = 0.0f;
-            polygonCoordinates.TextureCoordinates[1] = 0.0f;
-            polygonCoordinates.TextureCoordinates[2] = 0.0f;
-            polygonCoordinates.TextureCoordinates[3] = 1f;
-            polygonCoordinates.TextureCoordinates[4] = 1f;
-            polygonCoordinates.TextureCoordinates[5] = 1f;
-            polygonCoordinates.TextureCoordinates[6] = 0.0f;
-            polygonCoordinates.TextureCoordinates[7] = 0.0f;
-            polygonCoordinates.TextureCoordinates[8] = 1f;
-            polygonCoordinates.TextureCoordinates[9] = 1f;
-            polygonCoordinates.TextureCoordinates[10] = 1f;
-            polygonCoordinates.TextureCoordinates[11] = 0.0f;
-            polygonCoordinates.Width = Size.X;
-            polygonCoordinates.Height = Size.Y;
-            polygonCoordinates.MinU = 0.0f;
-            polygonCoordinates.MaxU = 1f;
-            polygonCoordinates.MinV = 0.0f;
-            polygonCoordinates.MaxV = 1f;
-            return polygonCoordinates;
+            return Utility.CreateDrawObject2D(Size.X, Size.Y);
         }
     }
 }

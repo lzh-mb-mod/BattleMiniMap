@@ -1,7 +1,14 @@
-﻿using BattleMiniMap.Config;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.GauntletUI.BaseTypes;
+using TaleWorlds.Library;
+using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.View.Screens;
+using TaleWorlds.TwoDimension;
 
 namespace BattleMiniMap.View.Map
 {
@@ -54,6 +61,40 @@ namespace BattleMiniMap.View.Map
             else
             {
                 IsEnabled = false;
+            }
+        }
+
+        protected override void OnRender(TwoDimensionContext twoDimensionContext, TwoDimensionDrawContext drawContext)
+        {
+            var config = BattleMiniMapConfig.Get();
+            if (!config.FollowMode || this.TextureProvider == null)
+            {
+                CircularClipEnabled = false;
+                base.OnRender(twoDimensionContext, drawContext);
+            }
+            else
+            {
+                this.Texture = this.TextureProvider.GetTexture(twoDimensionContext, string.Empty);
+                var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
+                var position = camera.Position.AsVec2;
+                var direction = camera.Direction.AsVec2.Normalized().LeftVec();
+                var size = Widgets.Utility.GetSize(this);
+                var scale = config.FollowModeScale / 100f * size.x;
+                var midPoint = new Vec2(size.X / 2, size.Y / 2);
+                var offset = (midPoint - MiniMap.Instance.MapToWidget(MiniMap.Instance.WorldToMapF(position)) * (scale * (MiniMap.Instance.MapBoundMax.y - MiniMap.Instance.MapBoundMin.y) / size.x) * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1));
+                var mesh = Widgets.Utility.CreateDrawObject2D(scale * (MiniMap.Instance.MapBoundMax.y - MiniMap.Instance.MapBoundMin.y), scale * (MiniMap.Instance.MapBoundMax.x - MiniMap.Instance.MapBoundMin.x), offset, midPoint,
+                    direction.AngleBetween(-Vec2.Forward));
+
+                CircularClipEnabled = true;
+                var s = MathF.Min(size.x, size.y);
+                CircularClipRadius = 0.8f * s;
+                CircularClipSmoothingRadius = 0.2f * s;
+
+                var globalPosition = Widgets.Utility.GetGlobalPosition(this);
+                var material = Widgets.Utility.CreateMaterial(drawContext, this);
+                material.Texture = this.Texture;
+
+                twoDimensionContext.Draw(globalPosition.X, globalPosition.Y, material, mesh);
             }
         }
     }

@@ -8,8 +8,7 @@ namespace BattleMiniMap.View.AgentMarkers
     public class AgentMarker
     {
         private Agent _agent;
-
-        public Vec2 PositionInMap { get; set; }
+        private Vec3 _cachedAgentPosition;
 
         public Vec2 PositionInWidget { get; set; }
 
@@ -34,9 +33,16 @@ namespace BattleMiniMap.View.AgentMarkers
             UpdateMarker();
         }
 
+        public void RenderUpdate()
+        {
+            if (MiniMap.Instance?.IsValid ?? false)
+            {
+                UpdateRenderedPosition();
+            }
+        }
+
         public void CopyFrom(AgentMarker other)
         {
-            PositionInMap = other.PositionInMap;
             PositionInWidget = other.PositionInWidget;
             AgentMarkerType = other.AgentMarkerType;
             _agent = other._agent;
@@ -62,17 +68,21 @@ namespace BattleMiniMap.View.AgentMarkers
                 return;
             }
 
+            _cachedAgentPosition = _agent.Position;
             var miniMap = MiniMap.Instance;
             if (!miniMap.IsValid && !BattleMiniMapConfig.Get().ShowMap)
                 return;
-            PositionInMap = miniMap.WorldToMapF(_agent.Position.AsVec2);
-            PositionInWidget = miniMap.MapToWidget(PositionInMap);
+            UpdateRenderedPosition();
+        }
+
+        private void UpdateRenderedPosition()
+        {
+            PositionInWidget = MiniMap.Instance.WorldToWidget(_cachedAgentPosition.AsVec2);
         }
 
         private void MakeDead()
         {
-            PositionInMap = MiniMap.Instance.WorldToMapF(_agent.Position.AsVec2);
-            PositionInWidget = MiniMap.Instance.MapToWidget(PositionInMap);
+            PositionInWidget = MiniMap.Instance.WorldToWidget(_agent.Position.AsVec2);
             _agent = null;
         }
     }

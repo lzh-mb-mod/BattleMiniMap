@@ -6,6 +6,7 @@ using MissionSharedLibrary.View.ViewModelCollection.Options;
 using MissionSharedLibrary.View.ViewModelCollection.Options.Selection;
 using TaleWorlds.Core;
 using TaleWorlds.GauntletUI;
+using TaleWorlds.Localization;
 
 namespace BattleMiniMap.Config
 {
@@ -83,6 +84,10 @@ namespace BattleMiniMap.Config
                     {
                         BattleMiniMapConfig.Get().ExcludeUnwalkableTerrain = b;
                     }));
+                optionCategory.AddOption(new BoolOptionViewModel(
+                    new TextObject("Follow Mode"), null,
+                    () => BattleMiniMapConfig.Get().FollowMode,
+                    b => BattleMiniMapConfig.Get().FollowMode = b));
                 optionClass.AddOptionCategory(0, optionCategory);
                 return optionClass;
             }, BattleMiniMapSubModule.ModuleId);

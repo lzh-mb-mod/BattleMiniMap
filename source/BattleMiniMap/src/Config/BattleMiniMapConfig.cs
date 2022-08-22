@@ -24,6 +24,10 @@ namespace BattleMiniMap.Config
         public bool ShowMapWhenCommanding { get; set; } = true;
         public int WidgetWidth { get; set; } = 400;
 
+        public bool FollowMode { get; set; } = true;
+
+        public float FollowModeScale { get; set; } = 0.1f;
+
         public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
 
         public VerticalAlignment VerticalAlignment { get; set; } = VerticalAlignment.Top;
@@ -54,6 +58,8 @@ namespace BattleMiniMap.Config
             EnableToggleMapLongPressKey = other.EnableToggleMapLongPressKey;
             ShowMapWhenCommanding = other.ShowMapWhenCommanding;
             WidgetWidth = other.WidgetWidth;
+            FollowMode = other.FollowMode;
+            FollowModeScale = other.FollowModeScale;
             HorizontalAlignment = other.HorizontalAlignment;
             VerticalAlignment = other.VerticalAlignment;
             PositionX = other.PositionX;

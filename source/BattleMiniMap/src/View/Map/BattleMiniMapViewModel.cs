@@ -136,6 +136,14 @@ namespace BattleMiniMap.View.Map
             UpdateAgentMarkers();
         }
 
+        public void UpdateRenderData()
+        {
+            foreach (var agentMarker in AgentMarkers.AgentMarkers)
+            {
+                agentMarker.RenderUpdate();
+            }
+        }
+
         public void UpdateCamera()
         {
             CameraMarkerLeft.Update();

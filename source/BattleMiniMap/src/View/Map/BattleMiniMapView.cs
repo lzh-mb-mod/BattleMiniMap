@@ -35,7 +35,7 @@ namespace BattleMiniMap.View.Map
             _layer = new GauntletLayer(20);
             _layer.LoadMovie(nameof(BattleMiniMapView), _dataSource);
             MissionScreen.AddLayer(_layer);
-            _timer = new MissionTimer(0.05f);
+            _timer = new MissionTimer(0.03f);
         }
 
         public override void OnMissionScreenTick(float dt)
@@ -71,6 +71,8 @@ namespace BattleMiniMap.View.Map
 
             if (_timer.Check(true))
                 _dataSource.UpdateData();
+            else if (BattleMiniMapConfig.Get().FollowMode)
+                _dataSource.UpdateRenderData();
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner)

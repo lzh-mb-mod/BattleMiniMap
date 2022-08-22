@@ -2,6 +2,8 @@
 using BattleMiniMap.View.MapTerrain;
 using System.Drawing;
 using TaleWorlds.Library;
+using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.View.Screens;
 
 namespace BattleMiniMap
 {
@@ -69,6 +71,23 @@ namespace BattleMiniMap
             var config = BattleMiniMapConfig.Get();
             var scale = (float)config.WidgetWidth / miniMap.BitmapWidth;
             return new Vec2(p.X / scale, p.Y / scale);
+        }
+
+        public static Vec2 WorldToWidget(this IMiniMap miniMap, Vec2 p)
+        {
+            var config = BattleMiniMapConfig.Get();
+            if (config.FollowMode)
+            {
+                var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
+                var position = camera.Position.AsVec2;
+                var direction = camera.Direction.AsVec2.Normalized().LeftVec();
+                var relativePosition = (p - position).TransformToLocalUnitF(direction);
+                return new Vec2(-relativePosition.y, relativePosition.x) * config.FollowModeScale / 100f * config.WidgetWidth + new Vec2(config.WidgetWidth / 2f, (float)config.WidgetWidth * miniMap.BitmapHeight / miniMap.BitmapWidth / 2);
+            }
+            else
+            {
+                return MapToWidget(miniMap, miniMap.WorldToMapF(p));
+            }
         }
     }
 }

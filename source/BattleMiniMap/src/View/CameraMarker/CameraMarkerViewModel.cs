@@ -94,11 +94,9 @@ namespace BattleMiniMap.View.CameraMarker
             var cameraPosition = _missionScreen.CombatCamera.Position;
             var markerLength = BattleMiniMapConfig.Get().WidgetWidth * 0.1f;
             var end = cameraPosition + edgeDir * markerLength;
-            var cameraPosInMap = MiniMap.Instance.WorldToMapF(cameraPosition.AsVec2);
             Vec2 cameraPosInWidget =
-                MiniMap.Instance.MapToWidget(cameraPosInMap);
-            var endPosInMap = MiniMap.Instance.WorldToMapF(end.AsVec2);
-            Vec2 endPositionInWidget = MiniMap.Instance.MapToWidget(endPosInMap);
+                MiniMap.Instance.WorldToWidget(cameraPosition.AsVec2);
+            Vec2 endPositionInWidget = MiniMap.Instance.WorldToWidget(end.AsVec2);
             BasePosition = cameraPosInWidget;
             RotateCenter = Vec2.Zero;
             RotateAngleInRadians = (endPositionInWidget - cameraPosInWidget).AngleBetween(new Vec2(1, 1));
