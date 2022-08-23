@@ -82,11 +82,31 @@ namespace BattleMiniMap
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized().LeftVec();
                 var relativePosition = (p - position).TransformToLocalUnitF(direction);
-                return new Vec2(-relativePosition.y, relativePosition.x) * config.FollowModeScale / 100f * config.WidgetWidth + new Vec2(config.WidgetWidth / 2f, (float)config.WidgetWidth * miniMap.BitmapHeight / miniMap.BitmapWidth / 2);
+                return new Vec2(-relativePosition.y, relativePosition.x) * config.FollowModeScale / 100f * config.WidgetWidth + new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
             }
             else
             {
                 return MapToWidget(miniMap, miniMap.WorldToMapF(p));
+            }
+        }
+
+        public static Vec2 WidgetToWorld(this IMiniMap miniMap, Vec2 p)
+        {
+            var config = BattleMiniMapConfig.Get();
+            if (config.FollowMode)
+            {
+                p -= new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
+                p = p * 100f / config.FollowModeScale / config.WidgetWidth;
+                var relativePosition = new Vec2(-p.y, -p.x);
+
+                var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
+                var position = camera.Position.AsVec2;
+                var direction = camera.Direction.AsVec2.Normalized().LeftVec();
+                return relativePosition.TransformToParentUnitF(direction) + position;
+            }
+            else
+            {
+                return MapFToWorld(miniMap, miniMap.WidgetToMap(p));
             }
         }
     }

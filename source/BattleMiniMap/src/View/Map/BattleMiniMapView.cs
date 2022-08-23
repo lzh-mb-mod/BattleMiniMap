@@ -4,6 +4,7 @@ using BattleMiniMap.View.MapTerrain;
 using System.Collections.Specialized;
 using TaleWorlds.Core;
 using TaleWorlds.Engine.GauntletUI;
+using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View;
 using TaleWorlds.MountAndBlade.View.MissionViews;
@@ -34,6 +35,7 @@ namespace BattleMiniMap.View.Map
 
             _layer = new GauntletLayer(20);
             _layer.LoadMovie(nameof(BattleMiniMapView), _dataSource);
+            _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.Mouse);
             MissionScreen.AddLayer(_layer);
             _timer = new MissionTimer(0.03f);
         }
@@ -61,6 +63,10 @@ namespace BattleMiniMap.View.Map
             else if(toggleMapKey.IsKeyPressed(Input))
             {
                 BattleMiniMapConfig.Get().ShowMap = !BattleMiniMapConfig.Get().ShowMap;
+                if (BattleMiniMapConfig.Get().ShowMap)
+                {
+                    BattleMiniMapConfig.Get().FollowMode = !BattleMiniMapConfig.Get().FollowMode;
+                }
             }
 
             _dataSource.UpdateEnabled(dt, MiniMap.Instance.IsValid &&

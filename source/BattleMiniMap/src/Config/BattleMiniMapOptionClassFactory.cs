@@ -65,6 +65,10 @@ namespace BattleMiniMap.Config
                     () => BattleMiniMapConfig.Get().Resolution,
                     f => { BattleMiniMapConfig.Get().Resolution = f; }, 0.5f, 50, false, true));
                 optionCategory.AddOption(new NumericOptionViewModel(
+                    GameTexts.FindText("str_battle_mini_map_map_scale"), null,
+                    () => BattleMiniMapConfig.Get().FollowModeScale,
+                    f => BattleMiniMapConfig.Get().FollowModeScale = f, 0.1f, 3, false, true));
+                optionCategory.AddOption(new NumericOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_agent_marker_scale"), null,
                     () => BattleMiniMapConfig.Get().AgentMarkerScale,
                     f => BattleMiniMapConfig.Get().AgentMarkerScale = f, 0.2f, 5f, false, true));
@@ -84,10 +88,6 @@ namespace BattleMiniMap.Config
                     {
                         BattleMiniMapConfig.Get().ExcludeUnwalkableTerrain = b;
                     }));
-                optionCategory.AddOption(new BoolOptionViewModel(
-                    new TextObject("Follow Mode"), null,
-                    () => BattleMiniMapConfig.Get().FollowMode,
-                    b => BattleMiniMapConfig.Get().FollowMode = b));
                 optionClass.AddOptionCategory(0, optionCategory);
                 return optionClass;
             }, BattleMiniMapSubModule.ModuleId);

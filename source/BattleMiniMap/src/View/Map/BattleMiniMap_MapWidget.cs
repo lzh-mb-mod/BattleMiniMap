@@ -25,12 +25,18 @@ namespace BattleMiniMap.View.Map
             base.OnUpdate(dt);
             if (MiniMap.Instance != null)
             {
-                var width = MiniMap.Instance.BitmapWidth;
-                var height = MiniMap.Instance.BitmapHeight;
-
                 var config = BattleMiniMapConfig.Get();
                 SuggestedWidth = config.WidgetWidth;
-                SuggestedHeight = height / (float) width * SuggestedWidth;
+                if (config.FollowMode)
+                {
+                    SuggestedHeight = SuggestedWidth;
+                }
+                else
+                {
+                    var width = MiniMap.Instance.BitmapWidth;
+                    var height = MiniMap.Instance.BitmapHeight;
+                    SuggestedHeight = height / (float)width * SuggestedWidth;
+                }
                 IsEnabled = MiniMap.Instance.IsValid;
 
                 HorizontalAlignment = config.HorizontalAlignment;
@@ -57,6 +63,18 @@ namespace BattleMiniMap.View.Map
                     MarginTop = 0;
                     MarginBottom = config.PositionY;
                 }
+
+                if (config.FollowMode)
+                {
+                    var size = Widgets.Utility.GetSize(this);
+                    CircularClipEnabled = true;
+                    CircularClipRadius = 0.3f * size.x;
+                    CircularClipSmoothingRadius = 0.2f * size.x;
+                }
+                else
+                {
+                    CircularClipEnabled = false;
+                }
             }
             else
             {
@@ -69,7 +87,6 @@ namespace BattleMiniMap.View.Map
             var config = BattleMiniMapConfig.Get();
             if (!config.FollowMode || this.TextureProvider == null)
             {
-                CircularClipEnabled = false;
                 base.OnRender(twoDimensionContext, drawContext);
             }
             else
@@ -85,9 +102,6 @@ namespace BattleMiniMap.View.Map
                 var mesh = Widgets.Utility.CreateDrawObject2D(scale * (MiniMap.Instance.MapBoundMax.y - MiniMap.Instance.MapBoundMin.y), scale * (MiniMap.Instance.MapBoundMax.x - MiniMap.Instance.MapBoundMin.x), offset, midPoint,
                     direction.AngleBetween(-Vec2.Forward));
 
-                CircularClipEnabled = true;
-                CircularClipRadius = 0.4f * size.x;
-                CircularClipSmoothingRadius = 0.1f * size.x;
 
                 var globalPosition = Widgets.Utility.GetGlobalPosition(this);
                 var material = Widgets.Utility.CreateMaterial(drawContext, this);

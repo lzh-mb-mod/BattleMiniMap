@@ -128,5 +128,11 @@ namespace BattleMiniMap.Widgets
         {
             drawContext.SetCircualMask(new Vector2(position.x, position.y), radius, smoothingRadius);
         }
+
+        public static Vec2 GetMousePosition(EventManager eventManager)
+        {
+            var vector = eventManager.MousePosition;
+            return new Vec2(vector.X, vector.Y);
+        }
     }
 }

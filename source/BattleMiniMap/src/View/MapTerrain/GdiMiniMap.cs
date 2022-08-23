@@ -186,7 +186,7 @@ namespace BattleMiniMap.View.MapTerrain
                         continue;
                     }
                     if (ExcludeUnwalkableTerrain && groundHeight >= waterLevel &&
-                        Math.Abs(groundHeight - terrainHeight) < 0.1f)
+                        Math.Abs(groundHeight - terrainHeight) < 0.5f)
                     {
                         scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
                         if (!faceRecord.IsValid())

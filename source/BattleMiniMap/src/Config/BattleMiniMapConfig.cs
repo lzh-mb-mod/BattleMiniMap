@@ -24,9 +24,9 @@ namespace BattleMiniMap.Config
         public bool ShowMapWhenCommanding { get; set; } = true;
         public int WidgetWidth { get; set; } = 400;
 
-        public bool FollowMode { get; set; } = true;
+        public bool FollowMode { get; set; } = false;
 
-        public float FollowModeScale { get; set; } = 0.1f;
+        public float FollowModeScale { get; set; } = 0.5f;
 
         public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
 

@@ -43,11 +43,18 @@ namespace BattleMiniMap.View.Boundary
             base.OnUpdate(dt);
             if (MiniMap.Instance != null)
             {
-                var width = MiniMap.Instance.BitmapWidth;
-                var height = MiniMap.Instance.BitmapHeight;
-
-                SuggestedWidth = BattleMiniMapConfig.Get().WidgetWidth;
-                SuggestedHeight = height / (float)width * SuggestedWidth;
+                var config = BattleMiniMapConfig.Get();
+                SuggestedWidth = config.WidgetWidth;
+                if (config.FollowMode)
+                {
+                    SuggestedHeight = SuggestedWidth;
+                }
+                else
+                {
+                    var width = MiniMap.Instance.BitmapWidth;
+                    var height = MiniMap.Instance.BitmapHeight;
+                    SuggestedHeight = height / (float)width * SuggestedWidth;
+                }
                 IsEnabled = MiniMap.Instance.IsValid;
             }
             else
