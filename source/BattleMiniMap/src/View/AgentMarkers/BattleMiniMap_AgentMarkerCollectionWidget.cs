@@ -36,7 +36,7 @@ namespace BattleMiniMap.View.AgentMarkers
                 //var size = Utility.WorldToMapF(10, MiniMap.Instance.Resolution, 0);
                 //_agentMarkerSize = Math.Max(MiniMap.Instance.MapFToWidget(size) * config.AgentMarkerScale, 1);
                 var size = Widgets.Utility.GetSize(this);
-                _agentMarkerSize = Math.Max(size.x * (config.FollowMode ? config.FollowModeScale * 0.025f : 0.01f) * config.AgentMarkerScale, 3);
+                _agentMarkerSize = Math.Max(size.x * (config.FollowMode ? config.GetFollowModeScale() * 0.025f : 0.01f) * config.AgentMarkerScale, 3);
             }
         }
 

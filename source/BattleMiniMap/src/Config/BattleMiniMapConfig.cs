@@ -3,6 +3,7 @@ using MissionSharedLibrary.Config;
 using System;
 using System.IO;
 using TaleWorlds.GauntletUI;
+using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap.Config
@@ -14,7 +15,9 @@ namespace BattleMiniMap.Config
 
     public class BattleMiniMapConfig : MissionConfigBase<BattleMiniMapConfig>
     {
-        protected static Version BinaryVersion => new Version(1, 0);
+        public static float DynamicScale = 1;
+
+        protected static Version BinaryVersion => new Version(1, 1);
         public string ConfigVersion { get; set; } = BinaryVersion.ToString();
 
         public bool ShowMap { get; set; } = true;
@@ -24,9 +27,11 @@ namespace BattleMiniMap.Config
         public bool ToggleMapWhenCommanding { get; set; } = true;
         public int WidgetWidth { get; set; } = 400;
 
-        public bool FollowMode { get; set; } = false;
+        public bool FollowMode { get; set; } = true;
 
         public float FollowModeScale { get; set; } = 0.5f;
+
+        public bool EnableDynamicScale { get; set; } = true;
 
         public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
 
@@ -47,6 +52,11 @@ namespace BattleMiniMap.Config
         public float ForegroundOpacity { get; set; } = 0.5f;
 
         public bool ExcludeUnwalkableTerrain { get; set; } = false;
+
+        public float GetFollowModeScale()
+        {
+            return MathF.Clamp(FollowModeScale * DynamicScale, 0.1f, 3f);
+        }
 
         protected override string SaveName { get; } = Path.Combine(ConfigPath.ConfigDir,
             BattleMiniMapSubModule.ModuleId, nameof(BattleMiniMapConfig) + ".xml");
@@ -74,6 +84,21 @@ namespace BattleMiniMap.Config
 
         protected override void UpgradeToCurrentVersion()
         {
+            switch (ConfigVersion)
+            {
+                default:
+                    ResetToDefault();
+                    Serialize();
+                    goto case "1.0";
+                case "1.0":
+                    if (ShowMap)
+                        FollowMode = true;
+                    break;
+                case "1.1":
+                    break;
+            }
+            
+            ConfigVersion = BinaryVersion.ToString(2);
         }
 
         public static void OnMenuClosed()

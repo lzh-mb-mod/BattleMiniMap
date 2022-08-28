@@ -39,6 +39,7 @@ namespace BattleMiniMap.View.MapTerrain
 
         public Vec2 MapBoundMin { get; private set; }
         public Vec2 MapBoundMax { get; private set; }
+        public float WaterLevel { get; private set; }
         public float Resolution { get; private set; }
         public float EdgeOpacityFactor { get; private set; }
 
@@ -144,7 +145,7 @@ namespace BattleMiniMap.View.MapTerrain
             // g = 255 * sin(height)
             // b = 255 * (1 - cos(height))
             //scene.GetTerrainMinMaxHeight(out var minHeight, out var maxHeight);
-            var waterLevel = scene.GetWaterLevel();
+            WaterLevel = scene.GetWaterLevel();
             var minHeight = float.MaxValue;
             var maxHeight = float.MinValue;
             var minGroundHeight = float.MaxValue;
@@ -161,15 +162,15 @@ namespace BattleMiniMap.View.MapTerrain
                 }
 
 
-            if (waterLevel == 0 && minGroundHeight == 2)
+            if (WaterLevel == 0 && minGroundHeight == 2)
             {
-                waterLevel = minGroundHeight;
+                WaterLevel = minGroundHeight;
             }
 
-            if (waterLevel < minHeight)
-                waterLevel = minHeight;
+            if (WaterLevel < minHeight)
+                WaterLevel = minHeight;
 
-            maxHeight = Math.Min(maxHeight - waterLevel, 120);
+            maxHeight = Math.Min(maxHeight - WaterLevel, 120);
 
             for (var w = 0; w < mapWidth; w++)
                 for (var h = 0; h < mapHeight; h++)
@@ -181,11 +182,11 @@ namespace BattleMiniMap.View.MapTerrain
                     var groundHeight = terrainHeight;
                     if (faceRecord.IsValid() || !scene.GetHeightAtPoint(pos, BodyFlags.CommonCollisionExcludeFlags, ref groundHeight))
                     {
-                        SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, waterLevel, maxHeight, EdgeOpacityFactor);
+                        SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, WaterLevel, maxHeight, EdgeOpacityFactor);
 
                         continue;
                     }
-                    if (ExcludeUnwalkableTerrain && groundHeight >= waterLevel &&
+                    if (ExcludeUnwalkableTerrain && groundHeight >= WaterLevel &&
                         Math.Abs(groundHeight - terrainHeight) < 0.5f)
                     {
                         scene.GetNavMeshFaceIndex(ref faceRecord, pos.ToVec3(terrainHeight), true);
@@ -197,15 +198,15 @@ namespace BattleMiniMap.View.MapTerrain
                         }
                     }
 
-                    SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, waterLevel, maxHeight, EdgeOpacityFactor);
+                    SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, WaterLevel, maxHeight, EdgeOpacityFactor);
                 }
         }
 
-        private void SetPixel(Bitmap image, int mapWidth, int mapHeight, int w, int h, float groundHeight, float waterLevel, float maxHeight, float edgeOpacityFactor)
+        private void SetPixel(Bitmap image, int mapWidth, int mapHeight, int w, int h, float groundHeight, float WaterLevel, float maxHeight, float edgeOpacityFactor)
         {
-            var color = groundHeight > waterLevel
-                ? AboveWater.GetColor((groundHeight - waterLevel) / maxHeight)
-                : BelowWater.GetColor((waterLevel - groundHeight) / 8);
+            var color = groundHeight > WaterLevel
+                ? AboveWater.GetColor((groundHeight - WaterLevel) / maxHeight)
+                : BelowWater.GetColor((WaterLevel - groundHeight) / 8);
             image.SetPixel(w, h,
                 Color.FromArgb(Math.Min(GetEdgeAlpha(w, h, edgeOpacityFactor), color.A), color.R, color.G, color.B));
         }

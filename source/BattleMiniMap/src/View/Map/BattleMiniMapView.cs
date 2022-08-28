@@ -18,6 +18,7 @@ namespace BattleMiniMap.View.Map
         private MissionTimer _timer;
         private bool _boundaryChanged;
         private bool _isOrderViewEnabled;
+        private float _targetDynamicScale = 1;
 
         public override void OnBehaviorInitialize()
         {
@@ -33,7 +34,7 @@ namespace BattleMiniMap.View.Map
         {
             base.OnMissionScreenInitialize();
 
-            _layer = new GauntletLayer(12); 
+            _layer = new GauntletLayer(12);
             _layer.LoadMovie(nameof(BattleMiniMapView), _dataSource);
             _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.Mouse);
             MissionScreen.AddLayer(_layer);
@@ -60,7 +61,7 @@ namespace BattleMiniMap.View.Map
             {
                 toggleMapKeyDown = true;
             }
-            else if(toggleMapKey.IsKeyPressed(Input))
+            else if (toggleMapKey.IsKeyPressed(Input))
             {
                 BattleMiniMapConfig.Get().ShowMap = !BattleMiniMapConfig.Get().ShowMap;
                 if (BattleMiniMapConfig.Get().ShowMap ^ (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding))
@@ -74,11 +75,33 @@ namespace BattleMiniMap.View.Map
                                           (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding)));
 
             _dataSource.UpdateCamera();
+            UpdateDynamicScale(dt);
 
             if (_timer.Check(true))
                 _dataSource.UpdateData();
             else if (BattleMiniMapConfig.Get().FollowMode)
                 _dataSource.UpdateRenderData();
+        }
+
+        private void UpdateDynamicScale(float dt)
+        {
+            if (!_dataSource.IsEnabled || !BattleMiniMapConfig.Get().FollowMode || !BattleMiniMapConfig.Get().EnableDynamicScale)
+                return;
+            
+            if (!MissionSharedLibrary.Utilities.Utility.IsAgentDead(MissionScreen.LastFollowedAgent))
+            {
+                var speed = MissionScreen.LastFollowedAgent.Velocity.Length;
+                _targetDynamicScale = 1 / MathF.Lerp(1f, 3f, speed / 50);
+            }
+            else
+            {
+                _targetDynamicScale = 1;
+                _targetDynamicScale *= 1 / MathF.Lerp(1f, 2f,
+                    (MissionScreen.CombatCamera.Position.z - MiniMap.Instance.WaterLevel) / 120);
+            }
+            
+            BattleMiniMapConfig.DynamicScale = MathF.Lerp(_targetDynamicScale, BattleMiniMapConfig.DynamicScale,
+                MathF.Pow(0.5f, dt));
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner)

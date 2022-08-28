@@ -7,6 +7,9 @@
 ### Changed
 - Change "Show Map When Commanding" option to "Toggle Map When Commanding" option.
 
+### Added
+- Add dynamic map scale in follow mode. The map scale will change with character speed or camera height.
+
 ## [v1.1.0] - 2022-08-23
 ### Fixed
 - Keep compatible with Bannerlord e1.8.0.

@@ -82,7 +82,7 @@ namespace BattleMiniMap
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized().LeftVec();
                 var relativePosition = (p - position).TransformToLocalUnitF(direction);
-                return new Vec2(-relativePosition.y, relativePosition.x) * config.FollowModeScale / 100f * config.WidgetWidth + new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
+                return new Vec2(-relativePosition.y, relativePosition.x) * config.GetFollowModeScale() / 100f * config.WidgetWidth + new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
             }
             else
             {
@@ -96,7 +96,7 @@ namespace BattleMiniMap
             if (config.FollowMode)
             {
                 p -= new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
-                p = p * 100f / config.FollowModeScale / config.WidgetWidth;
+                p = p * 100f / config.GetFollowModeScale() / config.WidgetWidth;
                 var relativePosition = new Vec2(-p.y, -p.x);
 
                 var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;

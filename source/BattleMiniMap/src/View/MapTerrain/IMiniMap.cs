@@ -13,6 +13,7 @@ namespace BattleMiniMap.View.MapTerrain
 
         public Vec2 MapBoundMin { get; }
         public Vec2 MapBoundMax { get; }
+        public float WaterLevel { get; }
         public float Resolution { get; }
         public float EdgeOpacityFactor { get; }
         bool IsValid { get; }

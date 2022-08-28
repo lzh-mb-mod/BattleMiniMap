@@ -18,6 +18,7 @@ namespace BattleMiniMap.View.MapTerrain
 
         public Vec2 MapBoundMin { get; private set; }
         public Vec2 MapBoundMax { get; private set; }
+        public float WaterLevel { get; private set; }
         public float Resolution { get; private set; }
         public float EdgeOpacityFactor { get; set; }
 
@@ -72,6 +73,7 @@ namespace BattleMiniMap.View.MapTerrain
         public void UpdateMapImage(Mission mission)
         {
             var scene = mission.Scene;
+            WaterLevel = scene.GetWaterLevel();
             var newImage = new ImageRGBA(BitmapWidth, BitmapHeight);
             SampleTerrainHeight(scene, newImage, BitmapWidth, BitmapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);
             SampleBoundaries(mission, newImage, BitmapWidth, BitmapHeight, MapBoundMin.x, MapBoundMin.y, Resolution);

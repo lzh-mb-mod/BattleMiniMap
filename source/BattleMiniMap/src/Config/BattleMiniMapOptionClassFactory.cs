@@ -6,7 +6,6 @@ using MissionSharedLibrary.View.ViewModelCollection.Options;
 using MissionSharedLibrary.View.ViewModelCollection.Options.Selection;
 using TaleWorlds.Core;
 using TaleWorlds.GauntletUI;
-using TaleWorlds.Localization;
 
 namespace BattleMiniMap.Config
 {
@@ -68,6 +67,11 @@ namespace BattleMiniMap.Config
                     GameTexts.FindText("str_battle_mini_map_map_scale"), null,
                     () => BattleMiniMapConfig.Get().FollowModeScale,
                     f => BattleMiniMapConfig.Get().FollowModeScale = f, 0.1f, 3, false, true));
+                optionCategory.AddOption(new BoolOptionViewModel(
+                    GameTexts.FindText("str_battle_mini_map_dynamic_map_scale"),
+                    GameTexts.FindText("str_battle_mini_map_dynamic_map_scale_hint"),
+                    () => BattleMiniMapConfig.Get().EnableDynamicScale,
+                    b => BattleMiniMapConfig.Get().EnableDynamicScale = b));
                 optionCategory.AddOption(new NumericOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_agent_marker_scale"), null,
                     () => BattleMiniMapConfig.Get().AgentMarkerScale,

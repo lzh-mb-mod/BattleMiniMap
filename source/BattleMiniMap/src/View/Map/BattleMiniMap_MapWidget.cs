@@ -96,7 +96,7 @@ namespace BattleMiniMap.View.Map
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized().LeftVec();
                 var size = Widgets.Utility.GetSize(this);
-                var scale = config.FollowModeScale / 100f * size.x;
+                var scale = config.GetFollowModeScale() / 100f * size.x;
                 var midPoint = new Vec2(size.X / 2, size.Y / 2);
                 var offset = (midPoint - MiniMap.Instance.MapToWidget(MiniMap.Instance.WorldToMapF(position)) * (scale * (MiniMap.Instance.MapBoundMax.y - MiniMap.Instance.MapBoundMin.y) / size.x) * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1));
                 var mesh = Widgets.Utility.CreateDrawObject2D(scale * (MiniMap.Instance.MapBoundMax.y - MiniMap.Instance.MapBoundMin.y), scale * (MiniMap.Instance.MapBoundMax.x - MiniMap.Instance.MapBoundMin.x), offset, midPoint,
