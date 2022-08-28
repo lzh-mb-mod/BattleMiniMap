@@ -21,7 +21,7 @@ namespace BattleMiniMap.Config
 
         public bool EnableToggleMapLongPressKey { get; set; } = true;
 
-        public bool ShowMapWhenCommanding { get; set; } = true;
+        public bool ToggleMapWhenCommanding { get; set; } = true;
         public int WidgetWidth { get; set; } = 400;
 
         public bool FollowMode { get; set; } = false;
@@ -56,7 +56,7 @@ namespace BattleMiniMap.Config
             ConfigVersion = other.ConfigVersion;
             ShowMap = other.ShowMap;
             EnableToggleMapLongPressKey = other.EnableToggleMapLongPressKey;
-            ShowMapWhenCommanding = other.ShowMapWhenCommanding;
+            ToggleMapWhenCommanding = other.ToggleMapWhenCommanding;
             WidgetWidth = other.WidgetWidth;
             FollowMode = other.FollowMode;
             FollowModeScale = other.FollowModeScale;

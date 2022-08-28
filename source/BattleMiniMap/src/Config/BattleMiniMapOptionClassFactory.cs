@@ -25,9 +25,9 @@ namespace BattleMiniMap.Config
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_enable_toggle_map_long_press_key"),
                     null, () => BattleMiniMapConfig.Get().EnableToggleMapLongPressKey, b => BattleMiniMapConfig.Get().EnableToggleMapLongPressKey = b));
                 optionCategory.AddOption(new BoolOptionViewModel(
-                    GameTexts.FindText("str_battle_mini_map_show_map_when_commanding"), null,
-                    () => BattleMiniMapConfig.Get().ShowMapWhenCommanding,
-                    b => BattleMiniMapConfig.Get().ShowMapWhenCommanding = b));
+                    GameTexts.FindText("str_battle_mini_map_toggle_map_when_commanding"), null,
+                    () => BattleMiniMapConfig.Get().ToggleMapWhenCommanding,
+                    b => BattleMiniMapConfig.Get().ToggleMapWhenCommanding = b));
                 optionCategory.AddOption(new NumericOptionViewModel(GameTexts.FindText("str_battle_mini_map_map_width"),
                     null,
                     () =>

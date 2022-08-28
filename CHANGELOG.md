@@ -1,5 +1,21 @@
 # Changelog
 
+## [v1.1.2] - 2022-08-28
+### Fixed
+- Fix the issue that minimap may block deployment UI.
+
+### Changed
+- Change "Show Map When Commanding" option to "Toggle Map When Commanding" option.
+
+## [v1.1.0] - 2022-08-23
+### Fixed
+- Keep compatible with Bannerlord e1.8.0.
+
+## [v1.0.13] - 2022-08-25
+### Fixed
+- Keep compatible with Bannerlord e1.7.2.
+
+
 ## [v1.0.8] - 2020-03-15
 ### Fixed
 - Adjust the shape of corpse marker.

@@ -17,7 +17,7 @@ namespace BattleMiniMap.View.Map
         private GauntletLayer _layer;
         private MissionTimer _timer;
         private bool _boundaryChanged;
-        private bool _isOrderViewOpened;
+        private bool _isOrderViewEnabled;
 
         public override void OnBehaviorInitialize()
         {
@@ -33,7 +33,7 @@ namespace BattleMiniMap.View.Map
         {
             base.OnMissionScreenInitialize();
 
-            _layer = new GauntletLayer(20);
+            _layer = new GauntletLayer(12); 
             _layer.LoadMovie(nameof(BattleMiniMapView), _dataSource);
             _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.Mouse);
             MissionScreen.AddLayer(_layer);
@@ -63,15 +63,15 @@ namespace BattleMiniMap.View.Map
             else if(toggleMapKey.IsKeyPressed(Input))
             {
                 BattleMiniMapConfig.Get().ShowMap = !BattleMiniMapConfig.Get().ShowMap;
-                if (BattleMiniMapConfig.Get().ShowMap)
+                if (BattleMiniMapConfig.Get().ShowMap ^ (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding))
                 {
                     BattleMiniMapConfig.Get().FollowMode = !BattleMiniMapConfig.Get().FollowMode;
                 }
             }
 
             _dataSource.UpdateEnabled(dt, MiniMap.Instance.IsValid &&
-                                          ((BattleMiniMapConfig.Get().ShowMap ^ toggleMapKeyDown) ||
-                                           _isOrderViewOpened && BattleMiniMapConfig.Get().ShowMapWhenCommanding));
+                                          (BattleMiniMapConfig.Get().ShowMap ^ toggleMapKeyDown ^
+                                          (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding)));
 
             _dataSource.UpdateCamera();
 
@@ -106,7 +106,7 @@ namespace BattleMiniMap.View.Map
 
         private void OnOrderViewToggled(MissionPlayerToggledOrderViewEvent obj)
         {
-            _isOrderViewOpened = obj.IsOrderEnabled;
+            _isOrderViewEnabled = obj.IsOrderEnabled;
         }
     }
 }
