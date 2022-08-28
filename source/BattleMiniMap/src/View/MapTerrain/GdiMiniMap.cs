@@ -226,7 +226,7 @@ namespace BattleMiniMap.View.MapTerrain
             var factor = edgeOpacityFactor * 2 + 2;
             var x = MathF.Clamp(Math.Abs((float)w / BitmapWidth - 0.5f) * 2, 0, 1);
             var y = MathF.Clamp(Math.Abs((float)h / BitmapHeight - 0.5f) * 2, 0, 1);
-            return (int)(MathF.Pow(MathF.Max(1 - MathF.Pow(x, factor) - MathF.Pow(y, factor), 0f), 1 / (factor + 2)) * 255);
+            return (int)(MathF.Pow(MathF.Max(1 - MathF.Pow(x, factor) - MathF.Pow(y, factor), 0f), (1f - edgeOpacityFactor / 2)) * 255);
         }
     }
 }

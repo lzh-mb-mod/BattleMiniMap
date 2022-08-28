@@ -85,19 +85,26 @@ namespace BattleMiniMap.View.Map
 
         private void UpdateDynamicScale(float dt)
         {
-            if (!_dataSource.IsEnabled || !BattleMiniMapConfig.Get().FollowMode || !BattleMiniMapConfig.Get().EnableDynamicScale)
+            if (!_dataSource.IsEnabled)
                 return;
-            
-            if (!MissionSharedLibrary.Utilities.Utility.IsAgentDead(MissionScreen.LastFollowedAgent))
+
+            if (!BattleMiniMapConfig.Get().FollowMode || !BattleMiniMapConfig.Get().EnableDynamicScale)
             {
-                var speed = MissionScreen.LastFollowedAgent.Velocity.Length;
-                _targetDynamicScale = 1 / MathF.Lerp(1f, 3f, speed / 50);
+                _targetDynamicScale = 1;
             }
             else
             {
-                _targetDynamicScale = 1;
-                _targetDynamicScale *= 1 / MathF.Lerp(1f, 2f,
-                    (MissionScreen.CombatCamera.Position.z - MiniMap.Instance.WaterLevel) / 120);
+                if (!MissionSharedLibrary.Utilities.Utility.IsAgentDead(MissionScreen.LastFollowedAgent))
+                {
+                    var speed = MissionScreen.LastFollowedAgent.Velocity.Length;
+                    _targetDynamicScale = 1 / MathF.Lerp(1f, 3f, speed / 50);
+                }
+                else
+                {
+                    _targetDynamicScale = 1;
+                    _targetDynamicScale *= 1 / MathF.Lerp(1f, 3f,
+                        (MissionScreen.CombatCamera.Position.z - MiniMap.Instance.WaterLevel) / 120);
+                }
             }
             
             BattleMiniMapConfig.DynamicScale = MathF.Lerp(_targetDynamicScale, BattleMiniMapConfig.DynamicScale,

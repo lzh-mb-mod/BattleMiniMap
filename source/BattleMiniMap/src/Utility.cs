@@ -80,9 +80,9 @@ namespace BattleMiniMap
             {
                 var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
                 var position = camera.Position.AsVec2;
-                var direction = camera.Direction.AsVec2.Normalized().LeftVec();
-                var relativePosition = (p - position).TransformToLocalUnitF(direction);
-                return new Vec2(-relativePosition.y, relativePosition.x) * config.GetFollowModeScale() / 100f * config.WidgetWidth + new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
+                var direction = camera.Direction.AsVec2.Normalized();
+                var relativePosition = direction.TransformToLocalUnitF(p - position);
+                return new Vec2(relativePosition.x, -relativePosition.y) * config.GetFollowModeScale() / 100f * config.WidgetWidth + new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
             }
             else
             {
@@ -97,12 +97,12 @@ namespace BattleMiniMap
             {
                 p -= new Vec2(config.WidgetWidth / 2f, config.WidgetWidth / 2f);
                 p = p * 100f / config.GetFollowModeScale() / config.WidgetWidth;
-                var relativePosition = new Vec2(-p.y, -p.x);
+                var relativePosition = new Vec2(p.x, -p.y);
 
                 var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
                 var position = camera.Position.AsVec2;
-                var direction = camera.Direction.AsVec2.Normalized().LeftVec();
-                return relativePosition.TransformToParentUnitF(direction) + position;
+                var direction = camera.Direction.AsVec2.Normalized();
+                return direction.TransformToParentUnitF(relativePosition) + position;
             }
             else
             {
