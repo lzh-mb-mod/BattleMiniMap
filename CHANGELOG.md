@@ -1,5 +1,12 @@
 # Changelog
 
+## [v1.1.3] - 2022-08-30
+### Fixed
+- Fix the issue that map may become too small when ui scale is lower than 1.
+
+### Improved
+- Improved effects of dynamic scale.
+
 ## [v1.1.2] - 2022-08-28
 ### Fixed
 - Fix the issue that minimap may block deployment UI.

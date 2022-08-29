@@ -202,11 +202,11 @@ namespace BattleMiniMap.View.MapTerrain
                 }
         }
 
-        private void SetPixel(Bitmap image, int mapWidth, int mapHeight, int w, int h, float groundHeight, float WaterLevel, float maxHeight, float edgeOpacityFactor)
+        private void SetPixel(Bitmap image, int mapWidth, int mapHeight, int w, int h, float groundHeight, float waterLevel, float maxHeight, float edgeOpacityFactor)
         {
-            var color = groundHeight > WaterLevel
-                ? AboveWater.GetColor((groundHeight - WaterLevel) / maxHeight)
-                : BelowWater.GetColor((WaterLevel - groundHeight) / 8);
+            var color = groundHeight > waterLevel
+                ? AboveWater.GetColor((groundHeight - waterLevel) / maxHeight)
+                : BelowWater.GetColor((waterLevel - groundHeight) / 8);
             image.SetPixel(w, h,
                 Color.FromArgb(Math.Min(GetEdgeAlpha(w, h, edgeOpacityFactor), color.A), color.R, color.G, color.B));
         }
@@ -223,10 +223,10 @@ namespace BattleMiniMap.View.MapTerrain
             //        (Math.Abs((float)h / BitmapHeight - 0.5f) * 2 - edgeOpacityFactor) / (1 - edgeOpacityFactor), 0, 1);
             //return (int)(MathF.Sqrt(Math.Max(1 - x * x - y * y, 0)) * 255);
             edgeOpacityFactor = MathF.Clamp(edgeOpacityFactor, 0, 1);
-            var factor = edgeOpacityFactor * 2 + 2;
-            var x = MathF.Clamp(Math.Abs((float)w / BitmapWidth - 0.5f) * 2, 0, 1);
-            var y = MathF.Clamp(Math.Abs((float)h / BitmapHeight - 0.5f) * 2, 0, 1);
-            return (int)(MathF.Pow(MathF.Max(1 - MathF.Pow(x, factor) - MathF.Pow(y, factor), 0f), (1f - edgeOpacityFactor / 2)) * 255);
+            var factor = edgeOpacityFactor + 2;
+            var x = MathF.Clamp(Math.Abs((float)w / BitmapWidth - 0.5f) * 5 - 1.5f, 0, 1);
+            var y = MathF.Clamp(Math.Abs((float)h / BitmapHeight - 0.5f) * 5 - 1.5f, 0, 1);
+            return (int)(MathF.Pow(MathF.Max(1 - MathF.Pow(x, factor) - MathF.Pow(y, factor), 0f), (1 - edgeOpacityFactor) * 2) * 255);
         }
     }
 }

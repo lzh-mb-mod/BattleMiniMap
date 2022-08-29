@@ -3,7 +3,7 @@ using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.TwoDimension;
 
-namespace BattleMiniMap.View.Map
+namespace BattleMiniMap.View.Background.Map
 {
     public class BattleMiniMap_MiniMapTextureProvider : TextureProvider
     {

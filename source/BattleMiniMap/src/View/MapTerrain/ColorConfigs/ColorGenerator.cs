@@ -34,7 +34,6 @@ namespace BattleMiniMap.View.MapTerrain.ColorConfigs
             if (progress >= 1)
                 return _colors[count - 1].Color;
             var remainingWeight = progress * _weightSum;
-            var x = progress * (count - 1);
             for (int i = 0; i < _colors.Length - 1; ++i)
             {
                 var weight = _colors[i].Weight;

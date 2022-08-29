@@ -33,10 +33,7 @@ namespace BattleMiniMap.View.AgentMarkers
                 var config = BattleMiniMapConfig.Get();
                 SuggestedWidth = config.WidgetWidth;
                 SuggestedHeight = height / (float)width * SuggestedWidth;
-                //var size = Utility.WorldToMapF(10, MiniMap.Instance.Resolution, 0);
-                //_agentMarkerSize = Math.Max(MiniMap.Instance.MapFToWidget(size) * config.AgentMarkerScale, 1);
-                var size = Widgets.Utility.GetSize(this);
-                _agentMarkerSize = Math.Max(size.x * (config.FollowMode ? config.GetFollowModeScale() * 0.025f : 0.01f) * config.AgentMarkerScale, 3);
+                _agentMarkerSize = Math.Max(SuggestedWidth * (config.FollowMode ? config.GetFollowModeScale() * 0.025f : 0.01f) * config.AgentMarkerScale, 3);
             }
         }
 
@@ -44,8 +41,9 @@ namespace BattleMiniMap.View.AgentMarkers
         {
             base.OnRender(twoDimensionContext, drawContext);
 
-            var size = _agentMarkerSize;
-            UpdateDrawObject2D(size, size);
+            var uiScale = ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1);
+            var scaledMarkerSize = _agentMarkerSize * uiScale;
+            UpdateDrawObject2D(scaledMarkerSize, scaledMarkerSize);
             var materials = new SimpleMaterial[(int)AgentMarkerType.Count];
             var globalPosition = Widgets.Utility.GetGlobalPosition(this);
 
@@ -53,7 +51,7 @@ namespace BattleMiniMap.View.AgentMarkers
             {
                 var agentMaker = AgentMakers.AgentMarkers[i];
                 var type = agentMaker.AgentMarkerType;
-                twoDimensionContext.Draw(globalPosition.x + agentMaker.PositionInWidget.x * ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1) - size * 0.5f, globalPosition.y + agentMaker.PositionInWidget.y * ScaledSuggestedHeight / Math.Max(SuggestedHeight, 1) - size * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
+                twoDimensionContext.Draw(globalPosition.x + agentMaker.PositionInWidget.x * uiScale - scaledMarkerSize * 0.5f, globalPosition.y + agentMaker.PositionInWidget.y * uiScale - scaledMarkerSize * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
             }
         }
 

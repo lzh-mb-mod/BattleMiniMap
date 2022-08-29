@@ -41,7 +41,7 @@ namespace BattleMiniMap.Widgets
             return polygonCoordinates;
         }
 
-        public static DrawObject2D CreateDrawObject2D(float width, float height, Vec2 offset ,Vec2 actualRotateCenter, float rotateAngleInRadians)
+        public static DrawObject2D CreateDrawObject2D(float width, float height, Vec2 offset, Vec2 actualRotateCenter, float rotateAngleInRadians)
         {
             Vec2 topLeft = Rotate(new Vec2(0, 0) + offset, actualRotateCenter, rotateAngleInRadians);
             Vec2 bottomLeft = Rotate(new Vec2(0, height) + offset, actualRotateCenter, rotateAngleInRadians);

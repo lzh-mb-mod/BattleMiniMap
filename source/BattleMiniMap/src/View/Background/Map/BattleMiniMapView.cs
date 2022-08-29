@@ -9,7 +9,7 @@ using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View;
 using TaleWorlds.MountAndBlade.View.MissionViews;
 
-namespace BattleMiniMap.View.Map
+namespace BattleMiniMap.View.Background.Map
 {
     public class BattleMiniMapView : MissionView
     {
@@ -38,7 +38,7 @@ namespace BattleMiniMap.View.Map
             _layer.LoadMovie(nameof(BattleMiniMapView), _dataSource);
             _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.Mouse);
             MissionScreen.AddLayer(_layer);
-            _timer = new MissionTimer(0.03f);
+            _timer = new MissionTimer(0.05f);
         }
 
         public override void OnMissionScreenTick(float dt)
@@ -55,6 +55,7 @@ namespace BattleMiniMap.View.Map
             }
 
             bool toggleMapKeyDown = false;
+            bool instantlyUpdateScale = false;
             var toggleMapLongPressKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMapLongPress);
             var toggleMapKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMap);
             if (BattleMiniMapConfig.Get().EnableToggleMapLongPressKey && toggleMapLongPressKey.IsKeyDown(Input))
@@ -67,6 +68,7 @@ namespace BattleMiniMap.View.Map
                 if (BattleMiniMapConfig.Get().ShowMap ^ (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding))
                 {
                     BattleMiniMapConfig.Get().FollowMode = !BattleMiniMapConfig.Get().FollowMode;
+                    instantlyUpdateScale = true;
                 }
             }
 
@@ -75,7 +77,7 @@ namespace BattleMiniMap.View.Map
                                           (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding)));
 
             _dataSource.UpdateCamera();
-            UpdateDynamicScale(dt);
+            UpdateDynamicScale(dt, instantlyUpdateScale);
 
             if (_timer.Check(true))
                 _dataSource.UpdateData();
@@ -83,7 +85,7 @@ namespace BattleMiniMap.View.Map
                 _dataSource.UpdateRenderData();
         }
 
-        private void UpdateDynamicScale(float dt)
+        private void UpdateDynamicScale(float dt, bool instantly)
         {
             if (!_dataSource.IsEnabled)
                 return;
@@ -101,14 +103,13 @@ namespace BattleMiniMap.View.Map
                 }
                 else
                 {
-                    _targetDynamicScale = 1;
-                    _targetDynamicScale *= 1 / MathF.Lerp(1f, 3f,
+                    _targetDynamicScale = 1 / MathF.Lerp(1f, 3f,
                         (MissionScreen.CombatCamera.Position.z - MiniMap.Instance.WaterLevel) / 120);
                 }
             }
-            
+
             BattleMiniMapConfig.DynamicScale = MathF.Lerp(_targetDynamicScale, BattleMiniMapConfig.DynamicScale,
-                MathF.Pow(0.5f, dt));
+                instantly ? 0 : MathF.Pow(0.4f, dt));
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner)

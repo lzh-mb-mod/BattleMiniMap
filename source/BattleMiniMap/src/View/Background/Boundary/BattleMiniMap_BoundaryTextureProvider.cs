@@ -1,16 +1,16 @@
-﻿using BattleMiniMap.Config;
-using BattleMiniMap.View.Image;
-using BattleMiniMap.View.MapTerrain;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Drawing.Imaging;
+using BattleMiniMap.Config;
+using BattleMiniMap.View.Image;
+using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.TwoDimension;
 
-namespace BattleMiniMap.View.Boundary
+namespace BattleMiniMap.View.Background.Boundary
 {
     public class BattleMiniMap_BoundaryTextureProvider : TextureProvider
     {

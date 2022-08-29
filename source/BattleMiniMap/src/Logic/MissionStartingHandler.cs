@@ -1,4 +1,4 @@
-﻿using BattleMiniMap.View.Map;
+﻿using BattleMiniMap.View.Background.Map;
 using MissionLibrary.Controller;
 using MissionSharedLibrary.Controller;
 using System.Collections.Generic;

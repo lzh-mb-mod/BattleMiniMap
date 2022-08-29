@@ -30,21 +30,5 @@ namespace BattleMiniMap.View.CameraMarker
             graphics.DrawLine(pen, new Point(0, 0), new Point(100, 100));
             return bitmap.CreateTexture();
         }
-
-        private Vec3 GetPositionFromScreen(Scene scene, Vec2 posOnScreen)
-        {
-            var missionScreen = MissionState.Current.Handler as MissionScreen;
-            if (missionScreen == null)
-                return Vec3.Invalid;
-            missionScreen.ScreenPointToWorldRay(posOnScreen, out var rayBegin, out var rayEnd);
-            if (scene.RayCastForClosestEntityOrTerrain(rayBegin, rayEnd, out var collisionDistance, 0.3f))
-            {
-                Vec3 vec3 = rayEnd - rayBegin;
-                vec3.Normalize();
-                return rayBegin + vec3 * collisionDistance;
-            }
-
-            return Vec3.Invalid;
-        }
     }
 }

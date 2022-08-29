@@ -8,7 +8,7 @@ using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Screens;
 
-namespace BattleMiniMap.View.Map
+namespace BattleMiniMap.View.Background.Map
 {
     public class BattleMiniMapViewModel : ViewModel
     {
