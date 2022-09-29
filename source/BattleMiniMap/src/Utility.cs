@@ -78,7 +78,7 @@ namespace BattleMiniMap
             var config = BattleMiniMapConfig.Get();
             if (config.FollowMode)
             {
-                var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
+                var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized();
                 var relativePosition = direction.TransformToLocalUnitF(p - position);
@@ -99,7 +99,7 @@ namespace BattleMiniMap
                 p = p * 100f / config.GetFollowModeScale() / config.WidgetWidth;
                 var relativePosition = new Vec2(p.x, -p.y);
 
-                var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
+                var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized();
                 return direction.TransformToParentUnitF(relativePosition) + position;
