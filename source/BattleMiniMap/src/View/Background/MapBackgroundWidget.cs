@@ -25,7 +25,7 @@ namespace BattleMiniMap.View.Background
             else
             {
                 this.Texture = this.TextureProvider.GetTexture(twoDimensionContext, string.Empty);
-                var camera = (MissionState.Current.Listener as MissionScreen).CombatCamera;
+                var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized().LeftVec();
                 var size = Widgets.Utility.GetSize(this);
