@@ -212,7 +212,6 @@ namespace BattleMiniMap.View.MapTerrain
         private void SetPixel(Bitmap image, int w, int h, float groundHeight, float waterLevel, float maxHeight, float minHeightInsideBoundary, float maxHeightInsideBoundary, float edgeOpacityFactor)
         {
             Color color;
-            float maxDepth = 8;
             if (IsAboveWater(waterLevel, groundHeight))
             {
                 minHeightInsideBoundary = MathF.Max(minHeightInsideBoundary, waterLevel);

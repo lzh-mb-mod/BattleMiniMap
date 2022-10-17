@@ -1,0 +1,65 @@
+<Tasks>
+  <GetItem>
+    <ItemId Value="2876503777"/>
+    <!-- Can be found in the URL of your workshop item -->
+  </GetItem>
+  <UpdateItem>
+    <ModuleFolder Value="C:\game\develop\BattleMiniMap\source\package\BattleMiniMap"/>
+    <!-- A direct path of your module -->
+    <ItemDescription Value="English below.
+可配置的战场小地图。
+Configurable battle mini map.
+
+
+存档兼容性：
+这个mod不会向存档读写任何东西，放心随时启用随时卸载。
+
+
+使用指南：
+按M可开关地图和切换地图模式。
+长按alt可临时开关地图。
+地图缩放会随人物移动速度变化而变化。
+
+在场景中按L键可打开配置菜单。
+
+快捷键列表：
+M   -    切换地图显示和地图模式
+alt -   临时开关地图
+L   -    打开配置菜单
+所有快捷键均可在配置菜单中设置。
+
+
+Save compatibility:
+This mod won&apos;t read/write anything from/into your save, so you can feel free to enable or uninstall this mod at any time.
+
+
+Usage:
+Press M to toggle map visibility and map mode.
+Keep pressing ALT to temporarily toggle map visibility.
+The map scale will change with player&apos;s movement speed.
+Press L to open config menu during battles.
+
+Hotkeys:
+M      -    Toggle map visibility and map mode.
+alt    -    temporarily toggle map visibility
+L      -    Open the config menu.
+All the hotkeys can be changed in config menu.
+
+
+links：
+Nexusmods: https://www.nexusmods.com/mountandblade2bannerlord/mods/2672"/>
+    <ChangeNotes Value="" />
+    <!-- Insert patch notes -->
+    <Tags>
+      <!-- You can use the following tags: -->
+      <!-- Type: Graphical Enhancement, Map Pack, Partial Conversion, Sound, Total Conversion, Troops, UI, Utility, Weapons and Armour -->
+      <!-- Setting: Native, Antiquity, Dark Ages, Medieval, Musket Era, Modern, Sci-Fi, Fantasy, Oriental, Apocalypse, Other -->
+      <!-- Game Mode: Singleplayer, Multiplayer -->
+      <!-- Compatible Version: e1.9.0, v1.0.0,... The currently available versions can be found at the Steam Workshop "Browse by Tag" section -->
+      <Tag Value="UI"/>
+      <Tag Value="Singleplayer"/>
+      <Tag Value="e1.8.1" />
+      <Tag Value="e1.9.0" />
+    </Tags>
+  </UpdateItem>
+</Tasks>

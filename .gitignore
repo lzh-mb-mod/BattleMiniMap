@@ -6,3 +6,5 @@ source/*/obj/
 *.csproj.user
 *.dll
 *.html
+steam_appid.txt
+steam_workshop_uploader.txt
