@@ -19,14 +19,7 @@ Configurable battle mini map.
 按M可开关地图和切换地图模式。
 长按alt可临时开关地图。
 地图缩放会随人物移动速度变化而变化。
-
 在场景中按L键可打开配置菜单。
-
-快捷键列表：
-M   -    切换地图显示和地图模式
-alt -   临时开关地图
-L   -    打开配置菜单
-所有快捷键均可在配置菜单中设置。
 
 
 Save compatibility:
@@ -35,15 +28,9 @@ This mod won&apos;t read/write anything from/into your save, so you can feel fre
 
 Usage:
 Press M to toggle map visibility and map mode.
-Keep pressing ALT to temporarily toggle map visibility.
+Hold ALT to temporarily toggle map visibility.
 The map scale will change with player&apos;s movement speed.
 Press L to open config menu during battles.
-
-Hotkeys:
-M      -    Toggle map visibility and map mode.
-alt    -    temporarily toggle map visibility
-L      -    Open the config menu.
-All the hotkeys can be changed in config menu.
 
 
 links：
