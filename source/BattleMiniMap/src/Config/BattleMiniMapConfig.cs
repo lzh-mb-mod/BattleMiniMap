@@ -17,6 +17,8 @@ namespace BattleMiniMap.Config
     {
         public static float DynamicScale = 1;
 
+        public static float DynamicOpacityExponent = 1;
+
         protected static Version BinaryVersion => new Version(1, 1);
         public string ConfigVersion { get; set; } = BinaryVersion.ToString();
 
@@ -52,6 +54,16 @@ namespace BattleMiniMap.Config
         public float ForegroundOpacity { get; set; } = 0.5f;
 
         public bool ExcludeUnwalkableTerrain { get; set; } = false;
+
+        public float GetBackgroundOpacity()
+        {
+            return MathF.Clamp(MathF.Pow(BackgroundOpacity, DynamicOpacityExponent), 0f, 1f);
+        }
+
+        public float GetForegroundOpacity()
+        {
+            return MathF.Clamp(MathF.Pow(ForegroundOpacity, DynamicOpacityExponent), 0f, 1f);
+        }
 
         public float GetFollowModeScale()
         {

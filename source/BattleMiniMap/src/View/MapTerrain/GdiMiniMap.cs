@@ -112,7 +112,7 @@ namespace BattleMiniMap.View.MapTerrain
 
             EdgeOpacityFactor = BattleMiniMapConfig.Get().EdgeOpacityFactor;
             ExcludeUnwalkableTerrain = BattleMiniMapConfig.Get().ExcludeUnwalkableTerrain;
-            SampleTerrainHeight(scene, bitmap, BitmapWidth, BitmapHeight);
+            SampleTerrainHeight(mission, bitmap, BitmapWidth, BitmapHeight);
 
             MapImage = bitmap;
             MapTexture = MapImage.CreateTexture();
@@ -137,7 +137,7 @@ namespace BattleMiniMap.View.MapTerrain
             MapTexture = MapImage.CreateTexture();
         }
 
-        private void SampleTerrainHeight(Scene scene, Bitmap image, float mapWidth, float mapHeight)
+        private void SampleTerrainHeight(Mission mission, Bitmap image, float mapWidth, float mapHeight)
         {
             //int minR = 92, minG = 77, minB = 10;
             //int maxR = 200, maxG = 240, maxB = 180;
@@ -145,9 +145,12 @@ namespace BattleMiniMap.View.MapTerrain
             // g = 255 * sin(height)
             // b = 255 * (1 - cos(height))
             //scene.GetTerrainMinMaxHeight(out var minHeight, out var maxHeight);
+            var scene = mission.Scene;
             WaterLevel = scene.GetWaterLevel();
             var minHeight = float.MaxValue;
             var maxHeight = float.MinValue;
+            var minHeightInsideBoundary = float.MaxValue;
+            var maxHeightInsideBoundary = float.MinValue;
             var minGroundHeight = float.MaxValue;
             for (var w = 0; w < mapWidth; w++)
                 for (var h = 0; h < mapHeight; h++)
@@ -159,8 +162,12 @@ namespace BattleMiniMap.View.MapTerrain
                     minGroundHeight = Math.Min(minGroundHeight, groundHeight);
                     minHeight = Math.Min(minHeight, terrainHeight);
                     maxHeight = Math.Max(maxHeight, terrainHeight);
+                    if (mission.IsPositionInsideBoundaries(position))
+                    {
+                        minHeightInsideBoundary = Math.Min(minHeightInsideBoundary, terrainHeight);
+                        maxHeightInsideBoundary = Math.Max(maxHeightInsideBoundary, terrainHeight);
+                    }
                 }
-
 
             if (WaterLevel == 0 && minGroundHeight == 2)
             {
@@ -170,7 +177,7 @@ namespace BattleMiniMap.View.MapTerrain
             if (WaterLevel < minHeight)
                 WaterLevel = minHeight;
 
-            maxHeight = Math.Min(maxHeight - WaterLevel, 120);
+            maxHeight = Math.Min(maxHeight, 120 + WaterLevel);
 
             for (var w = 0; w < mapWidth; w++)
                 for (var h = 0; h < mapHeight; h++)
@@ -182,7 +189,7 @@ namespace BattleMiniMap.View.MapTerrain
                     var groundHeight = terrainHeight;
                     if (faceRecord.IsValid() || !scene.GetHeightAtPoint(pos, BodyFlags.CommonCollisionExcludeFlags, ref groundHeight))
                     {
-                        SetPixel(image, BitmapWidth, BitmapHeight, w, h, terrainHeight, WaterLevel, maxHeight, EdgeOpacityFactor);
+                        SetPixel(image, w, h, terrainHeight, WaterLevel, maxHeight, minHeightInsideBoundary, maxHeightInsideBoundary, EdgeOpacityFactor);
 
                         continue;
                     }
@@ -198,17 +205,53 @@ namespace BattleMiniMap.View.MapTerrain
                         }
                     }
 
-                    SetPixel(image, BitmapWidth, BitmapHeight, w, h, groundHeight, WaterLevel, maxHeight, EdgeOpacityFactor);
+                    SetPixel(image, w, h, groundHeight, WaterLevel, maxHeight, minHeightInsideBoundary, maxHeightInsideBoundary, EdgeOpacityFactor);
                 }
         }
 
-        private void SetPixel(Bitmap image, int mapWidth, int mapHeight, int w, int h, float groundHeight, float waterLevel, float maxHeight, float edgeOpacityFactor)
+        private void SetPixel(Bitmap image, int w, int h, float groundHeight, float waterLevel, float maxHeight, float minHeightInsideBoundary, float maxHeightInsideBoundary, float edgeOpacityFactor)
         {
-            var color = groundHeight > waterLevel
-                ? AboveWater.GetColor((groundHeight - waterLevel) / maxHeight)
-                : BelowWater.GetColor((waterLevel - groundHeight) / 8);
+            Color color;
+            float maxDepth = 8;
+            if (IsAboveWater(waterLevel, groundHeight))
+            {
+                minHeightInsideBoundary = MathF.Max(minHeightInsideBoundary, waterLevel);
+                maxHeightInsideBoundary =
+                    maxHeightInsideBoundary < waterLevel ? maxHeight : maxHeightInsideBoundary;
+                float partInsideBoundary =
+                    (maxHeightInsideBoundary - minHeightInsideBoundary) / (maxHeight - waterLevel);
+                float partOutsideBoundary = 1 - partInsideBoundary;
+                float adjustedPartInsideBoundary = MathF.Sqrt(partInsideBoundary);
+                float adjustedPartOutsideBoundary = 1 - adjustedPartInsideBoundary;
+                float minHeightInsideBoundaryProgress =
+                    (minHeightInsideBoundary - waterLevel) / (maxHeight - waterLevel);
+                float maxHeightInsideBoundaryProgress =
+                    (maxHeightInsideBoundary - waterLevel) / (maxHeight - waterLevel);
+                float progress = (groundHeight - waterLevel) / (maxHeight - waterLevel);
+                float adjustedMinHeightInsideBoundaryProgress = minHeightInsideBoundaryProgress *
+                    adjustedPartOutsideBoundary / partOutsideBoundary;
+                float adjustedMaxHeightInsideBoundaryProgress =
+                    adjustedMinHeightInsideBoundaryProgress + adjustedPartInsideBoundary;
+                float adjustedProgress = progress <= minHeightInsideBoundaryProgress
+                    ? progress * adjustedPartOutsideBoundary / partOutsideBoundary
+                    : progress <= maxHeightInsideBoundaryProgress
+                        ? adjustedMinHeightInsideBoundaryProgress + (progress - minHeightInsideBoundaryProgress) *
+                        adjustedPartInsideBoundary / partInsideBoundary
+                        : adjustedMaxHeightInsideBoundaryProgress + (progress - maxHeightInsideBoundaryProgress) *
+                        adjustedPartOutsideBoundary / partOutsideBoundary;
+                color = AboveWater.GetColor(adjustedProgress);
+            }
+            else
+            {
+                color = BelowWater.GetColor((waterLevel - groundHeight) / 8);
+            }
             image.SetPixel(w, h,
                 Color.FromArgb(Math.Min(GetEdgeAlpha(w, h, edgeOpacityFactor), color.A), color.R, color.G, color.B));
+        }
+
+        private static bool IsAboveWater(float waterLevel, float groundHeight)
+        {
+            return waterLevel == 2 ? groundHeight > waterLevel : groundHeight >= waterLevel;
         }
 
         public int GetEdgeAlpha(int w, int h, float edgeOpacityFactor)

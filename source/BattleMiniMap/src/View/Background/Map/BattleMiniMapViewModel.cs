@@ -127,8 +127,8 @@ namespace BattleMiniMap.View.Background.Map
             }
 
             MiniMap.UpdateFading(dt);
-            BackgroundAlphaFactor = BattleMiniMapConfig.Get().BackgroundOpacity * MiniMap.FadeInOutAlphaFactor;
-            ForegroundAlphaFactor = BattleMiniMapConfig.Get().ForegroundOpacity * MiniMap.FadeInOutAlphaFactor;
+            BackgroundAlphaFactor = BattleMiniMapConfig.Get().GetBackgroundOpacity() * MiniMap.FadeInOutAlphaFactor;
+            ForegroundAlphaFactor = BattleMiniMapConfig.Get().GetForegroundOpacity() * MiniMap.FadeInOutAlphaFactor;
         }
 
         public void UpdateData()

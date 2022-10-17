@@ -39,6 +39,7 @@ namespace BattleMiniMap.View.Background.Map
             _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.Mouse);
             MissionScreen.AddLayer(_layer);
             _timer = new MissionTimer(0.05f);
+            BattleMiniMapConfig.DynamicOpacityExponent = MathF.Clamp(MathF.Abs(Mission.Scene.TimeOfDay - 12f) / 12f * 2f + 0.5f, 0.7f, 2.5f);
         }
 
         public override void OnMissionScreenTick(float dt)
@@ -104,7 +105,7 @@ namespace BattleMiniMap.View.Background.Map
                 else
                 {
                     _targetDynamicScale = 1 / MathF.Lerp(1f, 3f,
-                        (MissionScreen.CombatCamera.Position.z - MiniMap.Instance.WaterLevel) / 120);
+                        (MissionScreen.CombatCamera.Position.z - MissionScreen.Mission.Scene.GetGroundHeightAtPosition(MissionScreen.CombatCamera.Position + new Vec3(z: 100f))) / 120);
                 }
             }
 
