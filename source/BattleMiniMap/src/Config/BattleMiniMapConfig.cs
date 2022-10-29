@@ -82,6 +82,7 @@ namespace BattleMiniMap.Config
             WidgetWidth = other.WidgetWidth;
             FollowMode = other.FollowMode;
             FollowModeScale = other.FollowModeScale;
+            EnableDynamicScale = other.EnableDynamicScale;
             HorizontalAlignment = other.HorizontalAlignment;
             VerticalAlignment = other.VerticalAlignment;
             PositionX = other.PositionX;
