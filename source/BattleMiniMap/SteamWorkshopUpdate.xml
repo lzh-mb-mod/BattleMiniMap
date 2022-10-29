@@ -47,6 +47,7 @@ Nexusmods: https://www.nexusmods.com/mountandblade2bannerlord/mods/2672"/>
       <Tag Value="Singleplayer"/>
       <Tag Value="e1.8.1" />
       <Tag Value="e1.9.0" />
+      <Tag Value="v1.0.0"/>
     </Tags>
   </UpdateItem>
 </Tasks>

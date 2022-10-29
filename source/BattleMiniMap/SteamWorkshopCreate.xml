@@ -44,6 +44,7 @@ Nexusmods: https://www.nexusmods.com/mountandblade2bannerlord/mods/2672"/>
       <!-- <Tag Value="Multiplayer"/> -->
       <Tag Value="e1.8.1"/>
       <Tag Value="e1.9.0"/>
+      <Tag Value="v1.0.0"/>
     </Tags>
     <Image Value="C:\game\develop\BattleMiniMap\BattleMiniMap.png"/>
     <!--  Determines the featured image displayed on Steam Workshop, a direct path to it must be inserted here (the image should be smaller than 1 MB)  -->
