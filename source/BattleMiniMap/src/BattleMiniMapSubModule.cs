@@ -42,11 +42,11 @@ namespace BattleMiniMap
             if (!Initializer.SecondInitialize())
                 return false;
 
-            Global.GetProvider<AMissionStartingManager>().AddHandler(new MissionStartingHandler());
+            Global.GetInstance<AMissionStartingManager>().AddHandler(new MissionStartingHandler());
             BattleMiniMapGameKeyCategory.RegisterGameKeyCategory();
             var menuClassCollection = AMenuManager.Get().MenuClassCollection;
             AMenuManager.Get().OnMenuClosedEvent += BattleMiniMapConfig.OnMenuClosed;
-            menuClassCollection.AddOptionClass(
+            menuClassCollection.RegisterItem(
                 BattleMiniMapOptionClassFactory.CreateOptionClassProvider(menuClassCollection));
             return true;
         }

@@ -37,7 +37,7 @@ namespace BattleMiniMap.Widgets
             }
             else
             {
-                Dictionary<string, StyleLayer>.ValueCollection layers = brush.GetStyleOrDefault(CurrentState).Layers;
+                var layers = brush.GetStyleOrDefault(CurrentState).GetLayers();
                 styleLayer = layers?.FirstOrDefault();
             }
             simpleMaterial.OverlayEnabled = false;

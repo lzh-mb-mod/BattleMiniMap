@@ -4,12 +4,14 @@
     <!-- Can be found in the URL of your workshop item -->
   </GetItem>
   <UpdateItem>
-    <ModuleFolder Value="C:\game\develop\BattleMiniMap\source\package\BattleMiniMap"/>
+    <ModuleFolder Value="D:\develop\src\BattleMiniMap\source\package\BattleMiniMap"/>
     <!-- A direct path of your module -->
     <ItemDescription Value="English below.
 可配置的战场小地图。
 Configurable battle mini map.
 
+Compatible RTS Camera: https://steamcommunity.com/sharedfiles/filedetails/?id=2879991660
+兼容的RTS Camera: https://steamcommunity.com/sharedfiles/filedetails/?id=2879991660
 
 存档兼容性：
 这个mod不会向存档读写任何东西，放心随时启用随时卸载。
@@ -45,9 +47,7 @@ Nexusmods: https://www.nexusmods.com/mountandblade2bannerlord/mods/2672"/>
       <!-- Compatible Version: e1.9.0, v1.0.0,... The currently available versions can be found at the Steam Workshop "Browse by Tag" section -->
       <Tag Value="UI"/>
       <Tag Value="Singleplayer"/>
-      <Tag Value="e1.8.1" />
-      <Tag Value="e1.9.0" />
-      <Tag Value="v1.0.0"/>
+	  <Tag Value="v1.2.12" />
     </Tags>
   </UpdateItem>
 </Tasks>

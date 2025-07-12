@@ -11,9 +11,9 @@ namespace BattleMiniMap.Config
 {
     public class BattleMiniMapOptionClassFactory
     {
-        public static IIdProvider<AOptionClass> CreateOptionClassProvider(IMenuClassCollection menuClassCollection)
+        public static IProvider<AOptionClass> CreateOptionClassProvider(AMenuClassCollection menuClassCollection)
         {
-            return IdProviderCreator.Create(() =>
+            return ProviderCreator.Create(() =>
             {
                 var optionClass = new OptionClass(BattleMiniMapSubModule.ModuleId,
                     GameTexts.FindText("str_battle_mini_map_option_class"), menuClassCollection);
@@ -94,7 +94,7 @@ namespace BattleMiniMap.Config
                     }));
                 optionClass.AddOptionCategory(0, optionCategory);
                 return optionClass;
-            }, BattleMiniMapSubModule.ModuleId);
+            }, BattleMiniMapSubModule.ModuleId, new System.Version(1, 0));
         }
     }
 }

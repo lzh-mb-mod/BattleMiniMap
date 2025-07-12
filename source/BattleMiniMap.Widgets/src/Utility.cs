@@ -92,7 +92,7 @@ namespace BattleMiniMap.Widgets
             }
             else
             {
-                Dictionary<string, StyleLayer>.ValueCollection layers = brush.GetStyleOrDefault(widget.CurrentState).Layers;
+                var layers = brush.GetStyleOrDefault(widget.CurrentState).GetLayers();
                 styleLayer = layers?.FirstOrDefault();
             }
             simpleMaterial.OverlayEnabled = false;

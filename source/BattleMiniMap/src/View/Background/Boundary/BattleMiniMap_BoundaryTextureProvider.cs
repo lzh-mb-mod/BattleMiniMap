@@ -17,6 +17,7 @@ namespace BattleMiniMap.View.Background.Boundary
         private int _boundaryBitmapWidth;
         private Texture _texture;
         private static Texture _textureToBeReleased;
+        private bool _clearNextFrame;
 
         public Texture Texture
         {
@@ -47,10 +48,29 @@ namespace BattleMiniMap.View.Background.Boundary
             return Texture ??= CreateTexture();
         }
 
-        public override void Clear()
+        public override void Tick(float dt)
         {
-            base.Clear();
-            Texture = null;
+            base.Tick(dt);
+
+            if (_clearNextFrame)
+            {
+                _clearNextFrame = false;
+                Texture = null;
+            }
+        }
+
+        public override void Clear(bool clearNextFrame)
+        {
+            base.Clear(clearNextFrame);
+            if (clearNextFrame)
+            {
+                _clearNextFrame = true;
+            }
+            else
+            {
+                _clearNextFrame = false;
+                Texture = null;
+            }
         }
 
         private Texture CreateTexture()

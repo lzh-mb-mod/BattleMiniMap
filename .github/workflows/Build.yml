@@ -2,7 +2,7 @@
 
 name: Build
 
-# Controls when the action will run. 
+# Controls when the action will run.
 on:
   # Triggers the workflow on push or pull request events but only for the master branch
   push:
@@ -36,7 +36,7 @@ jobs:
       
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - name: Checkout Repositiory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3.1.0
       
       - name: submodules-init
         # You may pin to the exact commit or the version.
@@ -44,14 +44,14 @@ jobs:
         uses: snickerbockers/submodules-init@v4
 
       - name: Read tag name
-        uses: olegtarasov/get-tag@v2.1
+        uses: olegtarasov/get-tag@v2.1.1
         id: tagName
 
       - name: Read configuration file
         id: dotenv
         # You may pin to the exact commit or the version.
         # uses: falti/dotenv-action@cb77e3cb51b636f6833ceeb6928bf06ff66e82fa
-        uses: falti/dotenv-action@v0.2.5
+        uses: falti/dotenv-action@v0.2.8
         with:
           # the path to the .env file (including file name)
           path: .github/resources/config.env
@@ -86,24 +86,25 @@ jobs:
         # uses: NuGet/setup-nuget@04b0c2b8d1b97922f67eca497d7cf0bf17b8ffe1
         uses: NuGet/setup-nuget@v1.0.5
           
-      - name: Download DepotDownloader_2.4.7
-        uses: i3h/download-release-asset@v1
+      - name: Download DepotDownloader_3.4.0
+        uses: i3h/download-release-asset@v1.3.3
         with:
           owner: SteamRE
           repo: DepotDownloader
-          tag: DepotDownloader_2.4.7
-          file: depotdownloader-2.4.7.zip
-      - name: Extract DepotDownloader_2.4.7
+          tag: DepotDownloader_3.4.0
+          file: DepotDownloader-windows-x64.zip
+      - name: Extract DepotDownloader_3.4.0
         uses: DuckSoft/extract-7z-action@v1.0
         with:
-          pathSource: depotdownloader-2.4.7.zip
+          pathSource: DepotDownloader-windows-x64.zip
           pathTarget: depotdownloader
 
       - name: Download Bannerlord binaries 1
-        run: dotnet depotdownloader/DepotDownloader.dll -app 261550 -depot 261551 -beta ${{steps.dotenv.outputs.game_version}} -username ${{secrets.STEAM_LOGIN}} -password ${{secrets.STEAM_PASSWORD}} -filelist ./.github/resources/FileFilters.regexp -dir bannerlord;
-      
+        run: depotdownloader/DepotDownloader.exe -app 261550 -depot 261551 -branch ${{steps.dotenv.outputs.game_version}} -username ${{secrets.STEAM_LOGIN}} -password ${{secrets.STEAM_PASSWORD}} -filelist ./.github/resources/FileFilters.regexp -dir bannerlord;
+
       - name: Download Bannerlord binaries 2
-        run: dotnet depotdownloader/DepotDownloader.dll -app 261550 -depot 261552 -beta ${{steps.dotenv.outputs.game_version}} -username ${{secrets.STEAM_LOGIN}} -password ${{secrets.STEAM_PASSWORD}} -filelist ./.github/resources/FileFilters.regexp -dir bannerlord;
+        run: depotdownloader/DepotDownloader.exe -app 261550 -depot 261552 -branch ${{steps.dotenv.outputs.game_version}} -username ${{secrets.STEAM_LOGIN}} -password ${{secrets.STEAM_PASSWORD}} -filelist ./.github/resources/FileFilters.regexp -dir bannerlord;
+
       - name: Build Solution
         run: >-
           nuget restore .\source\BattleMiniMap.sln;
