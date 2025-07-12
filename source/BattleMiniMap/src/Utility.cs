@@ -1,6 +1,7 @@
 ﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
 using System.Drawing;
+using TaleWorlds.GauntletUI.BaseTypes;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.MountAndBlade.View.Screens;
@@ -108,6 +109,13 @@ namespace BattleMiniMap
             {
                 return MapFToWorld(miniMap, miniMap.WidgetToMap(p));
             }
+        }
+
+        public static Vec2 ScreenToWidget(this IMiniMap miniMap, Widget widget, Vec2 screenPosition)
+        {
+            var config = BattleMiniMapConfig.Get();
+            var scale = (float)config.WidgetWidth / miniMap.BitmapWidth;
+            return new Vec2(screenPosition.x * scale, screenPosition.y * scale);
         }
     }
 }

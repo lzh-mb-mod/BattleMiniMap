@@ -1,6 +1,7 @@
 ﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
 using MissionLibrary.Controller.Camera;
+using System;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.GauntletUI.BaseTypes;
 using TaleWorlds.Library;
@@ -41,9 +42,10 @@ namespace BattleMiniMap.View.Interaction
                 return;
             if (widget == this && eventName == "DoubleClick")
             {
+                var uiScale = _scaleToUse;
                 var globalMousePosition = Widgets.Utility.GetMousePosition(EventManager);
                 var widgetLocalPosition = globalMousePosition - Widgets.Utility.GetGlobalPosition(this);
-                var worldPosition = MiniMap.Instance.WidgetToWorld(widgetLocalPosition);
+                var worldPosition = MiniMap.Instance.WidgetToWorld(widgetLocalPosition / uiScale);
                 ACameraControllerManager.Get().Instance?.RequestCameraGoTo(worldPosition);
             }
         }

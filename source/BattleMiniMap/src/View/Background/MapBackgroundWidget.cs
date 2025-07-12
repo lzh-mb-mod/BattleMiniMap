@@ -35,7 +35,7 @@ namespace BattleMiniMap.View.Background
                 var scaleFromNonFollowModeToFollowMode = percentageInMapPerMeterInWorld *
                                                          (MiniMap.Instance.MapBoundMax.y -
                                                           MiniMap.Instance.MapBoundMin.y);
-                var uiScale = ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1);
+                var uiScale = _scaleToUse;
                 var midPoint = new Vec2(SuggestedWidth / 2, SuggestedHeight / 2);
                 var mapHeightWidthScale = (float)MiniMap.Instance.BitmapHeight / MathF.Max(MiniMap.Instance.BitmapWidth, 1);
                 var offset = (midPoint - MiniMap.Instance.MapToWidget(MiniMap.Instance.WorldToMapF(position)) * scaleFromNonFollowModeToFollowMode) * uiScale;

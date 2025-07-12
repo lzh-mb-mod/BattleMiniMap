@@ -41,7 +41,7 @@ namespace BattleMiniMap.View.AgentMarkers
         {
             base.OnRender(twoDimensionContext, drawContext);
 
-            var uiScale = ScaledSuggestedWidth / Math.Max(SuggestedWidth, 1);
+            var uiScale = _scaleToUse;
             var scaledMarkerSize = _agentMarkerSize * uiScale;
             UpdateDrawObject2D(scaledMarkerSize, scaledMarkerSize);
             var materials = new SimpleMaterial[(int)AgentMarkerType.Count];
