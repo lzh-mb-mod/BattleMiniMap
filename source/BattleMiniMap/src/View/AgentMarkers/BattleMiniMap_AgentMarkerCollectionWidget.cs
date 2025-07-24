@@ -33,7 +33,7 @@ namespace BattleMiniMap.View.AgentMarkers
                 var config = BattleMiniMapConfig.Get();
                 SuggestedWidth = config.WidgetWidth;
                 SuggestedHeight = height / (float)width * SuggestedWidth;
-                _agentMarkerSize = Math.Max(SuggestedWidth * (config.FollowMode ? config.GetFollowModeScale() * 0.025f : 0.01f) * config.AgentMarkerScale, 3);
+                _agentMarkerSize = Math.Max(SuggestedWidth * (config.FollowMode ? config.GetFollowModeScale() * 0.025f : 0.005f) * config.AgentMarkerScale, 3);
             }
         }
 
