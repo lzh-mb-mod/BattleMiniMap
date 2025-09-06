@@ -1,5 +1,14 @@
 # Changelog
 
+## [v2.0.4] 2025-09-07
+### Fixed
+- Fix the issue that hotkey config is reset on second startup.
+
+- Fix the issue that map show state is not saved.
+
+### Added
+- Add usage hint
+
 ## [v1.1.3] - 2022-08-30
 ### Fixed
 - Fix the issue that map may become too small when ui scale is lower than 1.

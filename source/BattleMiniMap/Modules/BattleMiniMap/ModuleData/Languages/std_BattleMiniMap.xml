@@ -40,7 +40,10 @@
     <string id="BattleMiniMap_hotkey_category" text="Battle Mini Map Hot Key" />
     <string id="BattleMiniMap_toggle_map" text="Toggle Map" />
     <string id="BattleMiniMap_toggle_map_hint" text="Show or hide the map." />
-    <string id="BattleMiniMapHotKey_toggle_map_long_press" text="Toggle Map (Hold)" />
-    <string id="BattleMiniMapHotKey_toggle_map_long_press_hint" text="Hold the key to show or hide the map." />
+    <string id="BattleMiniMapHotKey_toggle_map_holding" text="Toggle Map (Hold)" />
+    <string id="BattleMiniMapHotKey_toggle_map_holding_hint" text="Hold the key to show or hide the map." />
+
+    <string id="BattleMiniMap_toggle_map_usage" text="Toggle map by pressing {KeyName}." />
+    <string id="BattleMiniMapHotKey_toggle_map_holding_usage" text="Toggle map by holding {KeyName}." />
   </strings>
 </base>

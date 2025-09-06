@@ -40,7 +40,10 @@
     <string id="BattleMiniMap_hotkey_category" text="战场小地图按键" />
     <string id="BattleMiniMap_toggle_map" text="切换地图" />
     <string id="BattleMiniMap_toggle_map_hint" text="显示或隐藏地图。" />
-    <string id="BattleMiniMapHotKey_toggle_map_long_press" text="切换地图（长按）" />
-    <string id="BattleMiniMapHotKey_toggle_map_long_press_hint" text="长按来显示或隐藏地图。" />
+    <string id="BattleMiniMapHotKey_toggle_map_holding" text="切换地图（长按）" />
+    <string id="BattleMiniMapHotKey_toggle_map_holding_hint" text="长按来显示或隐藏地图。" />
+
+    <string id="BattleMiniMap_toggle_map_usage" text="按下{KeyName}切换地图。" />
+    <string id="BattleMiniMapHotKey_toggle_map_holding_usage" text="长按{KeyName}切换地图。" />
   </strings>
 </base>

@@ -9,8 +9,16 @@ namespace BattleMiniMap.Config.HotKey
     {
         protected override string SaveName { get; } =
             Path.Combine(ConfigPath.ConfigDir, BattleMiniMapSubModule.ModuleId, nameof(GameKeyConfig) + ".xml");
-            
+
         protected static Version BinaryVersion => new Version(1, 1);
+
+        public string ConfigVersion = BinaryVersion.ToString(2);
+
+        protected override void CopyFrom(GameKeyConfig other)
+        {
+            base.CopyFrom(other);
+            ConfigVersion = other.ConfigVersion;
+        }
 
         protected override void UpgradeToCurrentVersion()
         {

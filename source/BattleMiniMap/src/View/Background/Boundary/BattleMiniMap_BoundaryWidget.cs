@@ -25,7 +25,10 @@ namespace BattleMiniMap.View.Background.Boundary
         {
             base.OnDisconnectedFromRoot();
 
-            Mission.Current.Boundaries.CollectionChanged -= BoundariesOnCollectionChanged;
+            if (Mission.Current != null)
+            {
+                Mission.Current.Boundaries.CollectionChanged -= BoundariesOnCollectionChanged;
+            }
         }
 
         private void BoundariesOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)

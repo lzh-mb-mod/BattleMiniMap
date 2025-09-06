@@ -57,7 +57,7 @@ namespace BattleMiniMap.View.Background.Map
 
             bool toggleMapKeyDown = false;
             bool instantlyUpdateScale = false;
-            var toggleMapLongPressKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMapLongPress);
+            var toggleMapLongPressKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMapHolding);
             var toggleMapKey = BattleMiniMapGameKeyCategory.GetKey(GameKeyEnum.ToggleMap);
             if (BattleMiniMapConfig.Get().EnableToggleMapLongPressKey && toggleMapLongPressKey.IsKeyDown(Input))
             {
@@ -71,6 +71,7 @@ namespace BattleMiniMap.View.Background.Map
                     BattleMiniMapConfig.Get().FollowMode = !BattleMiniMapConfig.Get().FollowMode;
                     instantlyUpdateScale = true;
                 }
+                BattleMiniMapConfig.Get().Serialize();
             }
 
             _dataSource.UpdateEnabled(dt, MiniMap.Instance.IsValid &&

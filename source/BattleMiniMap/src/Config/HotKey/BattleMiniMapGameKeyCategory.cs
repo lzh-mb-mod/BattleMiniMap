@@ -13,7 +13,7 @@ namespace BattleMiniMap.Config.HotKey
     public enum GameKeyEnum
     {
         ToggleMap,
-        ToggleMapLongPress,
+        ToggleMapHolding,
         NumberOfGameKeyEnums
     }
     public class BattleMiniMapGameKeyCategory
@@ -41,8 +41,8 @@ namespace BattleMiniMap.Config.HotKey
                         }
                     )
                 }));
-            result.AddGameKeySequence(new GameKeySequence((int)GameKeyEnum.ToggleMapLongPress,
-                nameof(GameKeyEnum.ToggleMapLongPress),
+            result.AddGameKeySequence(new GameKeySequence((int)GameKeyEnum.ToggleMapHolding,
+                nameof(GameKeyEnum.ToggleMapHolding),
                 CategoryId, new List<GameKeySequenceAlternative>()
                 {
                     new GameKeySequenceAlternative(new List<InputKey>
