@@ -172,7 +172,7 @@ namespace BattleMiniMap.View.Background.Map
                 {
                     var current = AgentMarkers.AgentMarkers[i];
                     current.Update();
-                    if (current.AgentMarkerType == AgentMarkerType.Inactive)
+                    if (current.AgentMarkerType.ColorType == View.AgentMarkers.Colors.AgentMarkerColorType.Inactive)
                     {
                         //DeadAgentMarkers.Add(current);
                         if (i < lastOne)

@@ -5,28 +5,6 @@ using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap.View.AgentMarkers
 {
-    public enum AgentMarkerType
-    {
-        PlayerTeamHuman,
-        PlayerTeamEscapingHuman,
-        PlayerTeamHorse,
-        PlayerTeamEscapingHorse,
-        PlayerAllyTeamHuman,
-        PlayerAllyTeamEscapingHuman,
-        PlayerAllyTeamHorse,
-        PlayerAllyTeamEscapingHorse,
-        PlayerEnemyTeamHuman,
-        PlayerEnemyTeamEscapingHuman,
-        PlayerEnemyTeamHorse,
-        PlayerEnemyTeamEscapingHorse,
-        Human,
-        EscapingHuman,
-        Horse,
-        EscapingHorse,
-        Animal,
-        Inactive,
-        Count
-    }
 
     public struct ColorAndTexturePair
     {
@@ -42,12 +20,11 @@ namespace BattleMiniMap.View.AgentMarkers
 
     public static class AgentMarkerTypeExtension
     {
-        private static int _errorCount;
 
-        public static AgentMarkerType GetAgentMarkerType(this Agent agent)
+        public static ColorAndTexturePair GetColorAndTextureType(this Agent agent)
         {
             if (!agent.IsActive())
-                return AgentMarkerType.Inactive;
+                return new ColorAndTexturePair(AgentMarkerColorType.Inactive, AgentMarkerTextureType.Dead);
 
             if (agent.IsHuman)
             {
@@ -56,152 +33,154 @@ namespace BattleMiniMap.View.AgentMarkers
 
             if (agent.RiderAgent != null)
             {
-                return GetHumanMarkerType(agent.RiderAgent) + 2;
+                var riderType = GetHumanMarkerType(agent.RiderAgent);
+                return new ColorAndTexturePair(riderType.ColorType, AgentMarkerTextureType.Horse);
             }
 
-            return agent.IsMount ? AgentMarkerType.Horse : AgentMarkerType.Animal;
+            return agent.IsMount ?
+                new ColorAndTexturePair(AgentMarkerColorType.Horse, AgentMarkerTextureType.Horse) :
+                new ColorAndTexturePair(AgentMarkerColorType.Other, AgentMarkerTextureType.OtherAnimal);
         }
 
-        public static ColorAndTexturePair GetColorAndTextureType(
-            this AgentMarkerType type)
+        public static int GetLayer(this ColorAndTexturePair type)
         {
-            switch (type)
+            if (type.ColorType == AgentMarkerColorType.PlayerTeam || type.ColorType == AgentMarkerColorType.PlayerTeamHighlight)
             {
-                case AgentMarkerType.Inactive:
-                    return new ColorAndTexturePair(AgentMarkerColorType.Inactive,
-                        AgentMarkerTextureType.Dead);
-                case AgentMarkerType.PlayerTeamHuman:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerTeam,
-                        AgentMarkerTextureType.Human);
-                case AgentMarkerType.PlayerTeamEscapingHuman:
-                    return new ColorAndTexturePair(
-                        AgentMarkerColorType.PlayerTeamEscaping, AgentMarkerTextureType.Human);
-                case AgentMarkerType.PlayerTeamHorse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerTeam,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.PlayerTeamEscapingHorse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerTeamEscaping,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.PlayerAllyTeamHuman:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerAlly,
-                        AgentMarkerTextureType.Human);
-                case AgentMarkerType.PlayerAllyTeamEscapingHuman:
-                    return new ColorAndTexturePair(
-                        AgentMarkerColorType.PlayerAllyTeamEscaping, AgentMarkerTextureType.Human);
-                case AgentMarkerType.PlayerAllyTeamHorse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerAlly,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.PlayerAllyTeamEscapingHorse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerAllyTeamEscaping,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.PlayerEnemyTeamHuman:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerEnemy,
-                        AgentMarkerTextureType.Human);
-                case AgentMarkerType.PlayerEnemyTeamEscapingHuman:
-                    return new ColorAndTexturePair(
-                        AgentMarkerColorType.PlayerEnemyTeamEscaping, AgentMarkerTextureType.Human);
-                case AgentMarkerType.PlayerEnemyTeamHorse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerEnemy,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.PlayerEnemyTeamEscapingHorse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.PlayerEnemyTeamEscaping,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.Human:
-                    return new ColorAndTexturePair(AgentMarkerColorType.Human,
-                        AgentMarkerTextureType.Human);
-                case AgentMarkerType.EscapingHuman:
-                    return new ColorAndTexturePair(AgentMarkerColorType.Human,
-                        AgentMarkerTextureType.Human);
-                case AgentMarkerType.Horse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.Horse,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.EscapingHorse:
-                    return new ColorAndTexturePair(AgentMarkerColorType.Horse,
-                        AgentMarkerTextureType.Horse);
-                case AgentMarkerType.Animal:
-                    return new ColorAndTexturePair(AgentMarkerColorType.Other,
-                        AgentMarkerTextureType.OtherAnimal);
-                default:
-                {
-                    if (_errorCount < 10)
-                    {
-                        ++_errorCount;
-                        MissionSharedLibrary.Utilities.Utility.DisplayMessageForced(
-                            $"Error: Unexpected agent type '{type}'.");
-                    }
-                    return new ColorAndTexturePair(AgentMarkerColorType.Other,
-                        AgentMarkerTextureType.OtherAnimal);
-                }
+                return 7;
             }
-        }
-
-        public static int GetLayer(this AgentMarkerType type)
-        {
-            switch (type)
+            switch (type.TextureType)
             {
-                case AgentMarkerType.PlayerTeamHuman:
-                case AgentMarkerType.PlayerTeamEscapingHuman:
-                case AgentMarkerType.PlayerAllyTeamHuman:
-                case AgentMarkerType.PlayerAllyTeamEscapingHuman:
-                case AgentMarkerType.PlayerEnemyTeamHuman:
-                case AgentMarkerType.PlayerEnemyTeamEscapingHuman:
-                case AgentMarkerType.Human:
-                case AgentMarkerType.EscapingHuman:
+                case AgentMarkerTextureType.Hero:
+                    return 6;
+                case AgentMarkerTextureType.Human:
                     return 5;
-                case AgentMarkerType.PlayerTeamHorse:
-                case AgentMarkerType.PlayerTeamEscapingHorse:
-                case AgentMarkerType.PlayerAllyTeamHorse:
-                case AgentMarkerType.PlayerAllyTeamEscapingHorse:
-                case AgentMarkerType.PlayerEnemyTeamHorse:
-                case AgentMarkerType.PlayerEnemyTeamEscapingHorse:
-                case AgentMarkerType.Horse:
-                case AgentMarkerType.EscapingHorse:
+                case AgentMarkerTextureType.Horse:
                     return 4;
-                case AgentMarkerType.Animal:
+                case AgentMarkerTextureType.OtherAnimal:
                     return 3;
-                case AgentMarkerType.Inactive:
+                case AgentMarkerTextureType.Dead:
                     return 2;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 
-        private static AgentMarkerType GetHumanMarkerType(Agent agent)
+        private static ColorAndTexturePair GetHumanMarkerType(bool isEnemy, bool isPlayerTeam, bool isHero, bool isRunningAway)
         {
-            if (agent.Team == null || !agent.Team.IsValid)
+            AgentMarkerColorType colorType;
+            AgentMarkerTextureType textureType;
+            if (isEnemy)
+            {
+                if (isHero)
+                {
+                    colorType = isRunningAway ? AgentMarkerColorType.PlayerEnemyTeamEscaping : AgentMarkerColorType.PlayerEnemyHighlight;
+                    textureType = AgentMarkerTextureType.Hero;
+                }
+                else
+                {
+                    colorType = isRunningAway ? AgentMarkerColorType.PlayerEnemyTeamEscaping : AgentMarkerColorType.PlayerEnemy;
+                    textureType = AgentMarkerTextureType.Human;
+                }
+            }
+            else if (isPlayerTeam)
+            {
+                if (isHero)
+                {
+                    colorType = isRunningAway ? AgentMarkerColorType.PlayerTeamEscaping : AgentMarkerColorType.PlayerTeamHighlight;
+                    textureType = AgentMarkerTextureType.Hero;
+                }
+                else
+                {
+                    colorType = isRunningAway ? AgentMarkerColorType.PlayerTeamEscaping : AgentMarkerColorType.PlayerTeam;
+                    textureType = AgentMarkerTextureType.Human;
+                }
+            }
+            else
+            {
+                if (isHero)
+                {
+                    colorType = isRunningAway ? AgentMarkerColorType.PlayerAllyTeamEscaping : AgentMarkerColorType.PlayerAllyHighlight;
+                    textureType = AgentMarkerTextureType.Hero;
+                }
+                else
+                {
+                    colorType = isRunningAway ? AgentMarkerColorType.PlayerAllyTeamEscaping : AgentMarkerColorType.PlayerAlly;
+                    textureType = AgentMarkerTextureType.Human;
+                }
+            }
+            return new ColorAndTexturePair(colorType, textureType);
+        }
+
+        private static ColorAndTexturePair GetHumanMarkerType(Agent agent)
+        {
+            bool isEnemy = false, isPlayerTeam = false, isHero = agent.IsHero, isRunningAway = agent.IsRunningAway;
+            AgentMarkerColorType colorType;
+            AgentMarkerTextureType textureType;
+            if (agent.Team == null || !agent.Team.IsValid || Mission.Current.PlayerTeam == null)
             {
                 if (Mission.Current.MainAgent != null)
                 {
                     if (agent.IsEnemyOf(Mission.Current.MainAgent))
                     {
-                        return agent.IsRunningAway ? AgentMarkerType.PlayerEnemyTeamEscapingHuman : AgentMarkerType.PlayerEnemyTeamHuman;
+                        isEnemy = true;
+                        isPlayerTeam = false;
                     }
 
                     if (agent.IsFriendOf(Mission.Current.MainAgent))
                     {
-                        return agent.IsRunningAway ? AgentMarkerType.PlayerAllyTeamEscapingHuman : AgentMarkerType.PlayerAllyTeamHuman;
+                        isEnemy = false;
+                        isPlayerTeam = false;
                     }
+                    return GetHumanMarkerType(isEnemy, isPlayerTeam, isHero, isRunningAway);
                 }
-
-                return AgentMarkerType.Human;
+                else
+                {
+                    if (isHero)
+                    {
+                        colorType = AgentMarkerColorType.HumanHighlight;
+                        textureType = AgentMarkerTextureType.Hero;
+                    }
+                    else
+                    {
+                        colorType = AgentMarkerColorType.Human;
+                        textureType = AgentMarkerTextureType.Human;
+                    }
+                    return new ColorAndTexturePair(colorType, textureType);
+                }
             }
 
-            if (agent.Team == Mission.Current.PlayerTeam)
+            if (agent.Team.IsPlayerTeam)
             {
-                return agent.IsRunningAway ? AgentMarkerType.PlayerTeamEscapingHuman : AgentMarkerType.PlayerTeamHuman;
+                isEnemy = false;
+                isPlayerTeam = true;
+                return GetHumanMarkerType(isEnemy, isPlayerTeam, isHero, isRunningAway);
             }
 
             if (agent.Team.IsPlayerAlly)
             {
-                return agent.IsRunningAway ? AgentMarkerType.PlayerAllyTeamEscapingHuman : AgentMarkerType.PlayerAllyTeamHuman;
+                isEnemy = false;
+                isPlayerTeam = false;
+                return GetHumanMarkerType(isEnemy, isPlayerTeam, isHero, isRunningAway);
             }
 
-            if (agent.Team == Mission.Current.PlayerEnemyTeam)
+            if (agent.Team.IsEnemyOf(Mission.Current.PlayerTeam))
             {
-                return agent.IsRunningAway ? AgentMarkerType.PlayerEnemyTeamEscapingHuman : AgentMarkerType.PlayerEnemyTeamHuman;
+                isEnemy = true;
+                isPlayerTeam = false;
+                return GetHumanMarkerType(isEnemy, isPlayerTeam, isHero, isRunningAway);
             }
 
-            return AgentMarkerType.Human;
+            if (isHero)
+            {
+                colorType = AgentMarkerColorType.HumanHighlight;
+                textureType = AgentMarkerTextureType.Hero;
+            }
+            else
+            {
+                colorType = AgentMarkerColorType.Human;
+                textureType = AgentMarkerTextureType.Human;
+            }
+            return new ColorAndTexturePair(colorType, textureType);
         }
     }
 }

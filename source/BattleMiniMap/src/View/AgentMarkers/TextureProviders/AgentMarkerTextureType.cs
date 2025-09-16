@@ -2,6 +2,6 @@
 {
     public enum AgentMarkerTextureType
     {
-        Human, Horse, OtherAnimal, Dead, Count
+        Human, Hero, Horse, OtherAnimal, Dead, Count
     }
 }

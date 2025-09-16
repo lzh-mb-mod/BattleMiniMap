@@ -9,6 +9,7 @@ namespace BattleMiniMap.View.AgentMarkers.TextureProviders
         private static readonly IAgentTextureProvider[] AgentTextureProviders = new IAgentTextureProvider[]
         {
            new HumanAgentTextureProvider(),
+           new HeroAgentTextureProvider(),
            new HorseAgentTextureProvider(),
            new OtherAgentTextureProvider(),
            new DeadAgentTextureProvider()

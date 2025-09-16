@@ -3,9 +3,15 @@ using BattleMiniMap.View.AgentMarkers.Colors;
 using BattleMiniMap.View.AgentMarkers.TextureProviders;
 using BattleMiniMap.View.MapTerrain;
 using System;
+using System.Collections.Generic;
+using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.GauntletUI.BaseTypes;
+using TaleWorlds.Library;
+using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.View.Screens;
 using TaleWorlds.TwoDimension;
+using static TaleWorlds.MountAndBlade.Source.Objects.Siege.AgentPathNavMeshChecker;
 
 namespace BattleMiniMap.View.AgentMarkers
 {
@@ -13,6 +19,7 @@ namespace BattleMiniMap.View.AgentMarkers
     {
         private DrawObject2D _cachedMesh;
         private float _agentMarkerSize;
+        private bool _isLastDrawHero;
 
         public BattleMiniMap_AgentMarkerCollectionWidget(UIContext context) : base(context)
         {
@@ -37,38 +44,71 @@ namespace BattleMiniMap.View.AgentMarkers
             }
         }
 
+        private float GetAgentMarkerSize(ColorAndTexturePair type)
+        {
+            var config = BattleMiniMapConfig.Get();
+            var markerScale = type.TextureType == AgentMarkerTextureType.Hero ? 5f * HeroAgentTextureProvider.HeroTextureScale : config.AgentMarkerScale;
+            return Math.Max(SuggestedWidth * (config.FollowMode ? config.GetFollowModeScale() * 0.025f : 0.005f) * markerScale, 3);
+        }
+
         protected override void OnRender(TwoDimensionContext twoDimensionContext, TwoDimensionDrawContext drawContext)
         {
             base.OnRender(twoDimensionContext, drawContext);
 
             var uiScale = _scaleToUse;
-            var scaledMarkerSize = _agentMarkerSize * uiScale;
-            UpdateDrawObject2D(scaledMarkerSize, scaledMarkerSize);
-            var materials = new SimpleMaterial[(int)AgentMarkerType.Count];
+            
+            var materials = new Dictionary<ColorAndTexturePair, SimpleMaterial>();
             var globalPosition = Widgets.Utility.GetGlobalPosition(this);
 
             for (int i = 0; i < AgentMakers.CountOfAgentMarkers; ++i)
             {
                 var agentMaker = AgentMakers.AgentMarkers[i];
                 var type = agentMaker.AgentMarkerType;
-                twoDimensionContext.Draw(globalPosition.x + agentMaker.PositionInWidget.x * uiScale - scaledMarkerSize * 0.5f, globalPosition.y + agentMaker.PositionInWidget.y * uiScale - scaledMarkerSize * 0.5f, materials[(int)type] ??= CreateMaterial(drawContext, type), _cachedMesh, type.GetLayer());
+                if (!materials.TryGetValue(type, out var material))
+                {
+                    material = materials[type] = CreateMaterial(drawContext, type);
+                }
+                var scaledMarkerSize = GetAgentMarkerSize(type) * uiScale;
+                var x = globalPosition.x + agentMaker.PositionInWidget.x * uiScale - scaledMarkerSize * 0.5f;
+                var y = globalPosition.y + agentMaker.PositionInWidget.y * uiScale - scaledMarkerSize * 0.5f;
+                UpdateDrawObject2D(x, y, scaledMarkerSize, scaledMarkerSize, type.TextureType == AgentMarkerTextureType.Hero, agentMaker.Direction);
+                twoDimensionContext.Draw(x, y, material, _cachedMesh, type.GetLayer());
             }
         }
 
-        private SimpleMaterial CreateMaterial(TwoDimensionDrawContext drawContext, AgentMarkerType type)
+        private SimpleMaterial CreateMaterial(TwoDimensionDrawContext drawContext, ColorAndTexturePair type)
         {
-            var types = type.GetColorAndTextureType();
             var material = Widgets.Utility.CreateMaterial(drawContext, this);
-            material.Texture = types.TextureType.GetTexture();
-            material.Color *= types.ColorType.GetColor();
+            material.Texture = type.TextureType.GetTexture();
+            material.Color *= type.ColorType.GetColor();
             return material;
         }
 
-        private void UpdateDrawObject2D(float width, float height)
+        private void UpdateDrawObject2D(float x, float y, float width, float height, bool isHero, Vec2 agentDirection)
         {
-            if (_cachedMesh == null || Math.Abs(_cachedMesh.Width - width) > 0.01f && Math.Abs(_cachedMesh.Height - height) > 0.01f)
+            if (_cachedMesh == null || Math.Abs(_cachedMesh.Width - width) > 0.01f && Math.Abs(_cachedMesh.Height - height) > 0.01f || isHero || _isLastDrawHero)
             {
-                _cachedMesh = Widgets.Utility.CreateDrawObject2D(width, height);
+                if (isHero)
+                {
+                    var config = BattleMiniMapConfig.Get();
+                    float angle;
+                    if (config.FollowMode)
+                    {
+                        var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
+                        var cameraDirection = camera.Direction.AsVec2.Normalized();
+                        angle = -agentDirection.AngleBetween(cameraDirection);
+                    }
+                    else
+                    {
+                        angle = -agentDirection.LeftVec().AngleBetween(-Vec2.Forward);
+                    }
+
+                    _cachedMesh = Widgets.Utility.CreateDrawObject2D(width, height, new Vec2(0, 0), new Vec2(width / 2, height / 2), angle);
+                }
+                else
+                {
+                    _cachedMesh = Widgets.Utility.CreateDrawObject2D(width, height);
+                }
             }
         }
     }

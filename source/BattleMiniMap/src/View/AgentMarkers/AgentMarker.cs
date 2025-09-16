@@ -11,8 +11,9 @@ namespace BattleMiniMap.View.AgentMarkers
         private Vec3 _cachedAgentPosition;
 
         public Vec2 PositionInWidget { get; set; }
+        public Vec2 Direction { get; set; }
 
-        public AgentMarkerType AgentMarkerType { get; set; }
+        public ColorAndTexturePair AgentMarkerType { get; set; } = new ColorAndTexturePair(Colors.AgentMarkerColorType.Other, TextureProviders.AgentMarkerTextureType.OtherAnimal);
 
         public AgentMarker(Agent agent)
         {
@@ -27,7 +28,7 @@ namespace BattleMiniMap.View.AgentMarkers
 
         public void Update()
         {
-            if (AgentMarkerType == AgentMarkerType.Inactive)
+            if (AgentMarkerType.ColorType == Colors.AgentMarkerColorType.Inactive)
                 return;
 
             UpdateMarker();
@@ -61,8 +62,8 @@ namespace BattleMiniMap.View.AgentMarkers
 
         private void UpdateMarker()
         {
-            AgentMarkerType = _agent.GetAgentMarkerType();
-            if (AgentMarkerType == AgentMarkerType.Inactive)
+            AgentMarkerType = _agent.GetColorAndTextureType();
+            if (AgentMarkerType.ColorType == Colors.AgentMarkerColorType.Inactive)
             {
                 MakeDead();
                 return;
@@ -78,11 +79,16 @@ namespace BattleMiniMap.View.AgentMarkers
         private void UpdateRenderedPosition()
         {
             PositionInWidget = MiniMap.Instance.WorldToWidget(_cachedAgentPosition.AsVec2);
+            if (_agent != null && _agent.IsHero)
+            {
+                Direction = _agent.GetMovementDirection();
+            }
         }
 
         private void MakeDead()
         {
             PositionInWidget = MiniMap.Instance.WorldToWidget(_agent.Position.AsVec2);
+            Direction = _agent.GetMovementDirection();
             _agent = null;
         }
     }
