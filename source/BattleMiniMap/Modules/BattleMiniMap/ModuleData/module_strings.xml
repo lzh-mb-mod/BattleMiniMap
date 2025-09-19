@@ -18,7 +18,8 @@
   <string id="str_battle_mini_map_map_scale" text="{=BattleMiniMap_map_scale}Map Scale" />
   <string id="str_battle_mini_map_dynamic_map_scale" text="{=BattleMiniMap_dynamic_map_scale}Dynamic Map Scale" />
   <string id="str_battle_mini_map_dynamic_map_scale_hint" text="{=BattleMiniMap_dynamic_map_scale_hint}The map scale will change with character speed or camera height." />
-  <string id="str_battle_mini_map_agent_marker_scale" text="{=BattleMiniMap_agent_marker_scale}Agent Marker Scale" />
+  <string id="str_battle_mini_map_agent_marker_scale" text="{=BattleMiniMap_agent_marker_scale}Soldier Marker Scale" />
+  <string id="str_battle_mini_map_hero_marker_scale" text="{=BattleMiniMap_hero_marker_scale}Hero Marker Scale" />
   <string id="str_battle_mini_map_edge_opacity_factor" text="{=BattleMiniMap_edge_opacity_factor}Edge Opacity Factor" />
 
   <string id="str_battle_mini_map_background_opacity" text="{=BattleMiniMap_background_opacity}Background Opacity" />

@@ -5,7 +5,6 @@ using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap.View.AgentMarkers
 {
-
     public struct ColorAndTexturePair
     {
         public AgentMarkerColorType ColorType;

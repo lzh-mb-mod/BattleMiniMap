@@ -24,6 +24,7 @@
     <string id="BattleMiniMap_dynamic_map_scale" text="动态地图比例" />
     <string id="BattleMiniMap_dynamic_map_scale_hint" text="地图比例会随角色速度或相机高度而改变." />
     <string id="BattleMiniMap_agent_marker_scale" text="士兵标记缩放倍率" />
+    <string id="BattleMiniMap_hero_marker_scale" text="英雄标记缩放倍率" />
     <string id="BattleMiniMap_edge_opacity_factor" text="边缘不透明度" />
 
     <string id="BattleMiniMap_background_opacity" text="背景不透明度" />

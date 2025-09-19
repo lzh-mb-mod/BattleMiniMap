@@ -47,7 +47,7 @@ namespace BattleMiniMap.View.AgentMarkers
         private float GetAgentMarkerSize(ColorAndTexturePair type)
         {
             var config = BattleMiniMapConfig.Get();
-            var markerScale = type.TextureType == AgentMarkerTextureType.Hero ? 5f * HeroAgentTextureProvider.HeroTextureScale : config.AgentMarkerScale;
+            var markerScale = type.TextureType == AgentMarkerTextureType.Hero ? config.HeroMarkerScale * HeroAgentTextureProvider.HeroTextureScale : config.AgentMarkerScale;
             return Math.Max(SuggestedWidth * (config.FollowMode ? config.GetFollowModeScale() * 0.025f : 0.005f) * markerScale, 3);
         }
 
