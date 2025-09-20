@@ -16,7 +16,7 @@ namespace BattleMiniMap.View.AgentMarkers.Colors
                 case AgentMarkerColorType.Inactive:
                     return new Color(0.45f, 0.4f, 0.4f, 0.8f);
                 case AgentMarkerColorType.PlayerTeam:
-                    return new Color(0.19f, 0.30f, 0.75f);
+                    return new Color(0.19f, 0.4f, 0.75f);
                 case AgentMarkerColorType.PlayerTeamHighlight:
                     return new Color(0.10f, 0.25f, 1f);
                 case AgentMarkerColorType.PlayerTeamEscaping:
