@@ -115,7 +115,7 @@ namespace BattleMiniMap.View.MapTerrain
             SampleTerrainHeight(mission, bitmap, BitmapWidth, BitmapHeight);
 
             MapImage = bitmap;
-            MapTexture = MapImage.CreateTexture();
+            MapTexture = MapImage.CreateTexture(true);
         }
 
         public void UpdateEdgeOpacity()
@@ -134,7 +134,7 @@ namespace BattleMiniMap.View.MapTerrain
                                 color.G, color.B));
                 }
 
-            MapTexture = MapImage.CreateTexture();
+            MapTexture = MapImage.CreateTexture(true);
         }
 
         private void SampleTerrainHeight(Mission mission, Bitmap image, float mapWidth, float mapHeight)

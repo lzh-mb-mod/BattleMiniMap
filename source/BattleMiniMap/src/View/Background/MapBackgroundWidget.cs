@@ -1,6 +1,7 @@
 ﻿using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
-using System;
+using BattleMiniMap.Widgets;
+using System.Drawing;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.GauntletUI.BaseTypes;
 using TaleWorlds.Library;
@@ -18,13 +19,23 @@ namespace BattleMiniMap.View.Background
         protected override void OnRender(TwoDimensionContext twoDimensionContext, TwoDimensionDrawContext drawContext)
         {
             var config = BattleMiniMapConfig.Get();
-            if (!config.FollowMode || this.TextureProvider == null)
+            if (TextureProvider == null)
             {
                 base.OnRender(twoDimensionContext, drawContext);
             }
+            else if (!config.FollowMode)
+            {
+                var simpleMaterial = Widgets.Utility.CreateMaterial2(drawContext, this);
+                Texture = TextureProvider.GetTextureForRender(twoDimensionContext, useHashcodeAsName: true);
+                simpleMaterial.Texture = Texture;
+                var size = Widgets.Utility.GetSize(this);
+                var drawObject = Widgets.Utility.CreateDrawObject2D(this, 0, 0, size.x, size.y);
+                drawObject.Scale = _scaleToUse;
+                drawContext.Draw(simpleMaterial, in drawObject);
+            }
             else
             {
-                this.Texture = this.TextureProvider.GetTexture(twoDimensionContext, string.Empty);
+                Texture = TextureProvider.GetTextureForRender(twoDimensionContext, useHashcodeAsName: true);
                 var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized().LeftVec();
@@ -35,18 +46,25 @@ namespace BattleMiniMap.View.Background
                 var scaleFromNonFollowModeToFollowMode = percentageInMapPerMeterInWorld *
                                                          (MiniMap.Instance.MapBoundMax.y -
                                                           MiniMap.Instance.MapBoundMin.y);
-                var uiScale = _scaleToUse;
-                var midPoint = new Vec2(SuggestedWidth / 2, SuggestedHeight / 2);
                 var mapHeightWidthScale = (float)MiniMap.Instance.BitmapHeight / MathF.Max(MiniMap.Instance.BitmapWidth, 1);
-                var offset = (midPoint - MiniMap.Instance.MapToWidget(MiniMap.Instance.WorldToMapF(position)) * scaleFromNonFollowModeToFollowMode) * uiScale;
-                var mesh = Widgets.Utility.CreateDrawObject2D(scaleFromNonFollowModeToFollowMode * size.x, scaleFromNonFollowModeToFollowMode * size.x * mapHeightWidthScale, offset, midPoint * uiScale,
-                    direction.AngleBetween(-Vec2.Forward));
+                var offset = (new Vec2(SuggestedWidth / 2, SuggestedHeight / 2) - MiniMap.Instance.MapToWidget(MiniMap.Instance.WorldToMapF(position)) * scaleFromNonFollowModeToFollowMode) * _scaleToUse;
+                var width = scaleFromNonFollowModeToFollowMode * SuggestedWidth * _scaleToUse;
+                var height = scaleFromNonFollowModeToFollowMode * SuggestedWidth * _scaleToUse * mapHeightWidthScale;
+                var pivot = MiniMap.Instance.MapToWidget(MiniMap.Instance.WorldToMapF(position));
+                pivot = new Vec2(pivot.x / SuggestedWidth, pivot.y / (SuggestedWidth * mapHeightWidthScale));
+                var rotation = -direction.AngleBetween(-Vec2.Forward);
+                var mesh = Widgets.Utility.CreateDrawObject2D(this,
+                    offset,
+                    width, height,
+                    pivot,
+                    rotation);
+                mesh.Scale = _scaleToUse;
 
-                var globalPosition = Widgets.Utility.GetGlobalPosition(this);
-                var material = Widgets.Utility.CreateMaterial(drawContext, this);
-                material.Texture = this.Texture;
+                var material = Widgets.Utility.CreateMaterial2(drawContext, this);
+                material.Texture = Texture;
 
-                twoDimensionContext.Draw(globalPosition.X, globalPosition.Y, material, mesh);
+                mesh.Rectangle.CalculateVisualMatrixFrame();
+                twoDimensionContext.DrawImage(material, mesh);
             }
         }
     }

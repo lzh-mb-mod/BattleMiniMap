@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -7,9 +7,6 @@
 
   <Import Project="$(MSBuildProjectDirectory)\*.props" />
   <Import Project="..\library\mission-library\source\BasicSharedLibrary\BasicSharedLibrary.projitems" Label="Shared" />
-  <ItemGroup>
-    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
-  </ItemGroup>
   <ItemGroup>
     <Reference Include="SandBox">
       <HintPath>$(GamePath)Modules\SandBox\bin\Win64_Shipping_Client\SandBox.dll</HintPath>

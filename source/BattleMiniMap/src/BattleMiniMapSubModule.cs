@@ -41,13 +41,13 @@ namespace BattleMiniMap
         {
             base.OnBeforeInitialModuleScreenSetAsRoot();
 
-            if (!SecondInitialize())
+            if (!ThirdInitialize())
                 return;
         }
 
-        private bool SecondInitialize()
+        private bool ThirdInitialize()
         {
-            if (!Initializer.SecondInitialize())
+            if (!Initializer.ThirdInitialize())
                 return false;
 
             Global.GetInstance<AMissionStartingManager>().AddHandler(new MissionStartingHandler());

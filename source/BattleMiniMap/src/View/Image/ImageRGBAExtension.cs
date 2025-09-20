@@ -15,12 +15,17 @@ namespace BattleMiniMap.View.Image
                     TaleWorlds.Engine.Texture.CreateFromByteArray(image.Image, image.Width, image.Height)));
         }
 
-        public static Texture CreateTexture(this Bitmap image)
+        public static Texture CreateTexture(this Bitmap image, bool useHashAsName)
         {
             using var stream = new MemoryStream();
             image.Save(stream, ImageFormat.Bmp);
             var buffer = stream.GetBuffer();
-            return new Texture(new EngineTexture(TaleWorlds.Engine.Texture.CreateFromMemory(buffer)));
+            var platformTexture = new EngineTexture(TaleWorlds.Engine.Texture.CreateFromMemory(buffer));
+            if (useHashAsName)
+            {
+                platformTexture.Texture.Name = platformTexture.GetHashCode().ToString();
+            }
+            return new Texture(platformTexture);
         }
     }
 }

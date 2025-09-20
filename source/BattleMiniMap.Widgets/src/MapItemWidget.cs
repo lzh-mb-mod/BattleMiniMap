@@ -9,7 +9,7 @@ namespace BattleMiniMap.Widgets
 {
     public abstract class MapItemWidget : BrushWidget
     {
-        protected DrawObject2D CachedMesh;
+        protected ImageDrawObject CachedMesh;
 
         public abstract Texture Texture { get; }
 
@@ -47,7 +47,7 @@ namespace BattleMiniMap.Widgets
             simpleMaterial.SaturationFactor = styleLayer?.SaturationFactor ?? 0.0f;
             simpleMaterial.ValueFactor = styleLayer?.ValueFactor ?? 0.0f;
             simpleMaterial.Color = (styleLayer?.Color ?? Color.White) * Brush.GlobalColor;
-            if (CachedMesh == null || Math.Abs(CachedMesh.Width - Size.X) > 0.01f && Math.Abs(CachedMesh.Height - Size.Y) > 0.01f)
+            if (!CachedMesh.IsValid || Math.Abs(CachedMesh.Rectangle.LocalScale.X - Size.X) > 0.01f && Math.Abs(CachedMesh.Rectangle.LocalScale.Y - Size.Y) > 0.01f)
             {
                 UpdateDrawObject2D();
             }
@@ -58,18 +58,18 @@ namespace BattleMiniMap.Widgets
                 simpleMaterial.CircularMaskingRadius = drawContext.CircularMaskRadius;
                 simpleMaterial.CircularMaskingSmoothingRadius = drawContext.CircularMaskSmoothingRadius;
             }
-            //drawContext.Draw(GlobalPosition.X, GlobalPosition.Y, simpleMaterial, CachedMesh, Size.X, Size.Y);
-            twoDimensionContext.Draw(GlobalPosition.X, GlobalPosition.Y, simpleMaterial, CachedMesh, Layer);
+            twoDimensionContext.DrawImage(simpleMaterial, CachedMesh, Layer);
         }
 
         protected virtual void UpdateDrawObject2D()
         {
             CachedMesh = CreateDrawObject2D();
+            CachedMesh.Rectangle.CalculateVisualMatrixFrame();
         }
 
-        protected DrawObject2D CreateDrawObject2D()
+        protected ImageDrawObject CreateDrawObject2D()
         {
-            return Utility.CreateDrawObject2D(Size.X, Size.Y);
+            return Utility.CreateDrawObject2D(this, 0, 0, Size.X, Size.Y);
         }
     }
 }

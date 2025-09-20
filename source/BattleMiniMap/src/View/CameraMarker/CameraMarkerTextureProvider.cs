@@ -1,10 +1,6 @@
 ﻿using BattleMiniMap.View.Image;
 using System.Drawing;
 using System.Drawing.Imaging;
-using TaleWorlds.Engine;
-using TaleWorlds.Library;
-using TaleWorlds.MountAndBlade;
-using TaleWorlds.MountAndBlade.View.Screens;
 using Texture = TaleWorlds.TwoDimension.Texture;
 
 namespace BattleMiniMap.View.CameraMarker
@@ -28,7 +24,7 @@ namespace BattleMiniMap.View.CameraMarker
             var graphics = Graphics.FromImage(bitmap);
             var pen = new Pen(System.Drawing.Color.FromArgb(255, 30, 30, 30), 2);
             graphics.DrawLine(pen, new Point(0, 0), new Point(100, 100));
-            return bitmap.CreateTexture();
+            return bitmap.CreateTexture(true);
         }
     }
 }

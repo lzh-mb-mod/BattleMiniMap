@@ -43,7 +43,7 @@ namespace BattleMiniMap.View.Background.Boundary
             }
         }
 
-        public override Texture GetTexture(TwoDimensionContext twoDimensionContext, string name)
+        protected override Texture OnGetTextureForRender(TwoDimensionContext twoDimensionContext, string name)
         {
             return Texture ??= CreateTexture();
         }
@@ -88,7 +88,7 @@ namespace BattleMiniMap.View.Background.Boundary
                                       ? 1
                                       : BattleMiniMapConfig.Get().WidgetWidth);
             DrawBoundaries(Mission.Current, graphics, widthOfOnePixel);
-            return bitmap.CreateTexture();
+            return bitmap.CreateTexture(true);
         }
 
         private void DrawBoundaries(Mission mission, Graphics graphics, float widthOfOnePixel)

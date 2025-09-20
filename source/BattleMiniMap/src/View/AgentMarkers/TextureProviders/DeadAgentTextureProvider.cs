@@ -31,7 +31,7 @@ namespace BattleMiniMap.View.AgentMarkers.TextureProviders
 
         private Texture CreateTexture()
         {
-            return GetBitmap().CreateTexture();
+            return GetBitmap().CreateTexture(true);
         }
     }
 }

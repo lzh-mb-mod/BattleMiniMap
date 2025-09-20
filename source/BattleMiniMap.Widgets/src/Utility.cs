@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Numerics;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.GauntletUI.BaseTypes;
@@ -10,69 +9,54 @@ namespace BattleMiniMap.Widgets
 {
     public class Utility
     {
-        public static DrawObject2D CreateDrawObject2D(float width, float height)
+        public static ImageDrawObject CreateDrawObject2D(Widget widget, float x, float y, float width, float height)
         {
-            DrawObject2D polygonCoordinates = DrawObject2D.CreateTriangleTopologyMeshWithPolygonCoordinates(new List<Vector2>()
-            {
-                new Vector2(0.0f, 0.0f),
-                new Vector2(0.0f, height),
-                new Vector2(width, height),
-                new Vector2(width, 0.0f)
-            });
-            polygonCoordinates.DrawObjectType = DrawObjectType.Quad;
-            polygonCoordinates.TextureCoordinates[0] = 0.0f;
-            polygonCoordinates.TextureCoordinates[1] = 0.0f;
-            polygonCoordinates.TextureCoordinates[2] = 0.0f;
-            polygonCoordinates.TextureCoordinates[3] = 1f;
-            polygonCoordinates.TextureCoordinates[4] = 1f;
-            polygonCoordinates.TextureCoordinates[5] = 1f;
-            polygonCoordinates.TextureCoordinates[6] = 0.0f;
-            polygonCoordinates.TextureCoordinates[7] = 0.0f;
-            polygonCoordinates.TextureCoordinates[8] = 1f;
-            polygonCoordinates.TextureCoordinates[9] = 1f;
-            polygonCoordinates.TextureCoordinates[10] = 1f;
-            polygonCoordinates.TextureCoordinates[11] = 0.0f;
-            polygonCoordinates.Width = width;
-            polygonCoordinates.Height = height;
-            polygonCoordinates.MinU = 0.0f;
-            polygonCoordinates.MaxU = 1f;
-            polygonCoordinates.MinV = 0.0f;
-            polygonCoordinates.MaxV = 1f;
-            return polygonCoordinates;
+            var rect = widget.AreaRect;
+            rect.LocalPosition = new Vector2(widget.LocalPosition.X + x, widget.LocalPosition.Y + y);
+            rect.LocalScale = new Vector2(width, height);
+            rect.CalculateMatrixFrame(widget.ParentWidget == null ? widget.EventManager.AreaRectangle : widget.ParentWidget.AreaRect);
+            return ImageDrawObject.Create(rect, new Vec2(0, 0), new Vec2(1, 1));
         }
 
-        public static DrawObject2D CreateDrawObject2D(float width, float height, Vec2 offset, Vec2 actualRotateCenter, float rotateAngleInRadians)
+        public static ImageDrawObject CreateDrawObject2D(Widget widget, Vec2 offset, float width, float height, Vec2 actualRotateCenter, float rotateAngleInRadians)
         {
-            Vec2 topLeft = Rotate(new Vec2(0, 0) + offset, actualRotateCenter, rotateAngleInRadians);
-            Vec2 bottomLeft = Rotate(new Vec2(0, height) + offset, actualRotateCenter, rotateAngleInRadians);
-            Vec2 bottomRight = Rotate(new Vec2(width, height) + offset, actualRotateCenter, rotateAngleInRadians);
-            Vec2 topRight = Rotate(new Vec2(width, 0) + offset, actualRotateCenter, rotateAngleInRadians);
-            DrawObject2D polygonCoordinates = DrawObject2D.CreateTriangleTopologyMeshWithPolygonCoordinates(new List<Vector2>()
-            {
-                new Vector2(topLeft.x, topLeft.y),
-                new Vector2(bottomLeft.x, bottomLeft.y),
-                new Vector2(bottomRight.x, bottomRight.y),
-                new Vector2(topRight.x, topRight.y)
-            });
-            polygonCoordinates.TextureCoordinates[0] = 0.0f;
-            polygonCoordinates.TextureCoordinates[1] = 0.0f;
-            polygonCoordinates.TextureCoordinates[2] = 0.0f;
-            polygonCoordinates.TextureCoordinates[3] = 1f;
-            polygonCoordinates.TextureCoordinates[4] = 1f;
-            polygonCoordinates.TextureCoordinates[5] = 1f;
-            polygonCoordinates.TextureCoordinates[6] = 0.0f;
-            polygonCoordinates.TextureCoordinates[7] = 0.0f;
-            polygonCoordinates.TextureCoordinates[8] = 1f;
-            polygonCoordinates.TextureCoordinates[9] = 1f;
-            polygonCoordinates.TextureCoordinates[10] = 1f;
-            polygonCoordinates.TextureCoordinates[11] = 0.0f;
-            polygonCoordinates.Width = width;
-            polygonCoordinates.Height = height;
-            polygonCoordinates.MinU = 0.0f;
-            polygonCoordinates.MaxU = 1f;
-            polygonCoordinates.MinV = 0.0f;
-            polygonCoordinates.MaxV = 1f;
-            return polygonCoordinates;
+            var rectangle = widget.AreaRect;
+            rectangle.LocalPosition = new Vector2(widget.LocalPosition.X + offset.x, widget.LocalPosition.Y + offset.y);
+            rectangle.LocalScale = new Vector2(width, height);
+            rectangle.LocalPivot = new Vector2(actualRotateCenter.x, actualRotateCenter.y);
+            rectangle.LocalRotation = rotateAngleInRadians * 180 / Mathf.PI;
+            rectangle.CalculateMatrixFrame(widget.ParentWidget == null ? widget.EventManager.AreaRectangle : widget.ParentWidget.AreaRect);
+            return ImageDrawObject.Create(in rectangle, new Vec2(0, 0), new Vec2(1, 1));
+            //Vec2 topLeft = Rotate(new Vec2(0, 0) + offset, actualRotateCenter, rotateAngleInRadians);
+            //Vec2 bottomLeft = Rotate(new Vec2(0, height) + offset, actualRotateCenter, rotateAngleInRadians);
+            //Vec2 bottomRight = Rotate(new Vec2(width, height) + offset, actualRotateCenter, rotateAngleInRadians);
+            //Vec2 topRight = Rotate(new Vec2(width, 0) + offset, actualRotateCenter, rotateAngleInRadians);
+            //ImageDrawObject polygonCoordinates = ImageDrawObject.CreateTriangleTopologyMeshWithPolygonCoordinates(new List<Vector2>()
+            //{
+            //    new Vector2(topLeft.x, topLeft.y),
+            //    new Vector2(bottomLeft.x, bottomLeft.y),
+            //    new Vector2(bottomRight.x, bottomRight.y),
+            //    new Vector2(topRight.x, topRight.y)
+            //});
+            //polygonCoordinates.TextureCoordinates[0] = 0.0f;
+            //polygonCoordinates.TextureCoordinates[1] = 0.0f;
+            //polygonCoordinates.TextureCoordinates[2] = 0.0f;
+            //polygonCoordinates.TextureCoordinates[3] = 1f;
+            //polygonCoordinates.TextureCoordinates[4] = 1f;
+            //polygonCoordinates.TextureCoordinates[5] = 1f;
+            //polygonCoordinates.TextureCoordinates[6] = 0.0f;
+            //polygonCoordinates.TextureCoordinates[7] = 0.0f;
+            //polygonCoordinates.TextureCoordinates[8] = 1f;
+            //polygonCoordinates.TextureCoordinates[9] = 1f;
+            //polygonCoordinates.TextureCoordinates[10] = 1f;
+            //polygonCoordinates.TextureCoordinates[11] = 0.0f;
+            //polygonCoordinates.Width = width;
+            //polygonCoordinates.Height = height;
+            //polygonCoordinates.MinU = 0.0f;
+            //polygonCoordinates.MaxU = 1f;
+            //polygonCoordinates.MinV = 0.0f;
+            //polygonCoordinates.MaxV = 1f;
+            //return polygonCoordinates;
         }
         private static Vec2 Rotate(Vec2 pos, Vec2 actualRotateCenter, float rotateAngleInRadians)
         {
@@ -97,6 +81,7 @@ namespace BattleMiniMap.Widgets
             }
             simpleMaterial.OverlayEnabled = false;
             simpleMaterial.CircularMaskingEnabled = false;
+            simpleMaterial.NinePatchParameters = SpriteNinePatchParameters.Empty;
             simpleMaterial.AlphaFactor = (styleLayer?.AlphaFactor ?? 1f) * widget.Brush.GlobalAlphaFactor * widget.Context.ContextAlpha;
             simpleMaterial.ColorFactor = (styleLayer?.ColorFactor ?? 1f) * widget.Brush.GlobalColorFactor;
             simpleMaterial.HueFactor = styleLayer?.HueFactor ?? 0.0f;
@@ -113,9 +98,50 @@ namespace BattleMiniMap.Widgets
             return simpleMaterial;
         }
 
+        public static SimpleMaterial CreateMaterial2(TwoDimensionDrawContext drawContext, BrushWidget widget)
+        {
+            SimpleMaterial simpleMaterial = drawContext.CreateSimpleMaterial();
+            StyleLayer[] layers = widget.ReadOnlyBrush.GetStyleOrDefault(widget.CurrentState).GetLayers();
+            simpleMaterial.OverlayEnabled = false;
+            simpleMaterial.CircularMaskingEnabled = false;
+            simpleMaterial.NinePatchParameters = SpriteNinePatchParameters.Empty;
+            if (layers != null && layers.Length != 0)
+            {
+                StyleLayer styleLayer = layers[0];
+                simpleMaterial.AlphaFactor = styleLayer.AlphaFactor * widget.ReadOnlyBrush.GlobalAlphaFactor * widget.Context.ContextAlpha;
+                simpleMaterial.ColorFactor = styleLayer.ColorFactor * widget.ReadOnlyBrush.GlobalColorFactor;
+                simpleMaterial.HueFactor = styleLayer.HueFactor;
+                simpleMaterial.SaturationFactor = styleLayer.SaturationFactor;
+                simpleMaterial.ValueFactor = styleLayer.ValueFactor;
+                simpleMaterial.Color = styleLayer.Color * widget.ReadOnlyBrush.GlobalColor;
+            }
+            else
+            {
+                simpleMaterial.AlphaFactor = widget.ReadOnlyBrush.GlobalAlphaFactor * widget.Context.ContextAlpha;
+                simpleMaterial.ColorFactor = widget.ReadOnlyBrush.GlobalColorFactor;
+                simpleMaterial.HueFactor = 0f;
+                simpleMaterial.SaturationFactor = 0f;
+                simpleMaterial.ValueFactor = 0f;
+                simpleMaterial.Color = Color.White * widget.ReadOnlyBrush.GlobalColor;
+            }
+            if (drawContext.CircularMaskEnabled)
+            {
+                simpleMaterial.CircularMaskingEnabled = true;
+                simpleMaterial.CircularMaskingCenter = drawContext.CircularMaskCenter;
+                simpleMaterial.CircularMaskingRadius = drawContext.CircularMaskRadius;
+                simpleMaterial.CircularMaskingSmoothingRadius = drawContext.CircularMaskSmoothingRadius;
+            }
+            return simpleMaterial;
+        }
+
         public static Vec2 GetGlobalPosition(Widget widget)
         {
             return new Vec2(widget.GlobalPosition.X, widget.GlobalPosition.Y);
+        }
+
+        public static Vec2 GetLocalPosition(Widget widget)
+        {
+            return new Vec2(widget.LocalPosition.X, widget.LocalPosition.Y);
         }
 
         public static Vec2 GetSize(Widget widget)

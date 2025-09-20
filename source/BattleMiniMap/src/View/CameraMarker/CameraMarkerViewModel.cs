@@ -99,7 +99,7 @@ namespace BattleMiniMap.View.CameraMarker
             Vec2 endPositionInWidget = MiniMap.Instance.WorldToWidget(end.AsVec2);
             BasePosition = cameraPosInWidget;
             RotateCenter = Vec2.Zero;
-            RotateAngleInRadians = (endPositionInWidget - cameraPosInWidget).AngleBetween(new Vec2(1, 1));
+            RotateAngleInRadians = -(endPositionInWidget - cameraPosInWidget).AngleBetween(new Vec2(1, 1));
         }
     }
 }

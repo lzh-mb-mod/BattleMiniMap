@@ -49,7 +49,7 @@ namespace BattleMiniMap.View.AgentMarkers.TextureProviders
 
         private Texture CreateTexture()
         {
-            return GetBitmap().CreateTexture();
+            return GetBitmap().CreateTexture(true);
         }
 
         private void Fill(Graphics graphics, Brush brush)

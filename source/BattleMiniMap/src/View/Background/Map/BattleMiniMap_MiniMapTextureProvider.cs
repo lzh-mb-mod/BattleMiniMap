@@ -8,7 +8,7 @@ namespace BattleMiniMap.View.Background.Map
     public class BattleMiniMap_MiniMapTextureProvider : TextureProvider
     {
 
-        public override Texture GetTexture(TwoDimensionContext twoDimensionContext, string name)
+        protected override Texture OnGetTextureForRender(TwoDimensionContext twoDimensionContext, string name)
         {
             //return SimpleMiniMap.Instance?.MapTexture ?? new ImageRGBA(100, 100).CreateTexture();
             return MiniMap.Instance?.MapTexture ?? new ImageRGBA(100, 100).CreateTexture();
