@@ -1,7 +1,7 @@
 <Tasks>
   <CreateItem/>
   <UpdateItem>
-    <ModuleFolder Value="C:\game\develop\BattleMiniMap\source\package\BattleMiniMap"/>
+    <ModuleFolder Value="D:\develop\src\BattleMiniMap\source\package\BattleMiniMap"/>
     <!--  A direct path of your module  -->
     <ItemDescription Value="English below.
 可配置的战场小地图。
@@ -42,11 +42,9 @@ Nexusmods: https://www.nexusmods.com/mountandblade2bannerlord/mods/2672"/>
       <Tag Value="UI"/>
       <Tag Value="Singleplayer"/>
       <!-- <Tag Value="Multiplayer"/> -->
-      <Tag Value="e1.8.1"/>
-      <Tag Value="e1.9.0"/>
-      <Tag Value="v1.0.0"/>
+      <Tag Value="v1.3.0"/>
     </Tags>
-    <Image Value="C:\game\develop\BattleMiniMap\BattleMiniMap.png"/>
+    <Image Value="D:\develop\src\BattleMiniMap\BattleMiniMap.png"/>
     <!--  Determines the featured image displayed on Steam Workshop, a direct path to it must be inserted here (the image should be smaller than 1 MB)  -->
     <Visibility Value="FriendsOnly"/>
     <!--  Determines visibility on Steam Workshop. Can be: Public, FriendsOnly, Private  -->
