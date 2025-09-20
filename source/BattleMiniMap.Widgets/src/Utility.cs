@@ -27,42 +27,6 @@ namespace BattleMiniMap.Widgets
             rectangle.LocalRotation = rotateAngleInRadians * 180 / Mathf.PI;
             rectangle.CalculateMatrixFrame(widget.ParentWidget == null ? widget.EventManager.AreaRectangle : widget.ParentWidget.AreaRect);
             return ImageDrawObject.Create(in rectangle, new Vec2(0, 0), new Vec2(1, 1));
-            //Vec2 topLeft = Rotate(new Vec2(0, 0) + offset, actualRotateCenter, rotateAngleInRadians);
-            //Vec2 bottomLeft = Rotate(new Vec2(0, height) + offset, actualRotateCenter, rotateAngleInRadians);
-            //Vec2 bottomRight = Rotate(new Vec2(width, height) + offset, actualRotateCenter, rotateAngleInRadians);
-            //Vec2 topRight = Rotate(new Vec2(width, 0) + offset, actualRotateCenter, rotateAngleInRadians);
-            //ImageDrawObject polygonCoordinates = ImageDrawObject.CreateTriangleTopologyMeshWithPolygonCoordinates(new List<Vector2>()
-            //{
-            //    new Vector2(topLeft.x, topLeft.y),
-            //    new Vector2(bottomLeft.x, bottomLeft.y),
-            //    new Vector2(bottomRight.x, bottomRight.y),
-            //    new Vector2(topRight.x, topRight.y)
-            //});
-            //polygonCoordinates.TextureCoordinates[0] = 0.0f;
-            //polygonCoordinates.TextureCoordinates[1] = 0.0f;
-            //polygonCoordinates.TextureCoordinates[2] = 0.0f;
-            //polygonCoordinates.TextureCoordinates[3] = 1f;
-            //polygonCoordinates.TextureCoordinates[4] = 1f;
-            //polygonCoordinates.TextureCoordinates[5] = 1f;
-            //polygonCoordinates.TextureCoordinates[6] = 0.0f;
-            //polygonCoordinates.TextureCoordinates[7] = 0.0f;
-            //polygonCoordinates.TextureCoordinates[8] = 1f;
-            //polygonCoordinates.TextureCoordinates[9] = 1f;
-            //polygonCoordinates.TextureCoordinates[10] = 1f;
-            //polygonCoordinates.TextureCoordinates[11] = 0.0f;
-            //polygonCoordinates.Width = width;
-            //polygonCoordinates.Height = height;
-            //polygonCoordinates.MinU = 0.0f;
-            //polygonCoordinates.MaxU = 1f;
-            //polygonCoordinates.MinV = 0.0f;
-            //polygonCoordinates.MaxV = 1f;
-            //return polygonCoordinates;
-        }
-        private static Vec2 Rotate(Vec2 pos, Vec2 actualRotateCenter, float rotateAngleInRadians)
-        {
-            var vec = pos - actualRotateCenter;
-            vec.RotateCCW(-rotateAngleInRadians);
-            return vec + actualRotateCenter;
         }
 
         public static SimpleMaterial CreateMaterial(TwoDimensionDrawContext drawContext, BrushWidget widget)
