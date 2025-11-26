@@ -38,9 +38,6 @@
     <Reference Include="TaleWorlds.Diamond">
       <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.Diamond.dll</HintPath>
     </Reference>
-    <Reference Include="TaleWorlds.Diamond.AccessProvider.Epic">
-      <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.Diamond.AccessProvider.Epic.dll</HintPath>
-    </Reference>
     <Reference Include="TaleWorlds.Diamond.AccessProvider.Steam">
       <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.Diamond.AccessProvider.Steam.dll</HintPath>
     </Reference>
@@ -73,9 +70,6 @@
     </Reference>
     <Reference Include="TaleWorlds.GauntletUI.PrefabSystem">
       <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.PrefabSystem.dll</HintPath>
-    </Reference>
-    <Reference Include="TaleWorlds.GauntletUI.TooltipExtensions">
-      <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.GauntletUI.TooltipExtensions.dll</HintPath>
     </Reference>
     <Reference Include="TaleWorlds.InputSystem">
       <HintPath>$(GamePath)bin\Win64_Shipping_Client\TaleWorlds.InputSystem.dll</HintPath>

@@ -34,8 +34,9 @@ namespace BattleMiniMap.View.Background.Map
         {
             base.OnMissionScreenInitialize();
 
-            _layer = new GauntletLayer(12);
-            _layer.LoadMovie(nameof(BattleMiniMapView), _dataSource);
+            var movieName = nameof(BattleMiniMapView);
+            _layer = new GauntletLayer(movieName, 12);
+            _layer.LoadMovie(movieName, _dataSource);
             _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.Mouse);
             MissionScreen.AddLayer(_layer);
             _timer = new MissionTimer(0.05f);
@@ -110,8 +111,19 @@ namespace BattleMiniMap.View.Background.Map
                 }
             }
 
+            if (float.IsNaN(BattleMiniMapConfig.DynamicScale))
+            {
+                BattleMiniMapConfig.DynamicScale = 1f;
+            }
             BattleMiniMapConfig.DynamicScale = MathF.Lerp(_targetDynamicScale, BattleMiniMapConfig.DynamicScale,
                 instantly ? 0 : MathF.Pow(0.4f, dt));
+
+            if (float.IsNaN(BattleMiniMapConfig.DynamicNarvalScale))
+            {
+                BattleMiniMapConfig.DynamicNarvalScale = 1f;
+            }
+            BattleMiniMapConfig.DynamicNarvalScale = MathF.Lerp(1 / BattleMiniMapConfig.Get().GetNavalScaleReduction(), BattleMiniMapConfig.DynamicNarvalScale,
+                instantly ? 0 : MathF.Pow(0.05f, dt));
         }
 
         public override void OnAgentBuild(Agent agent, Banner banner)

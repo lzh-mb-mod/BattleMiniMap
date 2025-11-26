@@ -86,19 +86,23 @@ namespace BattleMiniMap.View.MapTerrain
             if (!IsValid)
                 return;
 
-            Resolution = BattleMiniMapConfig.Get().Resolution;
-            if (Resolution == 0)
-                Resolution = 1;
-            var mapWidth = (int)Math.Abs((MapBoundMax.y - MapBoundMin.y) / Resolution) + 1;
-            var mapHeight = (int)Math.Abs((MapBoundMax.x - MapBoundMin.x) / Resolution) + 1;
+            var newResolution = BattleMiniMapConfig.Get().Resolution;
+            if (newResolution == 0)
+                newResolution = 1;
+            var originalMapWidth = (int)Math.Abs(MapBoundMax.y - MapBoundMin.y) + 1;
+            var originalMapHeight = (int)Math.Abs(MapBoundMax.x - MapBoundMin.x) + 1;
+            newResolution = Math.Max(newResolution, Math.Max(originalMapWidth / 1000f, originalMapHeight / 1000f));
+            var mapWidth = (int)Math.Abs((MapBoundMax.y - MapBoundMin.y) / newResolution) + 1;
+            var mapHeight = (int)Math.Abs((MapBoundMax.x - MapBoundMin.x) / newResolution) + 1;
             bool changed = BitmapWidth != mapWidth || BitmapHeight != mapHeight;
 
             BitmapWidth = mapWidth;
             BitmapHeight = mapHeight;
+            Resolution = newResolution;
             if (changed)
                 OnTextureSizeChanged?.Invoke();
 
-            if (updateMap)
+            if (changed && updateMap)
                 UpdateMapImage(mission);
         }
 

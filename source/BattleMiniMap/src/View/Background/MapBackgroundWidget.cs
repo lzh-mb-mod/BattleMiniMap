@@ -26,7 +26,7 @@ namespace BattleMiniMap.View.Background
             else if (!config.FollowMode)
             {
                 var simpleMaterial = Widgets.Utility.CreateMaterial2(drawContext, this);
-                Texture = TextureProvider.GetTextureForRender(twoDimensionContext, useHashcodeAsName: true);
+                Texture = TextureProvider.GetTextureForRender(twoDimensionContext);
                 simpleMaterial.Texture = Texture;
                 var size = Widgets.Utility.GetSize(this);
                 var drawObject = Widgets.Utility.CreateDrawObject2D(this, 0, 0, size.x, size.y);
@@ -35,7 +35,7 @@ namespace BattleMiniMap.View.Background
             }
             else
             {
-                Texture = TextureProvider.GetTextureForRender(twoDimensionContext, useHashcodeAsName: true);
+                Texture = TextureProvider.GetTextureForRender(twoDimensionContext);
                 var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized().LeftVec();

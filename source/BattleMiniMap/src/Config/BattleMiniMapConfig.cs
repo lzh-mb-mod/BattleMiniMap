@@ -5,6 +5,7 @@ using System.IO;
 using TaleWorlds.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.TwoDimension;
 
 namespace BattleMiniMap.Config
 {
@@ -18,6 +19,8 @@ namespace BattleMiniMap.Config
         public static float DynamicScale = 1;
 
         public static float DynamicOpacityExponent = 1;
+
+        public static float DynamicNarvalScale = 1;
 
         protected static Version BinaryVersion => new Version(1, 1);
         public string ConfigVersion { get; set; } = BinaryVersion.ToString();
@@ -34,6 +37,8 @@ namespace BattleMiniMap.Config
         public float FollowModeScale { get; set; } = 0.5f;
 
         public bool EnableDynamicScale { get; set; } = true;
+
+        public float NarvalScaleReduction { get; set; } = 1f;
 
         public HorizontalAlignment HorizontalAlignment { get; set; } = HorizontalAlignment.Left;
 
@@ -68,7 +73,16 @@ namespace BattleMiniMap.Config
 
         public float GetFollowModeScale()
         {
-            return MathF.Clamp(FollowModeScale * DynamicScale, 0.1f, 3f);
+            return MathF.Clamp(FollowModeScale * DynamicScale, 0.1f, 2f) * DynamicNarvalScale;
+        }
+
+        public float GetNavalScaleReduction()
+        {
+            if (Mission.Current?.IsNavalBattle ?? false)
+            {
+                return MathF.Clamp(NarvalScaleReduction, 0.5f, 5f) * MathF.Max(1f, MathF.Log(MathF.Max(1f, Mission.Current.CustomCameraFixedDistance)) * 2);
+            }
+            return 1f;
         }
 
         protected override string SaveName { get; } = Path.Combine(ConfigPath.ConfigDir,

@@ -36,7 +36,7 @@ namespace BattleMiniMap.Config
                 optionCategory.AddOption(new SelectionOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_horizontal_alignment"), null, new SelectionOptionData(
                         i => BattleMiniMapConfig.Get().HorizontalAlignment = (HorizontalAlignment) i,
-                        () => (int) BattleMiniMapConfig.Get().HorizontalAlignment, 3, new SelectionItem[]
+                        () => (int) BattleMiniMapConfig.Get().HorizontalAlignment, () => 3, () => new SelectionItem[]
                         {
                             new SelectionItem(true, "str_battle_min_map_left"),
                             new SelectionItem(true, "str_battle_min_map_center"),
@@ -45,7 +45,7 @@ namespace BattleMiniMap.Config
                 optionCategory.AddOption(new SelectionOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_vertical_alignment"), null, new SelectionOptionData(
                         i => BattleMiniMapConfig.Get().VerticalAlignment = (VerticalAlignment) i,
-                        () => (int) BattleMiniMapConfig.Get().VerticalAlignment, 3, new SelectionItem[]
+                        () => (int) BattleMiniMapConfig.Get().VerticalAlignment, () => 3, () => new SelectionItem[]
                         {
                             new SelectionItem(true, "str_battle_min_map_top"),
                             new SelectionItem(true, "str_battle_min_map_center"),
@@ -66,12 +66,17 @@ namespace BattleMiniMap.Config
                 optionCategory.AddOption(new NumericOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_map_scale"), null,
                     () => BattleMiniMapConfig.Get().FollowModeScale,
-                    f => BattleMiniMapConfig.Get().FollowModeScale = f, 0.1f, 3, false, true));
+                    f => BattleMiniMapConfig.Get().FollowModeScale = f, 0.1f, 2f, false, true));
                 optionCategory.AddOption(new BoolOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_dynamic_map_scale"),
                     GameTexts.FindText("str_battle_mini_map_dynamic_map_scale_hint"),
                     () => BattleMiniMapConfig.Get().EnableDynamicScale,
                     b => BattleMiniMapConfig.Get().EnableDynamicScale = b));
+                optionCategory.AddOption(new NumericOptionViewModel(
+                    GameTexts.FindText("str_battle_mini_map_naval_scale_reduction"),
+                    GameTexts.FindText("str_battle_mini_map_naval_scale_reduction_hint"),
+                    () => BattleMiniMapConfig.Get().NarvalScaleReduction,
+                    f => BattleMiniMapConfig.Get().NarvalScaleReduction = f, 0.5f, 5f, false, true));
                 optionCategory.AddOption(new NumericOptionViewModel(
                     GameTexts.FindText("str_battle_mini_map_agent_marker_scale"), null,
                     () => BattleMiniMapConfig.Get().AgentMarkerScale,

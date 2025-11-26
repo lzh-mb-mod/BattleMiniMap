@@ -33,7 +33,7 @@ namespace BattleMiniMap.View.Interaction
 
             float num = EventManager.DeltaMouseScroll * 0.001f;
             if (BattleMiniMapConfig.Get().FollowMode)
-                BattleMiniMapConfig.Get().FollowModeScale = MathF.Clamp(BattleMiniMapConfig.Get().FollowModeScale * (1 + num), 0.1f, 3f);
+                BattleMiniMapConfig.Get().FollowModeScale = MathF.Clamp(BattleMiniMapConfig.Get().FollowModeScale * (1 + num), 0.1f, 2f);
         }
 
         private void OnEventFire(Widget widget, string eventName, object[] args)
