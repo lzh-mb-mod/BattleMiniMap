@@ -61,6 +61,8 @@ namespace BattleMiniMap.Config
 
         public bool ExcludeUnwalkableTerrain { get; set; } = false;
 
+        public bool IsMapOptionVisible { get; set; } = true;
+
         public float GetBackgroundOpacity()
         {
             return MathF.Clamp(MathF.Pow(BackgroundOpacity, DynamicOpacityExponent), 0f, 1f);
@@ -109,6 +111,7 @@ namespace BattleMiniMap.Config
             BackgroundOpacity = other.BackgroundOpacity;
             ForegroundOpacity = other.ForegroundOpacity;
             ExcludeUnwalkableTerrain = other.ExcludeUnwalkableTerrain;
+            IsMapOptionVisible = other.IsMapOptionVisible;
         }
 
         protected override void UpgradeToCurrentVersion()

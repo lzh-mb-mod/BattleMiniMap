@@ -6,8 +6,10 @@ using MissionLibrary;
 using MissionLibrary.Controller;
 using MissionLibrary.View;
 using MissionSharedLibrary;
+using System;
 using TaleWorlds.Core;
-using TaleWorlds.ModuleManager;
+using TaleWorlds.Engine;
+using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
 namespace BattleMiniMap
@@ -20,7 +22,6 @@ namespace BattleMiniMap
         {
             base.OnSubModuleLoad();
 
-            Module.CurrentModule.GlobalTextManager.LoadGameTexts();
             Initialize();
         }
 
@@ -43,6 +44,16 @@ namespace BattleMiniMap
 
             if (!ThirdInitialize())
                 return;
+
+            try
+            {
+                Module.CurrentModule.GlobalTextManager.LoadGameTexts();
+            }
+            catch (Exception e)
+            {
+                MBDebug.ConsolePrint(e.ToString());
+                InformationManager.DisplayMessage(new InformationMessage($"BattleMiniMap: failed to load game texts: {e}"));
+            }
         }
 
         private bool ThirdInitialize()

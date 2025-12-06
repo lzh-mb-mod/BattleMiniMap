@@ -18,7 +18,8 @@ namespace BattleMiniMap.Config
                 var optionClass = new OptionClass(BattleMiniMapSubModule.ModuleId,
                     GameTexts.FindText("str_battle_mini_map_option_class"), menuClassCollection);
 
-                var optionCategory = new OptionCategory("Map", GameTexts.FindText("str_battle_mini_map_map_options"));
+                var optionCategory = new OptionCategory("Map", GameTexts.FindText("str_battle_mini_map_map_options"),
+                    () => BattleMiniMapConfig.Get().IsMapOptionVisible, b => BattleMiniMapConfig.Get().IsMapOptionVisible = b);
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_show_map"),
                     null, () => BattleMiniMapConfig.Get().ShowMap, b => BattleMiniMapConfig.Get().ShowMap = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_enable_toggle_map_long_press_key"),

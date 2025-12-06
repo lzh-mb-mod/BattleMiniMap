@@ -1,5 +1,20 @@
 # Changelog
 
+## [v3.1.3] - 2025-12-06
+### Fixed
+- Fix crash on startup when failing to loading game texts. This may happen when other mods have broken text files.
+
+### Added
+- Support keeping options hidden in mod menu.
+
+## [v3.1.2] - 2025-11-26
+### Fixed
+- Keep compatible with Bannerlord v1.3.4 and War Sail DLC.
+
+## [v3.0.0] - 2025-09-20
+### Added
+- Highlight hero in map.
+
 ## [v2.0.4] 2025-09-07
 ### Fixed
 - Fix the issue that hotkey config is reset on second startup.
