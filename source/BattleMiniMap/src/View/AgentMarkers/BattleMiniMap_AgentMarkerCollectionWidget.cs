@@ -15,14 +15,13 @@ namespace BattleMiniMap.View.AgentMarkers
 {
     public class BattleMiniMap_AgentMarkerCollectionWidget : BrushWidget
     {
-
         public BattleMiniMap_AgentMarkerCollectionWidget(UIContext context) : base(context)
         {
             WidthSizePolicy = HeightSizePolicy = SizePolicy.Fixed;
         }
 
-        public AgentMarkerCollection AgentMakers { get; set; }
-
+        public AgentMarkerCollection NonHeroAgentMarkers { get; set; }
+        public AgentMarkerCollection HeroAgentMarkers { get; set; }
 
         protected override void OnUpdate(float dt)
         {
@@ -50,21 +49,37 @@ namespace BattleMiniMap.View.AgentMarkers
             base.OnRender(twoDimensionContext, drawContext);
 
             var uiScale = _scaleToUse;
-            
             var materials = new Dictionary<ColorAndTexturePair, SimpleMaterial>();
 
-            for (int i = 0; i < AgentMakers.CountOfAgentMarkers; ++i)
+            for (int i = 0; i < NonHeroAgentMarkers.CountOfAgentMarkers; ++i)
             {
-                var agentMaker = AgentMakers.AgentMarkers[i];
+                var agentMaker = NonHeroAgentMarkers.AgentMarkers[i];
                 var type = agentMaker.AgentMarkerType;
                 if (!materials.TryGetValue(type, out var material))
                 {
                     material = materials[type] = CreateMaterial(drawContext, type);
                 }
+                material.Texture = type.TextureType.GetTexture();
                 var scaledMarkerSize = GetAgentMarkerSize(type) * uiScale;
                 var x = agentMaker.PositionInWidget.x * uiScale - scaledMarkerSize * 0.5f;
                 var y = agentMaker.PositionInWidget.y * uiScale - scaledMarkerSize * 0.5f;
-                var mesh = GetDrawObject2D(x, y, scaledMarkerSize, scaledMarkerSize, type.TextureType == AgentMarkerTextureType.Hero, agentMaker.Direction);
+                var mesh = GetNonHeroDrawObject2D(x, y, scaledMarkerSize, scaledMarkerSize, agentMaker.Direction);
+                mesh.Rectangle.CalculateVisualMatrixFrame();
+                twoDimensionContext.DrawImage(material, mesh, type.GetLayer());
+            }
+            for (int i = 0; i < HeroAgentMarkers.CountOfAgentMarkers; ++i)
+            {
+                var agentMaker = HeroAgentMarkers.AgentMarkers[i];
+                var type = agentMaker.AgentMarkerType;
+                if (!materials.TryGetValue(type, out var material))
+                {
+                    material = materials[type] = CreateMaterial(drawContext, type);
+                }
+                material.Texture = type.TextureType.GetTexture();
+                var scaledMarkerSize = GetAgentMarkerSize(type) * uiScale;
+                var x = agentMaker.PositionInWidget.x * uiScale - scaledMarkerSize * 0.5f;
+                var y = agentMaker.PositionInWidget.y * uiScale - scaledMarkerSize * 0.5f;
+                var mesh = GetHeroDrawObject2D(x, y, scaledMarkerSize, scaledMarkerSize, agentMaker.Direction);
                 mesh.Rectangle.CalculateVisualMatrixFrame();
                 twoDimensionContext.DrawImage(material, mesh, type.GetLayer());
             }
@@ -78,29 +93,27 @@ namespace BattleMiniMap.View.AgentMarkers
             return material;
         }
 
-        private ImageDrawObject GetDrawObject2D(float x, float y, float width, float height, bool isHero, Vec2 agentDirection)
+        private ImageDrawObject GetNonHeroDrawObject2D(float x, float y, float width, float height, Vec2 agentDirection)
         {
-            if (isHero)
-            {
-                var config = BattleMiniMapConfig.Get();
-                float angle;
-                if (config.FollowMode)
-                {
-                    var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
-                    var cameraDirection = camera.Direction.AsVec2.Normalized();
-                    angle = agentDirection.AngleBetween(cameraDirection);
-                }
-                else
-                {
-                    angle = agentDirection.LeftVec().AngleBetween(-Vec2.Forward);
-                }
+            return Widgets.Utility.CreateDrawObject2D(this, x, y, width, height);
+        }
 
-                return Widgets.Utility.CreateDrawObject2D(this, new Vec2(x, y), width, height, new Vec2(0.5f, 0.5f), angle);
+        private ImageDrawObject GetHeroDrawObject2D(float x, float y, float width, float height, Vec2 agentDirection)
+        {
+            var config = BattleMiniMapConfig.Get();
+            float angle;
+            if (config.FollowMode)
+            {
+                var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
+                var cameraDirection = camera.Direction.AsVec2.Normalized();
+                angle = agentDirection.AngleBetween(cameraDirection);
             }
             else
             {
-                return Widgets.Utility.CreateDrawObject2D(this, x, y, width, height);
+                angle = agentDirection.LeftVec().AngleBetween(-Vec2.Forward);
             }
+
+            return Widgets.Utility.CreateDrawObject2D(this, new Vec2(x, y), width, height, new Vec2(0.5f, 0.5f), angle);
         }
     }
 }

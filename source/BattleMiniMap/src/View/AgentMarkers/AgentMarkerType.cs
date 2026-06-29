@@ -15,6 +15,20 @@ namespace BattleMiniMap.View.AgentMarkers
             ColorType = colorType;
             TextureType = textureType;
         }
+
+        public override int GetHashCode()
+        {
+            return (int)ColorType * 10 + (int)TextureType;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is ColorAndTexturePair other)
+            {
+                return ColorType == other.ColorType && TextureType == other.TextureType;
+            }
+            return false;
+        }
     }
 
     public static class AgentMarkerTypeExtension

@@ -31,7 +31,7 @@ namespace BattleMiniMap.View.AgentMarkers.TextureProviders
 
         private Texture CreateTexture()
         {
-            return GetBitmap().CreateTexture(true);
+            return GetBitmap().CreateTexture(BattleMiniMapSubModule.ModuleId + "_HumanAgent");
         }
 
         //private void Draw(Graphics graphics, Pen pen)

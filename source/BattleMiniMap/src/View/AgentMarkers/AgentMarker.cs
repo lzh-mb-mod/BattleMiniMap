@@ -18,7 +18,7 @@ namespace BattleMiniMap.View.AgentMarkers
         public AgentMarker(Agent agent)
         {
             _agent = agent;
-            Update();
+            InitializeMarker();
         }
 
         public AgentMarker(AgentMarker other)
@@ -26,12 +26,32 @@ namespace BattleMiniMap.View.AgentMarkers
             CopyFrom(other);
         }
 
-        public void Update()
+        private void InitializeMarker()
+        {
+            AgentMarkerType = _agent.GetColorAndTextureType();
+            if (AgentMarkerType.TextureType == TextureProviders.AgentMarkerTextureType.Hero)
+            {
+                UpdateAsHero();
+            }
+            else
+            {
+                UpdateAsNonHero();
+            }
+        }
+
+        public void UpdateAsNonHero()
+        {
+            if (AgentMarkerType.ColorType == Colors.AgentMarkerColorType.Inactive)
+                return;
+            UpdateMarkerPosition();
+        }
+
+        public void UpdateAsHero()
         {
             if (AgentMarkerType.ColorType == Colors.AgentMarkerColorType.Inactive)
                 return;
 
-            UpdateMarker();
+            UpdateMarkerPositionAndDirection();
         }
 
         public void RenderUpdate()
@@ -52,7 +72,7 @@ namespace BattleMiniMap.View.AgentMarkers
         public void SetAgent(Agent agent)
         {
             _agent = agent;
-            UpdateMarker();
+            UpdateMarkerPosition();
         }
 
         public void Clear()
@@ -60,7 +80,23 @@ namespace BattleMiniMap.View.AgentMarkers
             _agent = null;
         }
 
-        private void UpdateMarker()
+        private void UpdateMarkerPosition()
+        {
+            AgentMarkerType = _agent.GetColorAndTextureType();
+            if (AgentMarkerType.ColorType == Colors.AgentMarkerColorType.Inactive)
+            {
+                MakeDead();
+                return;
+            }
+
+            _cachedAgentPosition = _agent.Position;
+            var miniMap = MiniMap.Instance;
+            if (!miniMap.IsValid && !BattleMiniMapConfig.Get().ShowMap)
+                return;
+            UpdateRenderedPosition();
+        }
+
+        private void UpdateMarkerPositionAndDirection()
         {
             AgentMarkerType = _agent.GetColorAndTextureType();
             if (AgentMarkerType.ColorType == Colors.AgentMarkerColorType.Inactive)
@@ -79,10 +115,6 @@ namespace BattleMiniMap.View.AgentMarkers
         private void UpdateRenderedPosition()
         {
             PositionInWidget = MiniMap.Instance.WorldToWidget(_cachedAgentPosition.AsVec2);
-            if (_agent != null && _agent.IsHero)
-            {
-                Direction = _agent.GetMovementDirection();
-            }
         }
 
         private void MakeDead()

@@ -60,7 +60,8 @@ namespace BattleMiniMap.View.Background.Map
         public CameraMarkerViewModel CameraMarkerLeft { get; }
         public CameraMarkerViewModel CameraMarkerRight { get; }
 
-        public AgentMarkerCollection AgentMarkers { get; private set; }
+        public AgentMarkerCollection NonHeroAgentMarkers { get; private set; }
+        public AgentMarkerCollection HeroAgentMarkers { get; private set; }
 
         //[DataSourceProperty]
         //public AgentMarkerCollection DeadAgentMarkers
@@ -79,7 +80,11 @@ namespace BattleMiniMap.View.Background.Map
         {
             CameraMarkerLeft = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Left);
             CameraMarkerRight = new CameraMarkerViewModel(missionScreen, CameraMarkerSide.Right);
-            AgentMarkers = new AgentMarkerCollection
+            NonHeroAgentMarkers = new AgentMarkerCollection
+            {
+                AgentMarkers = new List<AgentMarker>()
+            };
+            HeroAgentMarkers = new AgentMarkerCollection
             {
                 AgentMarkers = new List<AgentMarker>()
             };
@@ -133,12 +138,17 @@ namespace BattleMiniMap.View.Background.Map
 
         public void UpdateData()
         {
-            UpdateAgentMarkers();
+            UpdateNonHeroAgentMarkers();
+            UpdateHeroAgentMarkers();
         }
 
         public void UpdateRenderData()
         {
-            foreach (var agentMarker in AgentMarkers.AgentMarkers)
+            foreach (var agentMarker in NonHeroAgentMarkers.AgentMarkers)
+            {
+                agentMarker.RenderUpdate();
+            }
+            foreach (var agentMarker in HeroAgentMarkers.AgentMarkers)
             {
                 agentMarker.RenderUpdate();
             }
@@ -154,7 +164,10 @@ namespace BattleMiniMap.View.Background.Map
         {
             if (agent.IsActive())
             {
-                AgentMarkers.Add(agent);
+                if (agent.IsHero)
+                    HeroAgentMarkers.Add(agent);
+                else
+                    NonHeroAgentMarkers.Add(agent);
             }
             //else
             //{
@@ -162,22 +175,22 @@ namespace BattleMiniMap.View.Background.Map
             //}
         }
 
-        private void UpdateAgentMarkers()
+        private void UpdateNonHeroAgentMarkers()
         {
             try
             {
-                int count = AgentMarkers.CountOfAgentMarkers;
+                int count = NonHeroAgentMarkers.CountOfAgentMarkers;
                 int lastOne = count - 1;
                 for (int i = 0; i <= lastOne;)
                 {
-                    var current = AgentMarkers.AgentMarkers[i];
-                    current.Update();
+                    var current = NonHeroAgentMarkers.AgentMarkers[i];
+                    current.UpdateAsNonHero();
                     if (current.AgentMarkerType.ColorType == View.AgentMarkers.Colors.AgentMarkerColorType.Inactive)
                     {
                         //DeadAgentMarkers.Add(current);
                         if (i < lastOne)
                         {
-                            AgentMarkers.AgentMarkers[i].CopyFrom(AgentMarkers.AgentMarkers[lastOne]);
+                            NonHeroAgentMarkers.AgentMarkers[i].CopyFrom(NonHeroAgentMarkers.AgentMarkers[lastOne]);
                         }
 
                         --lastOne;
@@ -192,28 +205,52 @@ namespace BattleMiniMap.View.Background.Map
                 {
                     for (int i = count - 1; i > lastOne; i--)
                     {
-                        AgentMarkers.AgentMarkers[i].Clear();
+                        NonHeroAgentMarkers.AgentMarkers[i].Clear();
                     }
 
-                    AgentMarkers.CountOfAgentMarkers = lastOne + 1;
+                    NonHeroAgentMarkers.CountOfAgentMarkers = lastOne + 1;
+                }
+            }
+            catch (Exception e)
+            {
+                MissionSharedLibrary.Utilities.Utility.DisplayMessageForced(e.ToString());
+            }
+        }
+        private void UpdateHeroAgentMarkers()
+        {
+            try
+            {
+                int count = HeroAgentMarkers.CountOfAgentMarkers;
+                int lastOne = count - 1;
+                for (int i = 0; i <= lastOne;)
+                {
+                    var current = HeroAgentMarkers.AgentMarkers[i];
+                    current.UpdateAsHero();
+                    if (current.AgentMarkerType.ColorType == View.AgentMarkers.Colors.AgentMarkerColorType.Inactive)
+                    {
+                        //DeadAgentMarkers.Add(current);
+                        if (i < lastOne)
+                        {
+                            HeroAgentMarkers.AgentMarkers[i].CopyFrom(HeroAgentMarkers.AgentMarkers[lastOne]);
+                        }
+
+                        --lastOne;
+                    }
+                    else
+                    {
+                        ++i;
+                    }
                 }
 
-                //if (BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.IsGeneratingTexture)
-                //    BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.Update();
-                //else
-                //{
-                //    if (DeadAgentMarkers.CountOfAgentMarkers > 50 ||
-                //        DeadAgentMarkers.CountOfAgentMarkers > 0 && _timer.ElapsedTime > 10f)
-                //    {
-                //        _timer.Reset();
-                //        var backup = _deadAgentMarkersBackup;
-                //        backup.CountOfAgentMarkers = 0;
-                //        _deadAgentMarkersBackup = DeadAgentMarkers;
-                //        BattleMiniMap_DeadAgentMarkerCollectionTextureProvider.AddDeadAgentMarkers(DeadAgentMarkers
-                //            .AgentMarkers);
-                //        DeadAgentMarkers = backup;
-                //    }
-                //}
+                if (lastOne < count - 1)
+                {
+                    for (int i = count - 1; i > lastOne; i--)
+                    {
+                        HeroAgentMarkers.AgentMarkers[i].Clear();
+                    }
+
+                    HeroAgentMarkers.CountOfAgentMarkers = lastOne + 1;
+                }
             }
             catch (Exception e)
             {

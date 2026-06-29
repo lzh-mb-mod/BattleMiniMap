@@ -88,7 +88,7 @@ namespace BattleMiniMap.View.Background.Boundary
                                       ? 1
                                       : BattleMiniMapConfig.Get().WidgetWidth);
             DrawBoundaries(Mission.Current, graphics, widthOfOnePixel);
-            return bitmap.CreateTexture(true);
+            return bitmap.CreateTexture(BattleMiniMapSubModule.ModuleId + "_Boundary");
         }
 
         private void DrawBoundaries(Mission mission, Graphics graphics, float widthOfOnePixel)

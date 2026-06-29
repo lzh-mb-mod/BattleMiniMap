@@ -24,7 +24,7 @@ namespace BattleMiniMap.View.CameraMarker
             var graphics = Graphics.FromImage(bitmap);
             var pen = new Pen(System.Drawing.Color.FromArgb(255, 30, 30, 30), 2);
             graphics.DrawLine(pen, new Point(0, 0), new Point(100, 100));
-            return bitmap.CreateTexture(true);
+            return bitmap.CreateTexture(BattleMiniMapSubModule.ModuleId + "_CameraMarker");
         }
     }
 }
