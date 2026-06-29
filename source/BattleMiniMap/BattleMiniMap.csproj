@@ -4,6 +4,12 @@
 	  <ProcessorArchitecture>amd64</ProcessorArchitecture>
 	  <LangVersion>8</LangVersion>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DONTUSEHARMONY</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DefineConstants>$(DefineConstants);DONTUSEHARMONY</DefineConstants>
+  </PropertyGroup>
 
 
   <Import Project="$(MSBuildProjectDirectory)\*.props" />
