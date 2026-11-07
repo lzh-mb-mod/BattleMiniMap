@@ -1,5 +1,9 @@
 # Changelog
 
+## [v3.2.1] - 2026-11-08
+### Fixed
+- Support Bannerlord v1.4.8 and update the shared mission menu and hotkey library.
+
 ## [v3.1.3] - 2025-12-06
 ### Fixed
 - Fix crash on startup when failing to loading game texts. This may happen when other mods have broken text files.

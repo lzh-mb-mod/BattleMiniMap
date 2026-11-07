@@ -108,7 +108,7 @@ jobs:
       - name: Build Solution
         run: >-
           nuget restore .\source\BattleMiniMap.sln;
-          MSBuild.exe .\source\BattleMiniMap.sln /p:Configuration=Release /p:GamePath="$PWD\bannerlord\";
+          MSBuild.exe .\source\BattleMiniMap.sln /p:Configuration=Release /p:DeployToGame=false /p:GamePath="$PWD\bannerlord\";
       
       - name: Generate html files
         run: >-
@@ -154,7 +154,7 @@ jobs:
           # `true` to create a draft (unpublished) release, `false` to create a published one. Default: `false`
           # draft: # optional
           # `true` to identify the release as a prerelease. `false` to identify the release as a full release. Default: `false`
-          # prerelease: # optional
+          prerelease: ${{ steps.dotenv.outputs.game_branch == 'beta' }} # optional
           # Any branch or commit SHA the Git tag is created from, unused if the Git tag already exists. Default: SHA of current commit
           # commitish: # optional
           # Owner of the repository if it is not the current one

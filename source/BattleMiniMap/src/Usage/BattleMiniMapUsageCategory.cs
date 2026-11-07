@@ -1,6 +1,7 @@
 ﻿using BattleMiniMap.Config.HotKey;
 using MissionLibrary.Usage;
 using MissionSharedLibrary.HotKey;
+using MissionSharedLibrary.Repository;
 using MissionSharedLibrary.Usage;
 using System;
 using System.Collections.Generic;

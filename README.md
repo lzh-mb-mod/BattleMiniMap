@@ -2,6 +2,9 @@
 
 A mod for Mount&Blade II Bannerlord that provides mini map in battle.
 
+## Game Compatibility
+Use this build with Bannerlord v1.4.8. For Bannerlord v1.5.6 Beta, use the separate Beta build from [GitHub Releases](https://github.com/lzh-mb-mod/BattleMiniMap/releases).
+
 ## Save Compability
 This mod does not read or write stuffs to your game save. Installing or removing this mod has no impact on your game save.
 

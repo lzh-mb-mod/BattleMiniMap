@@ -2,7 +2,7 @@
 using MissionLibrary.Provider;
 using MissionSharedLibrary.Config.HotKey;
 using MissionSharedLibrary.HotKey;
-using MissionSharedLibrary.Provider;
+using MissionSharedLibrary.Repository;
 using MissionSharedLibrary.Usage;
 using System;
 using System.Collections.Generic;
