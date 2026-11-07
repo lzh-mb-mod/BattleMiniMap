@@ -1,5 +1,9 @@
 # Changelog
 
+## [v3.3.0] - 2026-11-08
+### Fixed
+- Support Bannerlord v1.5.6 Beta with the matching MissionLibrary version.
+
 ## [v3.2.1] - 2026-11-08
 ### Fixed
 - Support Bannerlord v1.4.8 and update the shared mission menu and hotkey library.

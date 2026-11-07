@@ -3,7 +3,7 @@
 这是一个骑马与砍杀2：霸主的mod，提供了战场小地图的功能。
 
 ## 游戏版本兼容性
-此构建适用于霸主 v1.4.8。使用 v1.5.6 Beta 的玩家请从 [GitHub Releases](https://github.com/lzh-mb-mod/BattleMiniMap/releases) 下载单独的 Beta 构建。
+此构建适用于霸主 v1.5.6 Beta。使用 v1.4.8 的玩家请从 [GitHub Releases](https://github.com/lzh-mb-mod/BattleMiniMap/releases) 下载正式版构建。
 
 ## 存档兼容性
 本mod不会读写你的存档数据。安装或卸载本mod不会对你的存档造成影响。
