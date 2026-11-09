@@ -1,5 +1,6 @@
 .vs/
 source/package/
+source/BattleMiniMap/package
 source/*/bin/
 source/*/obj/
 *.DotSettings.user
