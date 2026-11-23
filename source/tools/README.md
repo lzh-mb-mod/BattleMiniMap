@@ -19,3 +19,5 @@ dotnet run --project source/tests/MapGeometryTests/MapGeometryTests.csproj -c Re
 ```
 
 Game-native appearance, switching, depth-buffer behavior and mission teardown need visual validation on the matching game build. No sampling or scene enumeration is used by this feature.
+
+The current visibility recovery uses a deterministic CPU depth-rasterized texture from these same cached triangles. It rebuilds only when map size, variant or height ceiling changes. The private native SceneView implementation is retained for investigation, but is not selected until its pixel output is verified. This is a temporary display fallback, not evidence of GPU speedup. Status logs report nontransparent pixel coverage.

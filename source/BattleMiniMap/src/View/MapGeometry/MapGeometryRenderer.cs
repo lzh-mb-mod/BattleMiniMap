@@ -32,6 +32,8 @@ namespace BattleMiniMap.View.MapGeometry
         private readonly List<Mesh> _meshes = new List<Mesh>();
         private readonly List<Tuple<int, Action>> _retired = new List<Tuple<int, Action>>();
         private int _frame;
+        private Texture _displayFallback;
+        private UiTexture _fallbackUi;
         public UiTexture Texture { get; private set; }
         public MapGeometryRenderer(string sceneName) { _sceneName = sceneName; Active = this; }
 
@@ -47,13 +49,13 @@ namespace BattleMiniMap.View.MapGeometry
                 var ceiling = Ceiling(config);
                 var proxy = config.UseMapGeometryProxy && !_proxyNativeFailed;
                 var width = Math.Max(1, Math.Min(2048, map.BitmapWidth)); var height = Math.Max(1, Math.Min(2048, map.BitmapHeight));
-                if (_view == null || _min != map.MapBoundMin || _max != map.MapBoundMax || _width != width || _height != height ||
+                if (Texture == null || _min != map.MapBoundMin || _max != map.MapBoundMax || _width != width || _height != height ||
                     _lastProxy != proxy || _lastCeiling != ceiling || _resolution != map.Resolution)
                 {
                     ReleaseNative();
                     _min = map.MapBoundMin; _max = map.MapBoundMax; _width = width; _height = height;
                     _lastProxy = proxy; _lastCeiling = ceiling; _resolution = map.Resolution;
-                    Build(map, proxy, ceiling);
+                    BuildDisplayFallback(map, proxy, ceiling);
                 }
                 _view?.SetEnable(true);
             }
@@ -65,7 +67,7 @@ namespace BattleMiniMap.View.MapGeometry
                     _proxyNativeFailed = true; _lastProxy = false;
                     try
                     {
-                        Build(map, false, Ceiling(config));
+                        BuildDisplayFallback(map, false, Ceiling(config));
                         _view?.SetEnable(true);
                         TaleWorlds.Library.Debug.Print("BattleMiniMap geometry: original mesh fallback: " + ex.Message);
                         return;
@@ -94,6 +96,21 @@ namespace BattleMiniMap.View.MapGeometry
             TaleWorlds.Library.Debug.Print("BattleMiniMap geometry loaded: scene=" + _sceneName + " instances=" + _data.Layers.Count + " proxy=218 original=3242");
             if (!_data.HasCompleteProxy) TaleWorlds.Library.Debug.Print("BattleMiniMap geometry: using original mesh: " + _data.ProxyFallbackReason);
         }
+        private void BuildDisplayFallback(IMiniMap map, bool proxy, float? ceiling)
+        {
+            var started = System.Diagnostics.Stopwatch.StartNew();
+            var raster = MapGeometryRasterizer.Render(_data, proxy, ceiling, map.MapBoundMin.x, map.MapBoundMin.y,
+                map.Resolution, map.BitmapWidth, map.BitmapHeight, _width, _height);
+            _displayFallback = TaleWorlds.Engine.Texture.CreateFromByteArray(raster.Pixels, raster.Width, raster.Height);
+            _fallbackUi = new UiTexture(new EngineTexture(_displayFallback));
+            Texture = _fallbackUi;
+            TaleWorlds.Library.Debug.Print("BattleMiniMap geometry raster: pixels=" + raster.CoveredPixels +
+                " triangles=" + raster.Triangles + " target=" + raster.Width + "x" + raster.Height +
+                " variant=" + (proxy && _data.HasCompleteProxy ? "proxy" : "original") +
+                " ceiling=" + (ceiling.HasValue ? ceiling.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "none") +
+                " cpu_ms=" + started.Elapsed.TotalMilliseconds.ToString("F3", System.Globalization.CultureInfo.InvariantCulture));
+        }
+
         private void Build(IMiniMap map, bool proxy, float? ceiling)
         {
             _scene = Scene.CreateNewScene(initialize_physics: false, enable_decals: false); _scene.SetName("BattleMiniMap.MapGeometry");
@@ -151,6 +168,12 @@ namespace BattleMiniMap.View.MapGeometry
         private void ReleaseNative(bool defer = true)
         {
             Texture = null;
+            var fallback = _displayFallback; _displayFallback = null; _fallbackUi = null;
+            if (fallback != null)
+            {
+                if (defer) _retired.Add(Tuple.Create(_frame + 2, (Action)(() => fallback.Release())));
+                else fallback.Release();
+            }
             var view = _view; var scene = _scene; var material = _material; var white = _white;
             var target = _target; var camera = _camera; var meshes = _meshes.ToArray();
             _view = null; _scene = null; _material = null; _white = null; _target = null; _camera = null;

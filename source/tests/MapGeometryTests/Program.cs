@@ -25,6 +25,27 @@ static class Program
         Check(cut.Length == 2 && cut.SelectMany(x => x).All(v => v.Z <= 1), "Cross-layer clipping interpolates a quad");
         Check(mesh.Vertices[2].Z == 3 && MapGeometryData.Triangles(mesh, null).Count() == 1, "Clipping retains original data");
         Check(!MapGeometryData.Triangles(mesh, -1).Any(), "Height below mesh");
+        var raster = MapGeometryRasterizer.Render(data,true,null,168.779f,238.234f,1.034f,325,539,325,539);
+        Check(raster.CoveredPixels>0 && raster.Triangles==218,"Real cache renders nontransparent pixels at reported map bounds");
+        Check(raster.Pixels.Where((v,i)=>i%4==3).Count(v=>v==255)==raster.CoveredPixels,"Exact alpha coverage accounting");
+        var originalRaster=MapGeometryRasterizer.Render(data,false,null,168.779f,238.234f,1.034f,325,539,325,539);
+        Check(originalRaster.CoveredPixels>0 && originalRaster.Triangles==3242,"Original raster fallback visible");
+        var emptyRaster=MapGeometryRasterizer.Render(data,true,-50,168.779f,238.234f,1.034f,325,539,325,539);
+        Check(emptyRaster.CoveredPixels==0,"Height cutoff clears all geometry without stale pixels");
+        var offMap=MapGeometryRasterizer.Render(data,true,null,10000,10000,1,325,539,325,539);
+        Check(offMap.CoveredPixels==0,"Out-of-map geometry does not draw");
+        Console.WriteLine("Raster evidence: proxy pixels="+raster.CoveredPixels+", original pixels="+originalRaster.CoveredPixels);
+        var sampleData=new MapGeometryData();
+        GeometryMesh flat(float z)=>new GeometryMesh{Vertices=new[]{new GeometryPoint(0,0,z),new GeometryPoint(10,0,z),new GeometryPoint(0,10,z)},Faces=new[]{new[]{0,1,2}}};
+        sampleData.Layers.Add(new GeometryLayer{Resource="stone_bridge_wide",Original=flat(0)});
+        sampleData.Layers.Add(new GeometryLayer{Resource="stone_bridge_wide_extension",Original=flat(3)});
+        var top=MapGeometryRasterizer.Render(sampleData,false,null,0,0,1,10,10,10,10);
+        var lower=MapGeometryRasterizer.Render(sampleData,false,1,0,0,1,10,10,10,10);
+        Check(top.Pixels[0]==130 && lower.Pixels[0]==206,"Highest surface wins and height cut reveals lower source");
+        sampleData.Layers.Reverse();
+        Check(MapGeometryRasterizer.Render(sampleData,false,null,0,0,1,10,10,10,10).Pixels.SequenceEqual(top.Pixels),"Depth is independent of instance submission order");
+        foreach(var layer in sampleData.Layers)Array.Reverse(layer.Original.Faces[0]);
+        Check(MapGeometryRasterizer.Render(sampleData,false,null,0,0,1,10,10,10,10).Pixels.SequenceEqual(top.Pixels),"Raster is two sided");
         var temp = Path.Combine(Path.GetTempPath(), "BattleMiniMapGeometryTests-" + Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
         try
         {
