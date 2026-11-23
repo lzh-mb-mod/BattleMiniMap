@@ -41,8 +41,7 @@ namespace BattleMiniMap.View.MapGeometry
                     Clear(true);_mode=mode;_depth=config.MapGpuDiagnosticDepth;_proxy=config.UseMapGeometryProxy;
                     Build(data);_reports=0;_builtAtTick=_ticks;
                 }
-                // Automatic loading bypass and scene-shadow transitions are withdrawn.
-                // They reached shader compilation without producing verified geometry.
+                // No loading bypass or timed scene transitions; use normal readiness.
                 _view.SetEnable(true);
                 if(_reports<8 && _ticks%60==0)
                 {
@@ -70,6 +69,9 @@ namespace BattleMiniMap.View.MapGeometry
             _material.Flags=MaterialFlags.TwoSided|MaterialFlags.DontCastShadow|MaterialFlags.RequiresForwardRendering;
             if(!_depth)_material.Flags|=MaterialFlags.NoDepthTest|MaterialFlags.NoModifyDepthBuffer;
             _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend);_material.SetAlphaTestValue(0);
+            // Vanilla tableaus disable scene shadows as well as static/view shadows.
+            // Do this only after Bind has rejected an invalid or wrong shader resource.
+            _scene.SetShadow(false);
             var builder=new MeshBuilder();var count=0;var normalizer=new MapGpuDiagnosticGeometry(data);
             if(_mode==2){Add(builder,MapGpuDiagnosticGeometry.Triangle,0xffffd060);count=1;}
             if(_mode==3)foreach(var layer in data.Layers)foreach(var t in MapGeometryData.Triangles(data.Select(layer,_proxy),null))
@@ -90,7 +92,7 @@ namespace BattleMiniMap.View.MapGeometry
             _view.SetAcceptGlobalDebugRenderObjects(false);_view.SetRenderOrder(-1);_view.SetEnable(true);
             var cameraPoint=new Vec3(0,0,0);var actual=_camera.WorldPointToViewPortPoint(ref cameraPoint);
             var expected=MapGpuDiagnosticGeometry.ExpectedViewport(new GeometryPoint(0,0,0));
-            Debug.Print("BattleMiniMap GPU diagnostic build: staticShadowsDisabled=True mode="+_mode+" depth="+_depth+" triangles="+count+" proxy="+_proxy+
+            Debug.Print("BattleMiniMap GPU diagnostic build: staticShadowsDisabled=True sceneShadowsDisabled=True loadingGateBypassed=False mode="+_mode+" depth="+_depth+" triangles="+count+" proxy="+_proxy+
                 " center="+normalizer.Center.X+","+normalizer.Center.Y+","+normalizer.Center.Z+" scale="+normalizer.Scale+
                 " cameraOrigin="+_camera.Position+" cameraViewport="+actual+" expectedXY="+expected.X+","+expected.Y+" near="+_camera.Near+" far="+_camera.Far);
             foreach(var point in MapGpuDiagnosticGeometry.Triangle)
