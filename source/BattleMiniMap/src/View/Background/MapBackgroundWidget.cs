@@ -1,4 +1,4 @@
-﻿using BattleMiniMap.Config;
+using BattleMiniMap.Config;
 using BattleMiniMap.View.MapTerrain;
 using BattleMiniMap.Widgets;
 using System.Drawing;
@@ -16,17 +16,22 @@ namespace BattleMiniMap.View.Background
         public MapBackgroundWidget(UIContext context) : base(context)
         {
         }
+        // Geometry targets already exist and do not need TextureWidget's deferred provider bootstrap.
+        protected virtual bool UsesDirectTexture => false;
+        protected virtual Texture GetMapTexture(TwoDimensionContext context) => TextureProvider?.GetTextureForRender(context);
+
         protected override void OnRender(TwoDimensionContext twoDimensionContext, TwoDimensionDrawContext drawContext)
         {
             var config = BattleMiniMapConfig.Get();
-            if (TextureProvider == null)
+            if (!UsesDirectTexture && TextureProvider == null)
             {
                 base.OnRender(twoDimensionContext, drawContext);
             }
             else if (!config.FollowMode)
             {
                 var simpleMaterial = Widgets.Utility.CreateMaterial2(drawContext, this);
-                Texture = TextureProvider.GetTextureForRender(twoDimensionContext);
+                Texture = GetMapTexture(twoDimensionContext);
+                if (Texture == null || !Texture.IsValid) return;
                 simpleMaterial.Texture = Texture;
                 var size = Widgets.Utility.GetSize(this);
                 var drawObject = Widgets.Utility.CreateDrawObject2D(this, 0, 0, size.x, size.y);
@@ -35,7 +40,8 @@ namespace BattleMiniMap.View.Background
             }
             else
             {
-                Texture = TextureProvider.GetTextureForRender(twoDimensionContext);
+                Texture = GetMapTexture(twoDimensionContext);
+                if (Texture == null || !Texture.IsValid) return;
                 var camera = MissionState.Current.GetListenerOfType<MissionScreen>().CombatCamera;
                 var position = camera.Position.AsVec2;
                 var direction = camera.Direction.AsVec2.Normalized().LeftVec();

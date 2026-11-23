@@ -103,7 +103,7 @@ namespace BattleMiniMap.View.MapGeometry
             _material = Material.GetDefaultMaterial().CreateCopy(); _material.SetShader(Shader.GetFromResource("simple_shading"));
             _material.SetShaderFlags(0); _material.SetTexture(Material.MBTextureType.DiffuseMap, _white);
             _material.Flags = MaterialFlags.TwoSided | MaterialFlags.DontCastShadow | MaterialFlags.RequiresForwardRendering;
-            _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.Modulate); _material.SetAlphaTestValue(0);
+            _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend); _material.SetAlphaTestValue(0);
             var submitted = 0;
             foreach (var layer in _data.Layers)
             {
@@ -136,6 +136,13 @@ namespace BattleMiniMap.View.MapGeometry
             _view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearColor, true); _view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearDepth, true);
             _view.SetRenderWithPostfx(false); _view.SetSceneUsesSkybox(false); _view.SetSceneUsesShadows(false); _view.SetSceneUsesContour(false);
             _view.SetAcceptGlobalDebugRenderObjects(false); _view.SetRenderOrder(-2);
+            var first = _data.Layers[0].Original.Vertices[0];
+            var mapped = MapGeometryData.MapPoint(first, map.MapBoundMin.x, map.MapBoundMin.y);
+            var screen = _view.WorldPointToScreenPoint(new Vec3(mapped.X, mapped.Y, mapped.Z));
+            TaleWorlds.Library.Debug.Print("BattleMiniMap geometry projection: world=" + first.X + "," + first.Y + "," + first.Z +
+                " map=" + mapped.X + "," + mapped.Y + " screen=" + screen +
+                " bounds=" + map.MapBoundMin + ":" + map.MapBoundMax + " target=" + _width + "x" + _height +
+                " depth=true opaque=true");
             TaleWorlds.Library.Debug.Print("BattleMiniMap geometry submitted: triangles=" + submitted +
                 " variant=" + (proxy && _data.HasCompleteProxy ? "proxy" : "original") +
                 " ceiling=" + (ceiling.HasValue ? ceiling.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "none"));

@@ -6,17 +6,17 @@ using TaleWorlds.TwoDimension;
 
 namespace BattleMiniMap.View.MapGeometry
 {
-    public sealed class BattleMiniMap_GeometryTextureProvider : TextureProvider
-    {
-        protected override Texture OnGetTextureForRender(TwoDimensionContext context, string name) => MapGeometryRenderer.Active?.Texture;
-    }
     public sealed class BattleMiniMap_GeometryWidget : MapBackgroundWidget
     {
         public BattleMiniMap_GeometryWidget(UIContext context) : base(context)
         {
-            TextureProviderName = nameof(BattleMiniMap_GeometryTextureProvider);
+            TextureProviderName = null;
             WidthSizePolicy = HeightSizePolicy = SizePolicy.Fixed;
         }
+        private Texture _lastDrawnTexture;
+        protected override bool UsesDirectTexture => true;
+        protected override Texture GetMapTexture(TwoDimensionContext context) => MapGeometryRenderer.Active?.Texture;
+
         protected override void OnUpdate(float dt)
         {
             base.OnUpdate(dt);
@@ -27,8 +27,15 @@ namespace BattleMiniMap.View.MapGeometry
         }
         protected override void OnRender(TwoDimensionContext context, TwoDimensionDrawContext drawContext)
         {
-            if (BattleMiniMapConfig.Get().EnableMapGeometry && MapGeometryRenderer.Active?.Texture != null)
-                base.OnRender(context, drawContext);
+            var texture = MapGeometryRenderer.Active?.Texture;
+            if (!BattleMiniMapConfig.Get().EnableMapGeometry || texture == null) return;
+            if (!ReferenceEquals(_lastDrawnTexture, texture))
+            {
+                _lastDrawnTexture = texture;
+                TaleWorlds.Library.Debug.Print("BattleMiniMap geometry UI draw: valid=" + texture.IsValid +
+                    " suggested=" + SuggestedWidth + "x" + SuggestedHeight + " direct=true follow=" + BattleMiniMapConfig.Get().FollowMode);
+            }
+            base.OnRender(context, drawContext);
         }
     }
 }
