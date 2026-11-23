@@ -12,7 +12,18 @@ namespace BattleMiniMap.View.MapGeometry
     internal sealed class MapGpuDiagnosticRenderer : IDisposable
     {
         internal static MapGpuDiagnosticRenderer Active { get; private set; }
-        private Scene _scene; private SceneView _view; private Camera _camera;
+        private Scene _scene; private TableauView _view; private Camera _camera;
+        private TableauBinding _binding;
+        private static int _nextTargetId;
+        private static int _unboundCallbackFailureReported;
+        private sealed class TableauBinding
+        {
+            public Scene Scene;
+            public Camera Camera;
+            public string Name, Failure;
+            public bool Retired, Reported;
+            public int PaintCount;
+        }
         private Material _material; private Texture _white, _target, _control;
         public UiTexture ControlTexture { get; private set; }
         private readonly List<Mesh> _meshes = new List<Mesh>();
@@ -42,11 +53,13 @@ namespace BattleMiniMap.View.MapGeometry
                     Build(data);_reports=0;_builtAtTick=_ticks;
                 }
                 // No loading bypass or timed scene transitions; use normal readiness.
+                if(_binding.Failure!=null)throw new InvalidOperationException(_binding.Failure);
+                _view.SetDoNotRenderThisFrame(false);
                 _view.SetEnable(true);
                 if(_reports<8 && _ticks%60==0)
                 {
-                    ++_reports;Debug.Print("BattleMiniMap GPU diagnostic ready: mode="+_mode+" view="+_view.ReadyToRender()+
-                        " scene="+_view.CheckSceneReadyToRender()+" loading="+_scene.GetLoadingStateName()+
+                    ++_reports;Debug.Print("BattleMiniMap GPU diagnostic ready: mode="+_mode+" target="+_binding.Name+
+                        " paintCount="+_binding.PaintCount+" viewReady="+_view.ReadyToRender()+" loading="+_scene.GetLoadingStateName()+
                         " loadingFinished="+_scene.IsLoadingFinished()+
                         " elapsedTicks="+(_ticks-_builtAtTick)+" frame="+_camera.Frame);
                 }
@@ -83,16 +96,15 @@ namespace BattleMiniMap.View.MapGeometry
                 entity.AddMesh(mesh,recomputeBoundingBox:true);entity.SetVisibilityExcludeParents(true);entity.SetReadyToRender(true);
                 _meshes.Add(mesh);_entities.Add(entity);
             }
-            _target=TaleWorlds.Engine.Texture.CreateRenderTarget("BattleMiniMap.GpuDiagnostic",256,256,autoMipmaps:false,isTableau:false);
-            Texture=new UiTexture(new EngineTexture(_target));_view=SceneView.CreateSceneView();_view.SetScene(_scene);_view.SetCamera(_camera);_view.SetRenderTarget(_target);
-            _view.SetAutoDepthTargetCreation(true);_view.SetClearColor(new Color(.12f,.22f,.35f,1f).ToUnsignedInteger());
-            _view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearColor,true);_view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearDepth,true);
-            _view.SetRenderOnDemand(false);_view.SetCleanScreenUntilLoadingDone(false);_view.SetClearAndDisableAfterSucessfullRender(false);
-            _view.SetRenderWithPostfx(false);_view.SetSceneUsesSkybox(false);_view.SetSceneUsesShadows(false);_view.SetSceneUsesContour(false);
-            _view.SetAcceptGlobalDebugRenderObjects(false);_view.SetRenderOrder(-1);_view.SetEnable(true);
+            _binding=new TableauBinding{Scene=_scene,Camera=_camera,
+                Name="BattleMiniMap.GpuDiagnostic."+System.Threading.Interlocked.Increment(ref _nextTargetId)};
+            _target=TableauView.AddTableau(_binding.Name,PaintTableau,_binding,256,256);
+            _view=_target.TableauView;
+            ConfigureTableau(_view,_binding);
+            Texture=new UiTexture(new EngineTexture(_target));
             var cameraPoint=new Vec3(0,0,0);var actual=_camera.WorldPointToViewPortPoint(ref cameraPoint);
             var expected=MapGpuDiagnosticGeometry.ExpectedViewport(new GeometryPoint(0,0,0));
-            Debug.Print("BattleMiniMap GPU diagnostic build: staticShadowsDisabled=True sceneShadowsDisabled=True loadingGateBypassed=False mode="+_mode+" depth="+_depth+" triangles="+count+" proxy="+_proxy+
+            Debug.Print("BattleMiniMap GPU diagnostic build: backend=Tableau target="+_binding.Name+" staticShadowsDisabled=True sceneShadowsDisabled=True explicitLoadingBypass=False mode="+_mode+" depth="+_depth+" triangles="+count+" proxy="+_proxy+
                 " center="+normalizer.Center.X+","+normalizer.Center.Y+","+normalizer.Center.Z+" scale="+normalizer.Scale+
                 " cameraOrigin="+_camera.Position+" cameraViewport="+actual+" expectedXY="+expected.X+","+expected.Y+" near="+_camera.Near+" far="+_camera.Far);
             foreach(var point in MapGpuDiagnosticGeometry.Triangle)
@@ -100,6 +112,47 @@ namespace BattleMiniMap.View.MapGeometry
                 var vertex=new Vec3(point.X,point.Y,point.Z);var projected=_camera.WorldPointToViewPortPoint(ref vertex);
                 var want=MapGpuDiagnosticGeometry.ExpectedViewport(point);
                 Debug.Print("BattleMiniMap GPU diagnostic camera: point="+vertex+" viewport="+projected+" expectedXY="+want.X.ToString("R",CultureInfo.InvariantCulture)+","+want.Y.ToString("R",CultureInfo.InvariantCulture));
+            }
+        }
+        private static void ConfigureTableau(TableauView view,TableauBinding binding)
+        {
+            binding.Scene.EnsurePostfxSystem();
+            view.SetScene(binding.Scene);view.SetCamera(binding.Camera);
+            view.SetClearColor(new Color(.12f,.22f,.35f,1f).ToUnsignedInteger());
+            view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearColor,true);
+            view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearDepth,true);
+            view.SetCleanScreenUntilLoadingDone(false);view.SetClearAndDisableAfterSucessfullRender(false);
+            view.SetRenderWithPostfx(false);view.SetSceneUsesSkybox(false);view.SetSceneUsesShadows(false);view.SetSceneUsesContour(false);
+            view.SetAcceptGlobalDebugRenderObjects(false);view.SetRenderOrder(-1);
+            view.SetDeleteAfterRendering(false);view.SetContinuousRendering(true);view.SetEnable(true);
+        }
+        private static void PaintTableau(Texture sender,EventArgs args)
+        {
+            TableauBinding binding=null;
+            try
+            {
+                if(sender==null || sender.IsReleased || !sender.IsValid)return;
+                binding=sender.UserData as TableauBinding;
+                // Clear already stopped the retired view. Do not touch it again here.
+                if(binding==null || binding.Retired)return;
+                var view=sender.TableauView;
+                System.Threading.Interlocked.Increment(ref binding.PaintCount);
+                ConfigureTableau(view,binding);
+                // Match BannerTableau's paint callback; Update permits the next draw.
+                view.SetDoNotRenderThisFrame(true);
+                if(!binding.Reported)
+                {
+                    binding.Reported=true;
+                    Debug.Print("BattleMiniMap GPU diagnostic tableau callback: target="+binding.Name+
+                        " paintCount="+binding.PaintCount+" viewReady="+view.ReadyToRender()+
+                        " loading="+binding.Scene.GetLoadingStateName());
+                }
+            }
+            catch(Exception ex)
+            {
+                if(binding!=null && !binding.Retired)binding.Failure="Tableau callback: "+ex.Message;
+                else if(System.Threading.Interlocked.Exchange(ref _unboundCallbackFailureReported,1)==0)
+                    Debug.Print("BattleMiniMap GPU diagnostic ignored unbound tableau callback: "+ex.Message);
             }
         }
         private static void Add(MeshBuilder builder,GeometryPoint[] triangle,uint color)
@@ -110,9 +163,10 @@ namespace BattleMiniMap.View.MapGeometry
         }
         private void Clear(bool defer)
         {
+            if(_binding!=null){_binding.Retired=true;_binding.Scene=null;_binding.Camera=null;_binding=null;}
             Texture=null;var view=_view;var scene=_scene;var camera=_camera;var material=_material;var white=_white;var target=_target;var meshes=_meshes.ToArray();var entities=_entities.ToArray();
             _view=null;_scene=null;_camera=null;_material=null;_white=null;_target=null;_meshes.Clear();_entities.Clear();
-            if(view!=null){view.SetEnable(false);view.AddClearTask(clearOnlySceneview:true);}
+            if(view!=null){view.SetDoNotRenderThisFrame(true);view.SetContinuousRendering(false);view.SetEnable(false);view.AddClearTask(clearOnlySceneview:true);}
             Action release=()=>{if(scene!=null){scene.ClearAll();scene.ManualInvalidate();}foreach(var mesh in meshes)mesh.ManualInvalidate();material?.ManualInvalidate();white?.Release();target?.Release();camera?.ReleaseCamera();GC.KeepAlive(entities);GC.KeepAlive(view);};
             if(defer && scene!=null)_retired.Add(Tuple.Create(_ticks+2,release));else release();
         }
