@@ -4,7 +4,6 @@ using System.IO;
 using Path = System.IO.Path;
 using System.Linq;
 using BattleMiniMap.Config;
-using BattleMiniMap.View.Image;
 using BattleMiniMap.View.MapTerrain;
 using TaleWorlds.Engine;
 using TaleWorlds.Engine.GauntletUI;
@@ -18,16 +17,18 @@ namespace BattleMiniMap.View.MapGeometry
         internal static MapGeometryRenderer Active { get; private set; }
         private readonly string _sceneName;
         private MapGeometryData _data;
-        private bool _attempted, _failed, _lastProxy, _proxyNativeFailed;
+        private bool _attempted, _failed, _lastProxy, _gpuFailed;
         private float? _lastCeiling;
         private Vec2 _min, _max;
         private int _width, _height;
         private float _resolution;
         private Scene _scene;
         private Camera _camera;
-        private SceneView _view;
+        private MapGeometryTableau _gpu;
+        private readonly MapGeometryBackendState _gpuState = new MapGeometryBackendState();
+        private string _selectedBackend;
         private Material _material;
-        private Texture _white, _target;
+        private Texture _white;
         private readonly List<GameEntity> _entities = new List<GameEntity>();
         private readonly List<Mesh> _meshes = new List<Mesh>();
         private readonly List<Tuple<int, Action>> _retired = new List<Tuple<int, Action>>();
@@ -42,42 +43,75 @@ namespace BattleMiniMap.View.MapGeometry
         {
             ++_frame; DrainRetired(false);
             var config = BattleMiniMapConfig.Get();
-            if (_failed || !visible || !config.EnableMapGeometry || !map.IsValid) { _view?.SetEnable(false); return; }
+            // Apply manual CPU selection even while the map is hidden.
+            if (!config.UseGpuMapGeometry)
+            {
+                Texture = _fallbackUi; _gpuFailed = false;
+                ReleaseGpu(); SelectBackend(false, "manual CPU");
+            }
+            if (_failed || !visible || !config.EnableMapGeometry || !map.IsValid)
+            {
+                try { _gpu?.SetEnabled(false); }
+                catch (Exception ex) { FailGpu(ex); }
+                return;
+            }
             try
             {
                 if (!_attempted) Load();
                 if (_data == null) return;
                 var ceiling = Ceiling(config);
-                var proxy = config.UseMapGeometryProxy && !_proxyNativeFailed;
-                var width = Math.Max(1, Math.Min(2048, map.BitmapWidth)); var height = Math.Max(1, Math.Min(2048, map.BitmapHeight));
-                if (Texture == null || _min != map.MapBoundMin || _max != map.MapBoundMax || _width != width || _height != height ||
-                    _lastProxy != proxy || _lastCeiling != ceiling || _resolution != map.Resolution)
+                var proxy = config.UseMapGeometryProxy;
+                var width = Math.Max(1, Math.Min(2048, map.BitmapWidth));
+                var height = Math.Max(1, Math.Min(2048, map.BitmapHeight));
+                if (_fallbackUi == null || _min != map.MapBoundMin || _max != map.MapBoundMax ||
+                    _width != width || _height != height || _lastProxy != proxy || _lastCeiling != ceiling || _resolution != map.Resolution)
                 {
                     ReleaseNative();
                     _min = map.MapBoundMin; _max = map.MapBoundMax; _width = width; _height = height;
                     _lastProxy = proxy; _lastCeiling = ceiling; _resolution = map.Resolution;
                     BuildDisplayFallback(map, proxy, ceiling);
                 }
-                _view?.SetEnable(true);
+                Texture = _fallbackUi;
+                if (!config.UseGpuMapGeometry)
+                {
+                    SelectBackend(false, "manual CPU");
+                    return;
+                }
+                if (_gpuFailed) { SelectBackend(false, "GPU failure latched; CPU retained"); return; }
+                try
+                {
+                    if (_gpu == null) { Build(map, proxy, ceiling); _gpuState.Reset(); }
+                    _gpu.SetEnabled(true);
+                    var valid = _gpu.Texture != null && _gpu.Texture.IsValid;
+                    var useGpu = _gpuState.Update(_gpu.PaintCount, valid, _gpu.Failure);
+                    if (_gpuState.Failure != null) throw new InvalidOperationException(_gpuState.Failure);
+                    if (useGpu) Texture = _gpu.Texture;
+                    SelectBackend(useGpu, useGpu ? "Tableau paint progress" : "GPU warmup");
+                }
+                catch (Exception ex)
+                {
+                    FailGpu(ex);
+                }
             }
             catch (Exception ex)
             {
-                ReleaseNative();
-                if (_data != null && config.UseMapGeometryProxy && !_proxyNativeFailed)
-                {
-                    _proxyNativeFailed = true; _lastProxy = false;
-                    try
-                    {
-                        BuildDisplayFallback(map, false, Ceiling(config));
-                        _view?.SetEnable(true);
-                        TaleWorlds.Library.Debug.Print("BattleMiniMap geometry: original mesh fallback: " + ex.Message);
-                        return;
-                    }
-                    catch (Exception fallback) { ReleaseNative(); ex = fallback; }
-                }
-                _failed = true;
+                ReleaseNative(); _failed = true;
                 TaleWorlds.Library.Debug.Print("BattleMiniMap geometry disabled: " + ex.Message);
             }
+        }
+        private void FailGpu(Exception error)
+        {
+            Texture = _fallbackUi; _gpuFailed = true;
+            ReleaseGpu();
+            SelectBackend(false, "GPU fallback: " + error.Message, true);
+        }
+        private void SelectBackend(bool gpu, string reason, bool force = false)
+        {
+            var backend = gpu ? "GPU" : "CPU";
+            if (!force && _selectedBackend == backend) return;
+            _selectedBackend = backend;
+            TaleWorlds.Library.Debug.Print("BattleMiniMap geometry backend: " + backend + " reason=" + reason +
+                " target=" + (_gpu?.Name ?? "none") + " paints=" + (_gpu?.PaintCount ?? 0));
         }
         private static float? Ceiling(BattleMiniMapConfig config) =>
             config.CutMapGeometryByHeight && !float.IsNaN(config.MapGeometryCeiling) && !float.IsInfinity(config.MapGeometryCeiling)
@@ -103,6 +137,8 @@ namespace BattleMiniMap.View.MapGeometry
             var raster = MapGeometryRasterizer.Render(_data, proxy, ceiling, map.MapBoundMin.x, map.MapBoundMin.y,
                 map.Resolution, map.BitmapWidth, map.BitmapHeight, _width, _height);
             _displayFallback = TaleWorlds.Engine.Texture.CreateFromByteArray(raster.Pixels, raster.Width, raster.Height);
+            if (_displayFallback == null || !_displayFallback.IsValid)
+                throw new InvalidOperationException("CPU geometry texture creation failed");
             _fallbackUi = new UiTexture(new EngineTexture(_displayFallback));
             Texture = _fallbackUi;
             TaleWorlds.Library.Debug.Print("BattleMiniMap geometry raster: pixels=" + raster.CoveredPixels +
@@ -114,14 +150,16 @@ namespace BattleMiniMap.View.MapGeometry
 
         private void Build(IMiniMap map, bool proxy, float? ceiling)
         {
-            _scene = Scene.CreateNewScene(initialize_physics: false, enable_decals: false); _scene.SetName("BattleMiniMap.MapGeometry");
+            _scene = Scene.CreateNewScene(initialize_physics: false, enable_decals: false);
+            _scene.SetName("BattleMiniMap.MapGeometry"); _scene.DisableStaticShadows(true); _scene.EnsurePostfxSystem();
             _camera = Camera.CreateCamera();
-            var image = new ImageRGBA(1, 1); image.SetRGBA(0, 0, 255, 255, 255, 255);
-            var uiWhite = image.CreateTexture(); _white = ((EngineTexture)uiWhite.PlatformTexture).Texture;
+            _white = TaleWorlds.Engine.Texture.CreateFromByteArray(new byte[] { 255, 255, 255, 255 }, 1, 1);
+            if (_white == null || !_white.IsValid) throw new InvalidOperationException("GPU white texture creation failed");
             _material = Material.GetDefaultMaterial().CreateCopy(); MapGeometryShader.Bind(_material);
             _material.SetShaderFlags(0); _material.SetTexture(Material.MBTextureType.DiffuseMap, _white);
             _material.Flags = MaterialFlags.TwoSided | MaterialFlags.DontCastShadow | MaterialFlags.RequiresForwardRendering;
             _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend); _material.SetAlphaTestValue(0);
+            _scene.SetShadow(false);
             var submitted = 0;
             foreach (var layer in _data.Layers)
             {
@@ -133,39 +171,39 @@ namespace BattleMiniMap.View.MapGeometry
                     var u = b - a; var v = c - a;
                     var n = new Vec3(u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z, u.x * v.y - u.y * v.x);
                     var length = n.Length; if (length < 1e-8f) continue; n /= length;
-                    var shade = .65f + .3f * Math.Abs(n.z);
-                    var color = layer.Resource == "stone_bridge_wide" ? Color(shade, 206, 184, 143) : Color(shade, 130, 166, 183);
+                    var color = layer.Resource == "stone_bridge_wide" ? Color(206, 184, 143) : Color(130, 166, 183);
                     var ia = builder.AddFaceCorner(a, n, Vec2.Zero, color); var ib = builder.AddFaceCorner(b, n, Vec2.Zero, color);
                     var ic = builder.AddFaceCorner(c, n, Vec2.Zero, color); builder.AddFace(ia, ib, ic); faces++;
                 }
                 if (faces == 0) continue;
                 submitted += faces;
-                var mesh = builder.Finalize(); mesh.SetMaterial(_material); mesh.Color = uint.MaxValue;
-                var entity = GameEntity.CreateEmpty(_scene); entity.AddMesh(mesh); _entities.Add(entity); _meshes.Add(mesh);
+                var mesh = builder.Finalize() ?? throw new InvalidOperationException("GPU geometry mesh creation failed");
+                _meshes.Add(mesh);
+                mesh.UpdateBoundingBox(); mesh.SetMaterial(_material); mesh.Color = uint.MaxValue;
+                var entity = GameEntity.CreateEmpty(_scene, createPhysics: false, callScriptCallbacks: false);
+                _entities.Add(entity); entity.AddMesh(mesh, recomputeBoundingBox: true);
+                entity.SetVisibilityExcludeParents(true); entity.SetReadyToRender(true);
             }
             var highest = _data.Layers.Max(l => l.MaximumZ); var lowest = _data.Layers.Min(l => l.MinimumZ);
-            _camera.LookAt(new Vec3(0, 0, highest + 10), new Vec3(0, 0, lowest - 10), Vec3.Forward);
-            // Existing map pixels are u=worldY, v=worldX, including the final +1 pixel.
-            _camera.SetViewVolume(false, 0, map.BitmapWidth * map.Resolution, -map.BitmapHeight * map.Resolution, 0, .1f, highest - lowest + 30);
-            _target = TaleWorlds.Engine.Texture.CreateRenderTarget("BattleMiniMap.MapGeometryTarget", _width, _height, autoMipmaps: false, isTableau: false);
-            Texture = new UiTexture(new EngineTexture(_target));
-            _view = SceneView.CreateSceneView(); _view.SetScene(_scene); _view.SetCamera(_camera); _view.SetRenderTarget(_target);
-            _view.SetAutoDepthTargetCreation(true); _view.SetClearColor(0);
-            _view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearColor, true); _view.SetRenderOption(TaleWorlds.Engine.View.ViewRenderOptions.ClearDepth, true);
-            _view.SetRenderWithPostfx(false); _view.SetSceneUsesSkybox(false); _view.SetSceneUsesShadows(false); _view.SetSceneUsesContour(false);
-            _view.SetAcceptGlobalDebugRenderObjects(false); _view.SetRenderOrder(-2);
+            var projection = new MapGeometryProjection(_min.x, _min.y, map.Resolution, map.BitmapWidth, map.BitmapHeight, lowest, highest);
+            var frame = MatrixFrame.Identity; frame.origin.z = projection.CameraZ; _camera.Frame = frame;
+            _camera.LookAt(frame.origin, new Vec3(0, 0, lowest - 10), Vec3.Forward);
+            _camera.SetViewVolume(false, 0, projection.Right, projection.Bottom, 0, MapGeometryProjection.Near, projection.Far);
+            _gpu = new MapGeometryTableau(_scene, _camera);
+            _gpu.Initialize(_width, _height);
             var first = _data.Layers[0].Original.Vertices[0];
-            var mapped = MapGeometryData.MapPoint(first, map.MapBoundMin.x, map.MapBoundMin.y);
-            var screen = _view.WorldPointToScreenPoint(new Vec3(mapped.X, mapped.Y, mapped.Z));
-            TaleWorlds.Library.Debug.Print("BattleMiniMap geometry projection: world=" + first.X + "," + first.Y + "," + first.Z +
-                " map=" + mapped.X + "," + mapped.Y + " screen=" + screen +
-                " bounds=" + map.MapBoundMin + ":" + map.MapBoundMax + " target=" + _width + "x" + _height +
-                " depth=true opaque=true");
+            var mapped = MapGeometryData.MapPoint(first, _min.x, _min.y);
+            var point = new Vec3(mapped.X, mapped.Y, mapped.Z);
+            var viewport = _camera.WorldPointToViewPortPoint(ref point);
+            var expected = projection.TextureUv(first);
+            TaleWorlds.Library.Debug.Print("BattleMiniMap main geometry projection: viewport=" + viewport +
+                " expectedTextureUV=" + expected.X + "," + expected.Y + " bounds=" + _min + ":" + _max +
+                " target=" + _width + "x" + _height + " depth=true twoSided=true clearAlpha=0");
             TaleWorlds.Library.Debug.Print("BattleMiniMap geometry submitted: triangles=" + submitted +
                 " variant=" + (proxy && _data.HasCompleteProxy ? "proxy" : "original") +
                 " ceiling=" + (ceiling.HasValue ? ceiling.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "none"));
         }
-        private static uint Color(float shade, int r, int g, int b) => 0xff000000 | ((uint)(r * shade) << 16) | ((uint)(g * shade) << 8) | (uint)(b * shade);
+        private static uint Color(int r, int g, int b) => new TaleWorlds.Library.Color(r / 255f, g / 255f, b / 255f, 1).ToUnsignedInteger();
         private void ReleaseNative(bool defer = true)
         {
             Texture = null;
@@ -173,28 +211,54 @@ namespace BattleMiniMap.View.MapGeometry
             if (fallback != null)
             {
                 if (defer) _retired.Add(Tuple.Create(_frame + 2, (Action)(() => fallback.Release())));
-                else fallback.Release();
+                else MapGeometryCleanup.Run(ReportCleanupError, () => fallback.Release());
             }
-            var view = _view; var scene = _scene; var material = _material; var white = _white;
-            var target = _target; var camera = _camera; var meshes = _meshes.ToArray();
-            _view = null; _scene = null; _material = null; _white = null; _target = null; _camera = null;
+            ReleaseGpu(defer);
+            _selectedBackend = null;
+        }
+        private void ReleaseGpu(bool defer = true)
+        {
+            if (_gpu == null && _scene == null && _camera == null && _material == null && _white == null && _meshes.Count == 0) return;
+            var gpu = _gpu; var scene = _scene; var material = _material; var white = _white;
+            var camera = _camera; var meshes = _meshes.ToArray(); var entities = _entities.ToArray();
+            Texture = _fallbackUi;
+            _gpu = null; _scene = null; _material = null; _white = null; _camera = null;
             _meshes.Clear(); _entities.Clear();
-            if (view != null) { view.SetEnable(false); view.AddClearTask(clearOnlySceneview: true); }
             Action release = () =>
             {
-                if (scene != null) { scene.ClearAll(); scene.ManualInvalidate(); }
-                foreach (var mesh in meshes) mesh.ManualInvalidate();
-                material?.ManualInvalidate(); white?.Release(); target?.Release(); camera?.ReleaseCamera();
-                GC.KeepAlive(view);
+                MapGeometryCleanup.Run(ReportCleanupError, () => scene?.ClearAll(), () => scene?.ManualInvalidate());
+                foreach (var mesh in meshes) MapGeometryCleanup.Run(ReportCleanupError, () => mesh?.ManualInvalidate());
+                MapGeometryCleanup.Run(ReportCleanupError, () => material?.ManualInvalidate(), () => white?.Release(),
+                    () => gpu?.Release(), () => camera?.ReleaseCamera());
+                GC.KeepAlive(entities);
             };
-            // UI and native render commands can still reference the previous target.
-            if (defer && scene != null) _retired.Add(Tuple.Create(_frame + 2, release)); else release();
+            try { gpu?.Retire(); }
+            catch (Exception ex) { ReportCleanupError(ex); }
+            finally
+            {
+                if (defer && scene != null) _retired.Add(Tuple.Create(_frame + 2, release));
+                else MapGeometryCleanup.Run(ReportCleanupError, release);
+            }
         }
         private void DrainRetired(bool all)
         {
             for (var i = _retired.Count - 1; i >= 0; --i)
-                if (all || _retired[i].Item1 <= _frame) { var release = _retired[i].Item2; _retired.RemoveAt(i); release(); }
+                if (all || _retired[i].Item1 <= _frame)
+                {
+                    var release = _retired[i].Item2; _retired.RemoveAt(i);
+                    MapGeometryCleanup.Run(ReportCleanupError, release);
+                }
         }
-        public void Dispose() { if (Active == this) Active = null; ReleaseNative(false); DrainRetired(true); _data = null; }
+        private static void ReportCleanupError(Exception error)
+        {
+            try { TaleWorlds.Library.Debug.Print("BattleMiniMap geometry cleanup: " + error.Message); }
+            catch { } // Logging during shutdown must not interrupt remaining releases.
+        }
+        public void Dispose()
+        {
+            if (Active == this) Active = null;
+            try { ReleaseNative(false); }
+            finally { DrainRetired(true); _data = null; }
+        }
     }
 }

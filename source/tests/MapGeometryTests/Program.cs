@@ -58,6 +58,45 @@ static class Program
         Check(Math.Abs(aUv.Z-.79996)<.00001,"Camera depth matches observed near/far normalization");
         var textureUv=MapGpuDiagnosticGeometry.ExpectedTextureUv(MapGpuDiagnosticGeometry.Triangle[0]);
         Check(Math.Abs(textureUv.Y-.78)<.000001 && Math.Abs(textureUv.X-.18)<.000001,"Texture UV flips camera viewport Y explicitly");
+        var projection=new MapGeometryProjection(168.779f,238.234f,1.034f,325,539,-10,10);
+        Check(data.Layers.SelectMany(l=>l.Original.Vertices).All(v=>{
+            var uv=projection.TextureUv(v);var mapped=MapGeometryData.MapPoint(v,168.779f,238.234f);
+            return Math.Abs(uv.X-mapped.X/(325*1.034f))<1e-6 && Math.Abs(uv.Y-(-mapped.Y)/(539*1.034f))<1e-6;
+        }),"Main GPU texture axes match CPU raster on every cached vertex");
+        var corner=projection.TextureUv(new GeometryPoint(168.779f,238.234f,0));
+        Check(corner.X==0 && corner.Y==0,"World minimum maps to top-left texture corner");
+        var lastPixel=projection.TextureUv(new GeometryPoint(168.779f+538*1.034f,238.234f+324*1.034f,0));
+        Check(Math.Abs(lastPixel.X-324f/325)<1e-6 && Math.Abs(lastPixel.Y-538f/539)<1e-6,"Last map pixel preserves extra-pixel denominator");
+        var large=new MapGeometryProjection(0,0,1,4096,8192,-10,10);
+        var uvLarge=large.TextureUv(new GeometryPoint(4096,2048,0));
+        Check(uvLarge.X*2048==1024 && uvLarge.Y*2048==1024,"Downsampled non-square map keeps world UV mapping");
+        Check(projection.TextureUv(new GeometryPoint(200,300,10)).Z < projection.TextureUv(new GeometryPoint(200,300,-10)).Z,"Upper surface is nearer in GPU depth");
+        Check(data.Layers.SelectMany(l=>l.Original.Vertices).All(v=>{var uv=projection.TextureUv(v);return uv.Z>0 && uv.Z<1;}),"Cached layers fit main-map camera near/far");
+        try{new MapGeometryProjection(0,0,float.NaN,1,1,0,1);Check(false,"Invalid projection rejected");}catch(ArgumentOutOfRangeException){Check(true,"Invalid projection rejected");}
+        var backend=new MapGeometryBackendState();
+        Check(!backend.Update(0,false,null),"CPU retained before GPU callback");
+        Check(!backend.Update(1,true,null),"CPU retained after first callback");
+        Check(backend.Update(2,true,null),"Valid GPU target selected after callback warmup");
+        Check(!backend.Update(3,false,null) && backend.Failure!=null,"GPU invalidation returns CPU");
+        Check(!backend.Update(4,true,null),"GPU failure remains latched until reset");
+        backend.Reset();Check(!backend.Update(2,true,null) && backend.Update(3,true,null),"Reset allows GPU retry with minimum visible warmup");
+        Check(!backend.Update(4,true,"callback fault") && backend.Failure=="callback fault","Callback failure retains CPU");
+        backend.Reset();for(var n=0;n<MapGeometryBackendState.StallUpdates;n++)backend.Update(0,true,null);
+        Check(backend.Failure!=null,"No callback progress fails back to CPU");
+        backend.Reset();backend.Update(1,true,null);
+        // Hidden updates never call policy.Update; resuming counts only visible updates.
+        Check(backend.Update(2,true,null) && backend.Failure==null,"Hidden interval does not count toward GPU stall");
+        for(var n=0;n<MapGeometryBackendState.StallUpdates;n++)backend.Update(2,true,null);
+        Check(backend.Failure!=null,"Previously active GPU also fails back when callbacks stall");
+        backend.Reset();for(var n=0;n<MapGeometryBackendState.StallUpdates;n++)backend.Update(n+1,false,null);
+        Check(backend.Failure!=null,"Never-valid GPU target retains CPU despite callbacks");
+        var releases=0;var cleanupErrors=0;
+        MapGeometryCleanup.Run(e=>cleanupErrors++,()=>{throw new InvalidOperationException("failed resource");},()=>releases++);
+        Check(releases==1 && cleanupErrors==1,"One failed release does not skip remaining resources");
+        MapGeometryCleanup.Run(e=>{throw new Exception("failed reporter");},()=>{throw new Exception("failed resource");},()=>releases++);
+        Check(releases==2,"Cleanup reporter failure cannot prevent remaining releases");
+        MapGeometryCleanup.Run(null,()=>{throw new Exception("no reporter");},()=>releases++);
+        Check(releases==3,"Cleanup failure without reporter is contained");
         var temp = Path.Combine(Path.GetTempPath(), "BattleMiniMapGeometryTests-" + Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
         try
         {

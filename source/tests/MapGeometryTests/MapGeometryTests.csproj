@@ -5,5 +5,8 @@
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryManifest.cs" Link="MapGeometryManifest.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryRasterizer.cs" Link="MapGeometryRasterizer.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGpuDiagnosticGeometry.cs" Link="MapGpuDiagnosticGeometry.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryBackendState.cs" Link="MapGeometryBackendState.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryProjection.cs" Link="MapGeometryProjection.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryCleanup.cs" Link="MapGeometryCleanup.cs" />
   </ItemGroup>
 </Project>

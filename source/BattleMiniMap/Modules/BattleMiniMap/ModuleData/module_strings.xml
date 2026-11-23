@@ -45,6 +45,8 @@
   <string id="str_battle_mini_map_toggle_map_holding_usage" text="{=BattleMiniMapHotKey_toggle_map_holding_usage}Toggle map by holding {KeyName}." />
   <string id="str_battle_mini_map_geometry" text="{=BattleMiniMap_geometry}Bridge geometry overlay" />
   <string id="str_battle_mini_map_geometry_hint" text="{=BattleMiniMap_geometry_hint}Show verified geometry in the matching town scene. Other scenes use the existing map." />
+  <string id="str_battle_mini_map_geometry_gpu" text="{=BattleMiniMap_geometry_gpu}GPU geometry map" />
+  <string id="str_battle_mini_map_geometry_gpu_hint" text="{=BattleMiniMap_geometry_gpu_hint}Turn off to use CPU drawing. Use this if GPU geometry displays incorrectly." />
   <string id="str_battle_mini_map_geometry_proxy" text="{=BattleMiniMap_geometry_proxy}Use simplified map geometry" />
   <string id="str_battle_mini_map_geometry_proxy_hint" text="{=BattleMiniMap_geometry_proxy_hint}Turn off to render the retained original mesh. This does not change game collision." />
   <string id="str_battle_mini_map_geometry_cut" text="{=BattleMiniMap_geometry_cut}Limit displayed geometry height" />

@@ -56,6 +56,7 @@ namespace BattleMiniMap.Config
         public int MapGpuDiagnosticMode { get; set; } = 0;
         public bool MapGpuDiagnosticDepth { get; set; } = false;
 
+        public bool UseGpuMapGeometry { get; set; } = true;
         public bool EnableMapGeometry { get; set; } = true;
         public bool UseMapGeometryProxy { get; set; } = true;
         public bool CutMapGeometryByHeight { get; set; } = false;
