@@ -17,7 +17,8 @@ namespace BattleMiniMap.View.MapGeometry
             if (Scale <= 0 || float.IsNaN(Scale) || float.IsInfinity(Scale)) throw new ArgumentException("Invalid diagnostic bounds");
         }
         public GeometryPoint Normalize(GeometryPoint p) => new GeometryPoint((p.Y-Center.Y)/Scale,-(p.X-Center.X)/Scale,(p.Z-Center.Z)/Scale);
-        public static GeometryPoint ExpectedViewport(GeometryPoint p) => new GeometryPoint((p.X+1.25f)/2.5f,(1.25f-p.Y)/2.5f,400-p.Z);
+        public static GeometryPoint ExpectedViewport(GeometryPoint p) => new GeometryPoint((p.X+1.25f)/2.5f,(p.Y+1.25f)/2.5f,(400-p.Z-.1f)/(500-.1f));
+        public static GeometryPoint ExpectedTextureUv(GeometryPoint p) { var v=ExpectedViewport(p); return new GeometryPoint(v.X,1-v.Y,v.Z); }
         public static GeometryPoint[] Triangle => new[]{new GeometryPoint(-.8f,-.7f,0),new GeometryPoint(.8f,-.7f,0),new GeometryPoint(0,.8f,0)};
     }
 }

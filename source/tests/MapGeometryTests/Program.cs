@@ -53,8 +53,11 @@ static class Program
         var first=data.Layers[0].Original.Vertices[0];var qfirst=normalized.Normalize(first);
         Check(Math.Abs((normalized.Center.X-qfirst.Y*normalized.Scale)-first.X)<.0001 && Math.Abs((normalized.Center.Y+qfirst.X*normalized.Scale)-first.Y)<.0001 && Math.Abs((normalized.Center.Z+qfirst.Z*normalized.Scale)-first.Z)<.0001,"Diagnostic transform reversible to original XYZ");
         var aUv=MapGpuDiagnosticGeometry.ExpectedViewport(MapGpuDiagnosticGeometry.Triangle[0]);var cUv=MapGpuDiagnosticGeometry.ExpectedViewport(MapGpuDiagnosticGeometry.Triangle[2]);
-        Check(Math.Abs(aUv.X-.18)<.000001 && Math.Abs(aUv.Y-.78)<.000001 && Math.Abs(cUv.X-.5)<.000001 && Math.Abs(cUv.Y-.18)<.000001,"Synthetic triangle expected camera UV");
+        Check(Math.Abs(aUv.X-.18)<.000001 && Math.Abs(aUv.Y-.22)<.000001 && Math.Abs(cUv.X-.5)<.000001 && Math.Abs(cUv.Y-.82)<.000001,"Synthetic triangle expected camera UV");
         Check(data.Layers.SelectMany(l=>l.Original.Vertices).All(v=>{var p=normalized.Normalize(v);return 400-p.Z>.1 && 400-p.Z<500;}),"Entire bridge remains inside diagnostic near/far depth");
+        Check(Math.Abs(aUv.Z-.79996)<.00001,"Camera depth matches observed near/far normalization");
+        var textureUv=MapGpuDiagnosticGeometry.ExpectedTextureUv(MapGpuDiagnosticGeometry.Triangle[0]);
+        Check(Math.Abs(textureUv.Y-.78)<.000001 && Math.Abs(textureUv.X-.18)<.000001,"Texture UV flips camera viewport Y explicitly");
         var temp = Path.Combine(Path.GetTempPath(), "BattleMiniMapGeometryTests-" + Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
         try
         {
