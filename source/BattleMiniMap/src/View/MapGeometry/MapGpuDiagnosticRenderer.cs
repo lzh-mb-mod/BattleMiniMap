@@ -19,8 +19,6 @@ namespace BattleMiniMap.View.MapGeometry
         private readonly List<GameEntity> _entities = new List<GameEntity>();
         private int _mode, _ticks, _reports; private bool _depth, _proxy, _failed;
         private int _builtAtTick;
-        private bool _loadingGateBypassed;
-        private bool _sceneShadowsDisabled;
         private readonly List<Tuple<int,Action>> _retired = new List<Tuple<int,Action>>();
         public UiTexture Texture { get; private set; }
         public MapGpuDiagnosticRenderer(){Active=this;}
@@ -41,38 +39,16 @@ namespace BattleMiniMap.View.MapGeometry
                 if(_view==null || mode!=_mode || config.MapGpuDiagnosticDepth!=_depth || config.UseMapGeometryProxy!=_proxy)
                 {
                     Clear(true);_mode=mode;_depth=config.MapGpuDiagnosticDepth;_proxy=config.UseMapGeometryProxy;
-                    Build(data);_reports=0;_builtAtTick=_ticks;_loadingGateBypassed=false;_sceneShadowsDisabled=false;
+                    Build(data);_reports=0;_builtAtTick=_ticks;
                 }
-                // Controlled private-scene comparison, after giving normal loading a chance.
-                // Never applies to the mission scene or the working CPU map.
-                if(!_loadingGateBypassed && _ticks-_builtAtTick>=120 && !_view.CheckSceneReadyToRender())
-                {
-                    Debug.Print("BattleMiniMap GPU diagnostic loading gate before: view="+_view.ReadyToRender()+
-                        " scene="+_view.CheckSceneReadyToRender()+" loading="+_scene.GetLoadingStateName()+
-                        " loadingFinished="+_scene.IsLoadingFinished()+" elapsedTicks="+(_ticks-_builtAtTick));
-                    _scene.SetDoNotWaitForLoadingStatesToRender(true);
-                    _loadingGateBypassed=true;
-                    Debug.Print("BattleMiniMap GPU diagnostic loading gate bypass enabled: privateScene=True");
-                }
-                // SetDefaultLighting in vanilla tableaus also disables scene-level shadows.
-                // Isolate that call, without changing the lighting or the mission scene.
-                if(!_sceneShadowsDisabled && _ticks-_builtAtTick>=240 && !_view.CheckSceneReadyToRender())
-                {
-                    Debug.Print("BattleMiniMap GPU diagnostic scene shadow before: view="+_view.ReadyToRender()+
-                        " scene="+_view.CheckSceneReadyToRender()+" loading="+_scene.GetLoadingStateName()+
-                        " loadingFinished="+_scene.IsLoadingFinished()+" loadingGateBypassed="+_loadingGateBypassed+
-                        " elapsedTicks="+(_ticks-_builtAtTick));
-                    _scene.SetShadow(false);
-                    _sceneShadowsDisabled=true;
-                    Debug.Print("BattleMiniMap GPU diagnostic scene shadows disabled: privateScene=True");
-                }
+                // Automatic loading bypass and scene-shadow transitions are withdrawn.
+                // They reached shader compilation without producing verified geometry.
                 _view.SetEnable(true);
                 if(_reports<8 && _ticks%60==0)
                 {
                     ++_reports;Debug.Print("BattleMiniMap GPU diagnostic ready: mode="+_mode+" view="+_view.ReadyToRender()+
                         " scene="+_view.CheckSceneReadyToRender()+" loading="+_scene.GetLoadingStateName()+
-                        " loadingFinished="+_scene.IsLoadingFinished()+" loadingGateBypassed="+_loadingGateBypassed+
-                        " sceneShadowsDisabled="+_sceneShadowsDisabled+
+                        " loadingFinished="+_scene.IsLoadingFinished()+
                         " elapsedTicks="+(_ticks-_builtAtTick)+" frame="+_camera.Frame);
                 }
             }
