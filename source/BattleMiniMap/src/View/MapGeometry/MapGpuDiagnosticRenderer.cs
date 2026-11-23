@@ -65,7 +65,7 @@ namespace BattleMiniMap.View.MapGeometry
             _camera.LookAt(new Vec3(0,0,400),Vec3.Zero,Vec3.Forward);
             _camera.SetViewVolume(false,-1.25f,1.25f,-1.25f,1.25f,.1f,500);
             _white=TaleWorlds.Engine.Texture.CreateFromByteArray(new byte[]{255,255,255,255},1,1);
-            _material=Material.GetDefaultMaterial().CreateCopy();_material.SetShader(Shader.GetFromResource("simple_shading"));
+            _material=Material.GetDefaultMaterial().CreateCopy();MapGeometryShader.Bind(_material);
             _material.SetShaderFlags(0);_material.SetTexture(Material.MBTextureType.DiffuseMap,_white);
             _material.Flags=MaterialFlags.TwoSided|MaterialFlags.DontCastShadow|MaterialFlags.RequiresForwardRendering;
             if(!_depth)_material.Flags|=MaterialFlags.NoDepthTest|MaterialFlags.NoModifyDepthBuffer;

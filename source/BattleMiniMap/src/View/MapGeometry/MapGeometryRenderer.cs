@@ -118,7 +118,7 @@ namespace BattleMiniMap.View.MapGeometry
             _camera = Camera.CreateCamera();
             var image = new ImageRGBA(1, 1); image.SetRGBA(0, 0, 255, 255, 255, 255);
             var uiWhite = image.CreateTexture(); _white = ((EngineTexture)uiWhite.PlatformTexture).Texture;
-            _material = Material.GetDefaultMaterial().CreateCopy(); _material.SetShader(Shader.GetFromResource("simple_shading"));
+            _material = Material.GetDefaultMaterial().CreateCopy(); MapGeometryShader.Bind(_material);
             _material.SetShaderFlags(0); _material.SetTexture(Material.MBTextureType.DiffuseMap, _white);
             _material.Flags = MaterialFlags.TwoSided | MaterialFlags.DontCastShadow | MaterialFlags.RequiresForwardRendering;
             _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend); _material.SetAlphaTestValue(0);

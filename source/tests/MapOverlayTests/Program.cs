@@ -6,7 +6,18 @@ using TaleWorlds.TwoDimension;
 class Program
 {
  static void Check(bool ok,string name){if(!ok)throw new Exception(name);Console.WriteLine("PASS: "+name);}
+ static void Rejected(Action action,string name){try{action();}catch(InvalidOperationException){Check(true,name);return;}throw new Exception(name);}
  static void Main(){
+  var material=new TaleWorlds.Engine.Material();
+  TaleWorlds.Engine.Shader.Resolved=new TaleWorlds.Engine.Shader{Name="simple_shader"};
+  MapGeometryShader.Bind(material);Check(material.SetCalls==1 && TaleWorlds.Engine.Shader.Requested=="simple_shader","shader resource key and material identity accepted");
+  TaleWorlds.Engine.Shader.Resolved=new TaleWorlds.Engine.Shader{Name="adaptive_terrain_compute"};
+  Rejected(()=>MapGeometryShader.Bind(material),"valid but wrong native shader fallback rejected");Check(material.SetCalls==1,"wrong resource never assigned to material");
+  TaleWorlds.Engine.Shader.Resolved=null;Rejected(()=>MapGeometryShader.Bind(material),"null shader rejected");
+  TaleWorlds.Engine.Shader.Resolved=new TaleWorlds.Engine.Shader{Name="simple_shader",IsValid=false};Rejected(()=>MapGeometryShader.Bind(material),"invalid shader rejected");
+  TaleWorlds.Engine.Shader.Resolved=new TaleWorlds.Engine.Shader{Name="simple_shader"};
+  material.OverrideReadback=new TaleWorlds.Engine.Shader{Name="adaptive_terrain_compute"};Rejected(()=>MapGeometryShader.Bind(material),"wrong material shader readback rejected");
+
   var config=BattleMiniMap.Config.BattleMiniMapConfig.Get();var ui=new UIContext();var context=new TwoDimensionContext();var draw=new TwoDimensionDrawContext();
   var widget=new BattleMiniMap_GeometryWidget(ui);MapGeometryRenderer.Active=new MapGeometryRenderer{Texture=new Texture()};
   widget.Render(context,draw);Check(draw.Count==1 && widget.TextureProvider==null,"direct full-map draw before any provider bootstrap");
@@ -38,3 +49,8 @@ namespace BattleMiniMap.Widgets{public static class Utility{
 namespace TaleWorlds.MountAndBlade{public class MissionState{public static MissionState Current=new MissionState();public T GetListenerOfType<T>() where T:new()=>new T();}}
 namespace TaleWorlds.MountAndBlade.View.Screens{public class MissionScreen{public Camera CombatCamera=new Camera();}public class Camera{public TaleWorlds.Library.Position Position=new TaleWorlds.Library.Position(),Direction=new TaleWorlds.Library.Position();}}
 namespace BattleMiniMap.View.MapGeometry{internal class MapGeometryRenderer{internal static MapGeometryRenderer Active;public TaleWorlds.TwoDimension.Texture Texture;}}
+
+namespace TaleWorlds.Engine{
+ public class Shader{public bool IsValid=true;public string Name;public static Shader Resolved;public static string Requested;public static Shader GetFromResource(string name){Requested=name;return Resolved;}}
+ public class Material{Shader assigned;public Shader OverrideReadback;public int SetCalls;public void SetShader(Shader shader){assigned=shader;SetCalls++;}public Shader GetShader()=>OverrideReadback??assigned;}
+}
