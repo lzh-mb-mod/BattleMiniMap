@@ -48,5 +48,12 @@
 
     <string id="BattleMiniMap_toggle_map_usage" text="按下{KeyName}切换地图。" />
     <string id="BattleMiniMapHotKey_toggle_map_holding_usage" text="长按{KeyName}切换地图。" />
-  </strings>
+      <string id="BattleMiniMap_geometry" text="桥体几何叠加" />
+    <string id="BattleMiniMap_geometry_hint" text="在已验证的对应城镇场景显示桥体；其他场景使用现有地图。" />
+    <string id="BattleMiniMap_geometry_proxy" text="使用简化地图几何" />
+    <string id="BattleMiniMap_geometry_proxy_hint" text="关闭后绘制保留的原始网格；不改变游戏碰撞。" />
+    <string id="BattleMiniMap_geometry_cut" text="限制几何显示高度" />
+    <string id="BattleMiniMap_geometry_cut_hint" text="裁去指定世界高度以上的几何以查看下层结构；不代表楼层或通行判定。" />
+    <string id="BattleMiniMap_geometry_ceiling" text="几何显示高度上限（米）" />
+</strings>
 </base>

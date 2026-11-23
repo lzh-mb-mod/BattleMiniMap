@@ -1,4 +1,4 @@
-﻿using BattleMiniMap.Config;
+using BattleMiniMap.Config;
 using BattleMiniMap.Config.HotKey;
 using BattleMiniMap.View.MapTerrain;
 using System.Collections.Specialized;
@@ -13,6 +13,7 @@ namespace BattleMiniMap.View.Background.Map
 {
     public class BattleMiniMapView : MissionView
     {
+        private BattleMiniMap.View.MapGeometry.MapGeometryRenderer _mapGeometry;
         private BattleMiniMapViewModel _dataSource;
         private GauntletLayer _layer;
         private MissionTimer _timer;
@@ -34,6 +35,7 @@ namespace BattleMiniMap.View.Background.Map
         {
             base.OnMissionScreenInitialize();
 
+            _mapGeometry = new BattleMiniMap.View.MapGeometry.MapGeometryRenderer(Mission.SceneName);
             var movieName = nameof(BattleMiniMapView);
             _layer = new GauntletLayer(movieName, 12);
             _layer.LoadMovie(movieName, _dataSource);
@@ -79,6 +81,7 @@ namespace BattleMiniMap.View.Background.Map
                                           (BattleMiniMapConfig.Get().ShowMap ^ toggleMapKeyDown ^
                                           (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding)));
 
+            _mapGeometry?.Update(MiniMap.Instance, _dataSource.IsEnabled);
             _dataSource.UpdateCamera();
             UpdateDynamicScale(dt, instantlyUpdateScale);
 
@@ -138,6 +141,8 @@ namespace BattleMiniMap.View.Background.Map
             base.OnMissionScreenFinalize();
 
             MissionScreen.RemoveLayer(_layer);
+            _mapGeometry?.Dispose();
+            _mapGeometry = null;
             _dataSource.OnFinalize();
             _layer = null;
             Mission.Current.Boundaries.CollectionChanged -= BoundariesOnCollectionChanged;

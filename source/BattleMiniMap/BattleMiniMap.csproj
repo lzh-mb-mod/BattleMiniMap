@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
 	  <TargetFramework>net472</TargetFramework>
 	  <ProcessorArchitecture>amd64</ProcessorArchitecture>
@@ -142,6 +142,7 @@
     <Exec Command="xcopy &quot;$(TargetDir)MissionLibrary.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
     <Exec Command="xcopy &quot;$(TargetDir)BattleMiniMap.Widgets.dll&quot; &quot;$(ModulePackagePath)bin\Win64_Shipping_Client\&quot; /C /I /Y /F" />
     <Exec Command="xcopy &quot;$(ProjectDir)Modules\.&quot; &quot;$(PackagePath)&quot; /E /C /I /Y /F" />
+    <Exec Condition="Exists('$(ProjectDir)obj\map-geometry-cache\empire_town_g.xml')" Command="xcopy &quot;$(ProjectDir)obj\map-geometry-cache\empire_town_g.xml&quot; &quot;$(ModulePackagePath)ModuleData\MapGeometry\&quot; /I /Y /F" />
     <Exec Condition="'$(DeployToGame)' != 'false'" Command="xcopy &quot;$(ModulePackagePath).&quot; &quot;$(GamePath)Modules\$(ModuleAlias) &quot; /E /C /I /Y /F" />
   </Target>
 

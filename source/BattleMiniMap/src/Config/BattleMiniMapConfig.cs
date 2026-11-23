@@ -53,6 +53,11 @@ namespace BattleMiniMap.Config
         public float AgentMarkerScale { get; set; } = 1;
         public float HeroMarkerScale { get; set; } = 2.5f;
 
+        public bool EnableMapGeometry { get; set; } = true;
+        public bool UseMapGeometryProxy { get; set; } = true;
+        public bool CutMapGeometryByHeight { get; set; } = false;
+        public float MapGeometryCeiling { get; set; } = 5f;
+
         public float EdgeOpacityFactor { get; set; } = 0.5f;
 
         public float BackgroundOpacity { get; set; } = 0.7f;

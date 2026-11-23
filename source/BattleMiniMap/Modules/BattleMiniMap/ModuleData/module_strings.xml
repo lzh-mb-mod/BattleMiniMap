@@ -43,4 +43,11 @@
 
   <string id="str_battle_mini_map_toggle_map_usage" text="{=BattleMiniMap_toggle_map_usage}Toggle map by pressing {KeyName}." />
   <string id="str_battle_mini_map_toggle_map_holding_usage" text="{=BattleMiniMapHotKey_toggle_map_holding_usage}Toggle map by holding {KeyName}." />
+  <string id="str_battle_mini_map_geometry" text="{=BattleMiniMap_geometry}Bridge geometry overlay" />
+  <string id="str_battle_mini_map_geometry_hint" text="{=BattleMiniMap_geometry_hint}Show verified geometry in the matching town scene. Other scenes use the existing map." />
+  <string id="str_battle_mini_map_geometry_proxy" text="{=BattleMiniMap_geometry_proxy}Use simplified map geometry" />
+  <string id="str_battle_mini_map_geometry_proxy_hint" text="{=BattleMiniMap_geometry_proxy_hint}Turn off to render the retained original mesh. This does not change game collision." />
+  <string id="str_battle_mini_map_geometry_cut" text="{=BattleMiniMap_geometry_cut}Limit displayed geometry height" />
+  <string id="str_battle_mini_map_geometry_cut_hint" text="{=BattleMiniMap_geometry_cut_hint}Clip geometry above the selected world height to inspect lower structures. This is not a floor or pathfinding classification." />
+  <string id="str_battle_mini_map_geometry_ceiling" text="{=BattleMiniMap_geometry_ceiling}Geometry height ceiling (m)" />
 </strings>

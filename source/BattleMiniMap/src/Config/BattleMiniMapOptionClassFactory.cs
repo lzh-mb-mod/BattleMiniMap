@@ -28,6 +28,14 @@ namespace BattleMiniMap.Config
                     GameTexts.FindText("str_battle_mini_map_toggle_map_when_commanding"), null,
                     () => BattleMiniMapConfig.Get().ToggleMapWhenCommanding,
                     b => BattleMiniMapConfig.Get().ToggleMapWhenCommanding = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry"),
+                    GameTexts.FindText("str_battle_mini_map_geometry_hint"), () => BattleMiniMapConfig.Get().EnableMapGeometry, b => BattleMiniMapConfig.Get().EnableMapGeometry = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_proxy"),
+                    GameTexts.FindText("str_battle_mini_map_geometry_proxy_hint"), () => BattleMiniMapConfig.Get().UseMapGeometryProxy, b => BattleMiniMapConfig.Get().UseMapGeometryProxy = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_cut"),
+                    GameTexts.FindText("str_battle_mini_map_geometry_cut_hint"), () => BattleMiniMapConfig.Get().CutMapGeometryByHeight, b => BattleMiniMapConfig.Get().CutMapGeometryByHeight = b));
+                optionCategory.AddOption(new NumericOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_ceiling"),
+                    null, () => BattleMiniMapConfig.Get().MapGeometryCeiling, f => BattleMiniMapConfig.Get().MapGeometryCeiling = f, -50, 1000, false, true));
                 optionCategory.AddOption(new NumericOptionViewModel(GameTexts.FindText("str_battle_mini_map_map_width"),
                     null,
                     () =>
