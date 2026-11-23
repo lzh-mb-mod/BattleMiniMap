@@ -7,6 +7,7 @@ namespace BattleMiniMap.View.MapGeometry
     {
         public BattleMiniMap_GpuDiagnosticWidget(UIContext context):base(context)
         {
+            DoNotAcceptEvents=true;
             WidthSizePolicy=HeightSizePolicy=SizePolicy.Fixed;SuggestedWidth=SuggestedHeight=256;
             HorizontalAlignment=HorizontalAlignment.Right;VerticalAlignment=VerticalAlignment.Top;MarginRight=20;MarginTop=44;
         }

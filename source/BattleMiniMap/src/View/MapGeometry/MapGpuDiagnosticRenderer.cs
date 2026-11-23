@@ -51,7 +51,10 @@ namespace BattleMiniMap.View.MapGeometry
         }
         private void Build(MapGeometryData data)
         {
-            _scene=Scene.CreateNewScene(initialize_physics:false,enable_decals:false);_scene.SetName("BattleMiniMap.GpuDiagnostic");
+            _scene=Scene.CreateNewScene(initialize_physics:false,enable_decals:false);
+            // Like BannerTableau: disabling view shadows alone does not skip scene shadow preparation.
+            _scene.DisableStaticShadows(true);
+            _scene.SetName("BattleMiniMap.GpuDiagnostic");
             _scene.EnsurePostfxSystem();
             _camera=Camera.CreateCamera();var frame=MatrixFrame.Identity;frame.origin.z=400;_camera.Frame=frame;
             _camera.LookAt(new Vec3(0,0,400),Vec3.Zero,Vec3.Forward);
@@ -82,7 +85,7 @@ namespace BattleMiniMap.View.MapGeometry
             _view.SetAcceptGlobalDebugRenderObjects(false);_view.SetRenderOrder(-1);_view.SetEnable(true);
             var cameraPoint=new Vec3(0,0,0);var actual=_camera.WorldPointToViewPortPoint(ref cameraPoint);
             var expected=MapGpuDiagnosticGeometry.ExpectedViewport(new GeometryPoint(0,0,0));
-            Debug.Print("BattleMiniMap GPU diagnostic build: mode="+_mode+" depth="+_depth+" triangles="+count+" proxy="+_proxy+
+            Debug.Print("BattleMiniMap GPU diagnostic build: staticShadowsDisabled=True mode="+_mode+" depth="+_depth+" triangles="+count+" proxy="+_proxy+
                 " center="+normalizer.Center.X+","+normalizer.Center.Y+","+normalizer.Center.Z+" scale="+normalizer.Scale+
                 " cameraOrigin="+_camera.Position+" cameraViewport="+actual+" expectedXY="+expected.X+","+expected.Y+" near="+_camera.Near+" far="+_camera.Far);
             foreach(var point in MapGpuDiagnosticGeometry.Triangle)

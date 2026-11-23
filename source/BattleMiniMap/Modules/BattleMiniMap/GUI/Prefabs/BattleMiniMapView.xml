@@ -4,7 +4,7 @@
   <VisualDefinitions>
   </VisualDefinitions>
   <Window>
-    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent">
+    <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" DoNotAcceptEvents="true" DoNotPassEventsToChildren="false">
       <Children>
         <BattleMiniMap_MapWidget Brush.GlobalAlphaFactor="@BackgroundAlphaFactor" IsVisible="@IsEnabled">
           <Children>
@@ -16,7 +16,7 @@
             <MapControlWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" />
           </Children>
         </BattleMiniMap_MapWidget>
-        <BattleMiniMap_GpuDiagnosticWidget />
+        <BattleMiniMap_GpuDiagnosticWidget DoNotAcceptEvents="true" DoNotPassEventsToChildren="false" />
       </Children>
     </Widget>
   </Window>
