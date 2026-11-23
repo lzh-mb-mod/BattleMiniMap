@@ -46,6 +46,15 @@ static class Program
         Check(MapGeometryRasterizer.Render(sampleData,false,null,0,0,1,10,10,10,10).Pixels.SequenceEqual(top.Pixels),"Depth is independent of instance submission order");
         foreach(var layer in sampleData.Layers)Array.Reverse(layer.Original.Faces[0]);
         Check(MapGeometryRasterizer.Render(sampleData,false,null,0,0,1,10,10,10,10).Pixels.SequenceEqual(top.Pixels),"Raster is two sided");
+        var normalized=new MapGpuDiagnosticGeometry(data);
+        Check(data.Layers.SelectMany(l=>l.Original.Vertices).All(v=>{
+            var q=normalized.Normalize(v);return Math.Abs(q.X)<=1.000001 && Math.Abs(q.Y)<=1.000001 && Math.Abs(q.Z)<=1.000001;
+        }),"GPU diagnostic bridge fits centered volume without lost height");
+        var first=data.Layers[0].Original.Vertices[0];var qfirst=normalized.Normalize(first);
+        Check(Math.Abs((normalized.Center.X-qfirst.Y*normalized.Scale)-first.X)<.0001 && Math.Abs((normalized.Center.Y+qfirst.X*normalized.Scale)-first.Y)<.0001 && Math.Abs((normalized.Center.Z+qfirst.Z*normalized.Scale)-first.Z)<.0001,"Diagnostic transform reversible to original XYZ");
+        var aUv=MapGpuDiagnosticGeometry.ExpectedViewport(MapGpuDiagnosticGeometry.Triangle[0]);var cUv=MapGpuDiagnosticGeometry.ExpectedViewport(MapGpuDiagnosticGeometry.Triangle[2]);
+        Check(Math.Abs(aUv.X-.18)<.000001 && Math.Abs(aUv.Y-.78)<.000001 && Math.Abs(cUv.X-.5)<.000001 && Math.Abs(cUv.Y-.18)<.000001,"Synthetic triangle expected camera UV");
+        Check(data.Layers.SelectMany(l=>l.Original.Vertices).All(v=>{var p=normalized.Normalize(v);return 400-p.Z>.1 && 400-p.Z<500;}),"Entire bridge remains inside diagnostic near/far depth");
         var temp = Path.Combine(Path.GetTempPath(), "BattleMiniMapGeometryTests-" + Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
         try
         {

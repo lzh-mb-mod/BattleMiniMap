@@ -50,4 +50,11 @@
   <string id="str_battle_mini_map_geometry_cut" text="{=BattleMiniMap_geometry_cut}Limit displayed geometry height" />
   <string id="str_battle_mini_map_geometry_cut_hint" text="{=BattleMiniMap_geometry_cut_hint}Clip geometry above the selected world height to inspect lower structures. This is not a floor or pathfinding classification." />
   <string id="str_battle_mini_map_geometry_ceiling" text="{=BattleMiniMap_geometry_ceiling}Geometry height ceiling (m)" />
+  <string id="str_battle_mini_map_gpu_diagnostic" text="{=BattleMiniMap_gpu_diagnostic}GPU offscreen diagnostic" />
+  <string id="str_battle_mini_map_gpu_diagnostic_hint" text="{=BattleMiniMap_gpu_diagnostic_hint}Optional 256 px window at top right. CPU map stays active. No scene sampling. Test clear, triangle, then cached bridge." />
+  <string id="str_battle_mini_map_gpu_off" text="{=BattleMiniMap_gpu_off}Off" />
+  <string id="str_battle_mini_map_gpu_clear" text="{=BattleMiniMap_gpu_clear}Clear color only" />
+  <string id="str_battle_mini_map_gpu_triangle" text="{=BattleMiniMap_gpu_triangle}Synthetic triangle" />
+  <string id="str_battle_mini_map_gpu_bridge" text="{=BattleMiniMap_gpu_bridge}Cached bridge geometry" />
+  <string id="str_battle_mini_map_gpu_depth" text="{=BattleMiniMap_gpu_depth}GPU diagnostic depth test/write" />
 </strings>

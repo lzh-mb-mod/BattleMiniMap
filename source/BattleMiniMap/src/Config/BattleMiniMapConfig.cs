@@ -1,4 +1,4 @@
-﻿using BattleMiniMap.View.MapTerrain;
+using BattleMiniMap.View.MapTerrain;
 using MissionSharedLibrary.Config;
 using System;
 using System.IO;
@@ -52,6 +52,9 @@ namespace BattleMiniMap.Config
 
         public float AgentMarkerScale { get; set; } = 1;
         public float HeroMarkerScale { get; set; } = 2.5f;
+
+        public int MapGpuDiagnosticMode { get; set; } = 0;
+        public bool MapGpuDiagnosticDepth { get; set; } = false;
 
         public bool EnableMapGeometry { get; set; } = true;
         public bool UseMapGeometryProxy { get; set; } = true;

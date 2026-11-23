@@ -34,6 +34,7 @@ namespace BattleMiniMap.View.MapGeometry
         private int _frame;
         private Texture _displayFallback;
         private UiTexture _fallbackUi;
+        internal MapGeometryData CachedData => _data;
         public UiTexture Texture { get; private set; }
         public MapGeometryRenderer(string sceneName) { _sceneName = sceneName; Active = this; }
 

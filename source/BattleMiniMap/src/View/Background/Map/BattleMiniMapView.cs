@@ -13,6 +13,7 @@ namespace BattleMiniMap.View.Background.Map
 {
     public class BattleMiniMapView : MissionView
     {
+        private BattleMiniMap.View.MapGeometry.MapGpuDiagnosticRenderer _gpuDiagnostic;
         private BattleMiniMap.View.MapGeometry.MapGeometryRenderer _mapGeometry;
         private BattleMiniMapViewModel _dataSource;
         private GauntletLayer _layer;
@@ -36,6 +37,7 @@ namespace BattleMiniMap.View.Background.Map
             base.OnMissionScreenInitialize();
 
             _mapGeometry = new BattleMiniMap.View.MapGeometry.MapGeometryRenderer(Mission.SceneName);
+            _gpuDiagnostic = new BattleMiniMap.View.MapGeometry.MapGpuDiagnosticRenderer();
             var movieName = nameof(BattleMiniMapView);
             _layer = new GauntletLayer(movieName, 12);
             _layer.LoadMovie(movieName, _dataSource);
@@ -82,6 +84,7 @@ namespace BattleMiniMap.View.Background.Map
                                           (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding)));
 
             _mapGeometry?.Update(MiniMap.Instance, _dataSource.IsEnabled);
+            _gpuDiagnostic?.Update(_mapGeometry?.CachedData);
             _dataSource.UpdateCamera();
             UpdateDynamicScale(dt, instantlyUpdateScale);
 
@@ -141,6 +144,8 @@ namespace BattleMiniMap.View.Background.Map
             base.OnMissionScreenFinalize();
 
             MissionScreen.RemoveLayer(_layer);
+            _gpuDiagnostic?.Dispose();
+            _gpuDiagnostic = null;
             _mapGeometry?.Dispose();
             _mapGeometry = null;
             _dataSource.OnFinalize();

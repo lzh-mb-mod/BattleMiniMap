@@ -14,5 +14,6 @@
         <MapControlWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" />
       </Children>
     </BattleMiniMap_MapWidget>
+    <BattleMiniMap_GpuDiagnosticWidget />
   </Window>
 </Prefab>

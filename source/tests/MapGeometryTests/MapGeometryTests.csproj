@@ -4,5 +4,6 @@
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryData.cs" Link="MapGeometryData.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryManifest.cs" Link="MapGeometryManifest.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryRasterizer.cs" Link="MapGeometryRasterizer.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGpuDiagnosticGeometry.cs" Link="MapGpuDiagnosticGeometry.cs" />
   </ItemGroup>
 </Project>

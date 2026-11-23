@@ -1,4 +1,4 @@
-﻿using MissionLibrary.Provider;
+using MissionLibrary.Provider;
 using MissionLibrary.View;
 using MissionSharedLibrary.Provider;
 using MissionSharedLibrary.View.ViewModelCollection;
@@ -28,6 +28,14 @@ namespace BattleMiniMap.Config
                     GameTexts.FindText("str_battle_mini_map_toggle_map_when_commanding"), null,
                     () => BattleMiniMapConfig.Get().ToggleMapWhenCommanding,
                     b => BattleMiniMapConfig.Get().ToggleMapWhenCommanding = b));
+                optionCategory.AddOption(new SelectionOptionViewModel(GameTexts.FindText("str_battle_mini_map_gpu_diagnostic"),
+                    GameTexts.FindText("str_battle_mini_map_gpu_diagnostic_hint"), new SelectionOptionData(
+                        i => BattleMiniMapConfig.Get().MapGpuDiagnosticMode = i,
+                        () => BattleMiniMapConfig.Get().MapGpuDiagnosticMode, () => 4, () => new SelectionItem[] {
+                            new SelectionItem(true,"str_battle_mini_map_gpu_off"), new SelectionItem(true,"str_battle_mini_map_gpu_clear"),
+                            new SelectionItem(true,"str_battle_mini_map_gpu_triangle"), new SelectionItem(true,"str_battle_mini_map_gpu_bridge") }), false));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_gpu_depth"),
+                    null, () => BattleMiniMapConfig.Get().MapGpuDiagnosticDepth, b => BattleMiniMapConfig.Get().MapGpuDiagnosticDepth = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry"),
                     GameTexts.FindText("str_battle_mini_map_geometry_hint"), () => BattleMiniMapConfig.Get().EnableMapGeometry, b => BattleMiniMapConfig.Get().EnableMapGeometry = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_proxy"),

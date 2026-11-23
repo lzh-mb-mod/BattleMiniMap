@@ -55,5 +55,12 @@
     <string id="BattleMiniMap_geometry_cut" text="限制几何显示高度" />
     <string id="BattleMiniMap_geometry_cut_hint" text="裁去指定世界高度以上的几何以查看下层结构；不代表楼层或通行判定。" />
     <string id="BattleMiniMap_geometry_ceiling" text="几何显示高度上限（米）" />
+    <string id="BattleMiniMap_gpu_diagnostic" text="GPU离屏诊断" />
+    <string id="BattleMiniMap_gpu_diagnostic_hint" text="可选右上角256像素小窗，CPU地图保持显示。不采样；依次检查清屏、三角形、缓存桥。" />
+    <string id="BattleMiniMap_gpu_off" text="关闭" />
+    <string id="BattleMiniMap_gpu_clear" text="仅清屏色" />
+    <string id="BattleMiniMap_gpu_triangle" text="合成三角形" />
+    <string id="BattleMiniMap_gpu_bridge" text="缓存桥几何" />
+    <string id="BattleMiniMap_gpu_depth" text="GPU诊断深度测试/写入" />
 </strings>
 </base>
