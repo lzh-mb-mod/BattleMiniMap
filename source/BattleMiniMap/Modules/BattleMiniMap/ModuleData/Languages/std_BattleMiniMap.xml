@@ -52,6 +52,10 @@
     <string id="BattleMiniMap_geometry_hint" text="Show verified geometry in the matching town scene. Other scenes use the existing map." />
     <string id="BattleMiniMap_geometry_gpu" text="GPU geometry map" />
     <string id="BattleMiniMap_geometry_gpu_hint" text="Turn off to use CPU drawing. Use this if GPU geometry displays incorrectly." />
+    <string id="BattleMiniMap_geometry_tint" text="GPU verification colors" />
+    <string id="BattleMiniMap_geometry_tint_hint" text="GPU uses cyan/magenta; CPU keeps normal colors. Turn off to restore normal GPU colors." />
+    <string id="BattleMiniMap_geometry_profile" text="Record map rendering performance" />
+    <string id="BattleMiniMap_geometry_profile_hint" text="Log CPU update cost and mission tick intervals, not GPU execution time. Pause and state changes reset the window." />
     <string id="BattleMiniMap_geometry_proxy" text="Use simplified map geometry" />
     <string id="BattleMiniMap_geometry_proxy_hint" text="Turn off to render the retained original mesh. This does not change game collision." />
     <string id="BattleMiniMap_geometry_cut" text="Limit displayed geometry height" />

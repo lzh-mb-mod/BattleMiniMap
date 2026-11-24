@@ -97,6 +97,33 @@ static class Program
         Check(releases==2,"Cleanup reporter failure cannot prevent remaining releases");
         MapGeometryCleanup.Run(null,()=>{throw new Exception("no reporter");},()=>releases++);
         Check(releases==3,"Cleanup failure without reporter is contained");
+        var perf=new MapGeometryPerformance();string perfRow=null;
+        for(var n=0;n<=72;n++){var row=perf.Record("CPU",n*.1,2,false);if(row!=null)perfRow=row;}
+        Check(perfRow!=null && perfRow.Contains("update_cpu_mean_ms=2.0000") && perfRow.Contains("mission_tick_p95_ms=100.0000"),"Performance window reports CPU and wall-clock intervals independently");
+        perf.Reset();for(var n=0;n<40;n++)perf.Record("CPU",n*.1,1,false);
+        Check(perf.Record("GPU",4,1,false)==null,"Backend switch drops partial performance window");
+        Check(perf.Record("GPU",4.1,1,true)==null && perf.Record("GPU",4.2,1,false)==null,"Paused performance window is reset");
+        Check(perf.Record("GPU",6,1,false)?.Contains("reason=long_gap")==true,"Long tick gap resets and reports discarded window");
+        Check(perf.Record(null,6.1,1,false)==null,"Hidden or disabled profiling drops window");
+        perf=new MapGeometryPerformance();
+        for(var n=0;n<=40;n++)perf.Record("CPU",n*.1,99,false);
+        perf.Record("GPU",4.1,1,false);perfRow=null;double firstWindowAt=0;
+        for(var n=42;n<=120;n++){var row=perf.Record("GPU",n*.1,1,false);if(row!=null && row.Contains("event=window")){perfRow=row;firstWindowAt=n*.1;break;}}
+        Check(perfRow!=null && firstWindowAt>=11.1 && perfRow.Contains("update_cpu_mean_ms=1.0000"),"Backend reset discards high-cost samples and restarts full warmup/window");
+        perf=new MapGeometryPerformance();for(var n=0;n<=40;n++)perf.Record("CPU",n*.1,99,false);
+        perf.Record("CPU",4.1,99,true);perfRow=null;
+        for(var n=42;n<=120;n++){var row=perf.Record("CPU",n*.1,1,false);if(row!=null && row.Contains("event=window")){perfRow=row;firstWindowAt=n*.1;break;}}
+        Check(perfRow!=null && firstWindowAt>=11.2 && perfRow.Contains("update_cpu_mean_ms=1.0000"),"Pause reset cannot leak previous samples into resumed window");
+        perf=new MapGeometryPerformance();for(var n=0;n<=40;n++)perf.Record("CPU",n*.1,99,false);
+        var dropped=perf.Record("CPU",6,1,false);Check(dropped.Contains("long_gap_resets=1") && !dropped.Contains("dropped_samples=0"),"Long stalls retain discarded-sample evidence");
+        perfRow=null;for(var n=61;n<=140;n++){var row=perf.Record("CPU",n*.1,1,false);if(row!=null && row.Contains("event=window")){perfRow=row;firstWindowAt=n*.1;break;}}
+        Check(perfRow!=null && firstWindowAt>=13 && perfRow.Contains("update_cpu_mean_ms=1.0000") && perfRow.Contains("long_gap_resets=1"),"Post-stall windows restart and retain cumulative reset counters");
+        var contextA=new MapGeometryPerformanceContext{Gpu=true,Proxy=true,Tint=false,Follow=true,Dynamic=false,DiagnosticDepth=false,MarkersRequested=false,MarkerProfile=false,Generation=1,Width=790,Diagnostic=0,Zoom=.5f};var contextB=contextA;
+        Check(contextA.Equals(contextB),"Stable typed performance context compares without formatting");contextB.DiagnosticDepth=true;
+        Check(!contextA.Equals(contextB),"Diagnostic depth changes performance context");
+        perf=new MapGeometryPerformance();perfRow=null;
+        for(var n=0;n<=72;n++){var row=perf.Record("CPU",n*.1,n%5==0?9:1,false);if(row!=null && row.Contains("event=window")){perfRow=row;break;}}
+        Check(perfRow!=null && perfRow.Contains("update_cpu_p95_ms=9.0000"),"Performance P95 reflects high-cost tail, not mean");
         var temp = Path.Combine(Path.GetTempPath(), "BattleMiniMapGeometryTests-" + Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
         try
         {

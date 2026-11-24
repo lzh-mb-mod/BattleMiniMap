@@ -27,6 +27,12 @@ namespace BattleMiniMap.View.MapGeometry
         private MapGeometryTableau _gpu;
         private readonly MapGeometryBackendState _gpuState = new MapGeometryBackendState();
         private string _selectedBackend;
+        private bool _lastTint;
+        private int _profileGeneration;
+        private readonly MapGeometryPerformance _performance = new MapGeometryPerformance();
+        private bool _performanceFailed, _hasProfileContext;
+        private MapGeometryPerformanceContext _profileContext;
+        private string _profileLabel;
         private Material _material;
         private Texture _white;
         private readonly List<GameEntity> _entities = new List<GameEntity>();
@@ -39,7 +45,50 @@ namespace BattleMiniMap.View.MapGeometry
         public UiTexture Texture { get; private set; }
         public MapGeometryRenderer(string sceneName) { _sceneName = sceneName; Active = this; }
 
-        public void Update(IMiniMap map, bool visible)
+        public void Update(IMiniMap map, bool visible, float dt = 0, long tickEntryTimestamp = 0)
+        {
+            var config = BattleMiniMapConfig.Get();
+            var started = config.ProfileMapGeometry ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
+            try { UpdateCore(map, visible); }
+            finally
+            {
+                try { RecordPerformance(config, visible, dt, started, tickEntryTimestamp); }
+                catch (Exception ex)
+                {
+                    _performanceFailed = true; _performance.Reset();
+                    try { TaleWorlds.Library.Debug.Print("BattleMiniMap map profiling disabled: " + ex.Message); }
+                    catch { }
+                }
+            }
+        }
+        private void RecordPerformance(BattleMiniMapConfig config, bool visible, float dt, long started, long tickEntryTimestamp)
+        {
+            if (tickEntryTimestamp <= 0 || _performanceFailed || !config.ProfileMapGeometry || !visible || _failed || _data == null || !config.EnableMapGeometry ||
+                _selectedBackend == null || (_selectedBackend == "CPU" && config.UseGpuMapGeometry && !_gpuFailed))
+                _performance.Reset();
+            else
+            {
+                var end = System.Diagnostics.Stopwatch.GetTimestamp();
+                var context = new MapGeometryPerformanceContext {
+                    Gpu = _selectedBackend == "GPU", Proxy = _lastProxy && _data.HasCompleteProxy,
+                    Tint = _selectedBackend == "GPU" && _lastTint, Generation = _profileGeneration,
+                    Follow = config.FollowMode, Zoom = config.FollowModeScale, Dynamic = config.EnableDynamicScale,
+                    Width = config.WidgetWidth, Diagnostic = config.MapGpuDiagnosticMode,
+                    DiagnosticDepth = config.MapGpuDiagnosticMode != 0 && config.MapGpuDiagnosticDepth,
+                    MarkersRequested = config.UseMeshMarkerBatching, MarkerProfile = config.ProfileMarkerRendering };
+                if (!_hasProfileContext || !context.Equals(_profileContext))
+                {
+                    _profileContext = context; _hasProfileContext = true;
+                    _profileLabel = context.ToString() + " ceiling=" + (_lastCeiling?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "none");
+                }
+                var row = _performance.Record(_profileLabel, tickEntryTimestamp / (double)System.Diagnostics.Stopwatch.Frequency,
+                    (end - started) * 1000.0 / System.Diagnostics.Stopwatch.Frequency,
+                    dt <= 0 || TaleWorlds.MountAndBlade.MBCommon.IsPaused || TaleWorlds.MountAndBlade.MissionState.Current?.Paused == true,
+                    context.Gpu ? "GPU" : "CPU");
+                if (row != null) TaleWorlds.Library.Debug.Print("BattleMiniMap map profile: " + row + " paints=" + (_gpu?.PaintCount ?? 0));
+            }
+        }
+        private void UpdateCore(IMiniMap map, bool visible)
         {
             ++_frame; DrainRetired(false);
             var config = BattleMiniMapConfig.Get();
@@ -80,7 +129,8 @@ namespace BattleMiniMap.View.MapGeometry
                 if (_gpuFailed) { SelectBackend(false, "GPU failure latched; CPU retained"); return; }
                 try
                 {
-                    if (_gpu == null) { Build(map, proxy, ceiling); _gpuState.Reset(); }
+                    if (_gpu != null && _lastTint != config.TintGpuMapGeometry) ReleaseGpu();
+                    if (_gpu == null) { _lastTint = config.TintGpuMapGeometry; Build(map, proxy, ceiling); _gpuState.Reset(); }
                     _gpu.SetEnabled(true);
                     var valid = _gpu.Texture != null && _gpu.Texture.IsValid;
                     var useGpu = _gpuState.Update(_gpu.PaintCount, valid, _gpu.Failure);
@@ -150,6 +200,8 @@ namespace BattleMiniMap.View.MapGeometry
 
         private void Build(IMiniMap map, bool proxy, float? ceiling)
         {
+            var buildTimer = System.Diagnostics.Stopwatch.StartNew();
+            ++_profileGeneration;
             _scene = Scene.CreateNewScene(initialize_physics: false, enable_decals: false);
             _scene.SetName("BattleMiniMap.MapGeometry"); _scene.DisableStaticShadows(true); _scene.EnsurePostfxSystem();
             _camera = Camera.CreateCamera();
@@ -171,7 +223,9 @@ namespace BattleMiniMap.View.MapGeometry
                     var u = b - a; var v = c - a;
                     var n = new Vec3(u.y * v.z - u.z * v.y, u.z * v.x - u.x * v.z, u.x * v.y - u.y * v.x);
                     var length = n.Length; if (length < 1e-8f) continue; n /= length;
-                    var color = layer.Resource == "stone_bridge_wide" ? Color(206, 184, 143) : Color(130, 166, 183);
+                    var main = layer.Resource == "stone_bridge_wide";
+                    var color = _lastTint ? (main ? Color(0, 235, 255) : Color(255, 70, 230)) :
+                        (main ? Color(206, 184, 143) : Color(130, 166, 183));
                     var ia = builder.AddFaceCorner(a, n, Vec2.Zero, color); var ib = builder.AddFaceCorner(b, n, Vec2.Zero, color);
                     var ic = builder.AddFaceCorner(c, n, Vec2.Zero, color); builder.AddFace(ia, ib, ic); faces++;
                 }
@@ -201,11 +255,14 @@ namespace BattleMiniMap.View.MapGeometry
                 " target=" + _width + "x" + _height + " depth=true twoSided=true clearAlpha=0");
             TaleWorlds.Library.Debug.Print("BattleMiniMap geometry submitted: triangles=" + submitted +
                 " variant=" + (proxy && _data.HasCompleteProxy ? "proxy" : "original") +
-                " ceiling=" + (ceiling.HasValue ? ceiling.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "none"));
+                " ceiling=" + (ceiling.HasValue ? ceiling.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "none") +
+                " tint=" + _lastTint + " build_cpu_ms=" + buildTimer.Elapsed.TotalMilliseconds.ToString("F3", System.Globalization.CultureInfo.InvariantCulture));
         }
         private static uint Color(int r, int g, int b) => new TaleWorlds.Library.Color(r / 255f, g / 255f, b / 255f, 1).ToUnsignedInteger();
         private void ReleaseNative(bool defer = true)
         {
+            ++_profileGeneration;
+            _performance.Reset();
             Texture = null;
             var fallback = _displayFallback; _displayFallback = null; _fallbackUi = null;
             if (fallback != null)

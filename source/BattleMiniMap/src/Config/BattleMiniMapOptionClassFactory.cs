@@ -40,6 +40,10 @@ namespace BattleMiniMap.Config
                     GameTexts.FindText("str_battle_mini_map_geometry_hint"), () => BattleMiniMapConfig.Get().EnableMapGeometry, b => BattleMiniMapConfig.Get().EnableMapGeometry = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_gpu"),
                     GameTexts.FindText("str_battle_mini_map_geometry_gpu_hint"), () => BattleMiniMapConfig.Get().UseGpuMapGeometry, b => BattleMiniMapConfig.Get().UseGpuMapGeometry = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_tint"),
+                    GameTexts.FindText("str_battle_mini_map_geometry_tint_hint"), () => BattleMiniMapConfig.Get().TintGpuMapGeometry, b => BattleMiniMapConfig.Get().TintGpuMapGeometry = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_profile"),
+                    GameTexts.FindText("str_battle_mini_map_geometry_profile_hint"), () => BattleMiniMapConfig.Get().ProfileMapGeometry, b => BattleMiniMapConfig.Get().ProfileMapGeometry = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_proxy"),
                     GameTexts.FindText("str_battle_mini_map_geometry_proxy_hint"), () => BattleMiniMapConfig.Get().UseMapGeometryProxy, b => BattleMiniMapConfig.Get().UseMapGeometryProxy = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_cut"),

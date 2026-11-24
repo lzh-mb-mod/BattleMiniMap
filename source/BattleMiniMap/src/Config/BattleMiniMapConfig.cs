@@ -56,6 +56,8 @@ namespace BattleMiniMap.Config
         public int MapGpuDiagnosticMode { get; set; } = 0;
         public bool MapGpuDiagnosticDepth { get; set; } = false;
 
+        public bool TintGpuMapGeometry { get; set; } = false;
+        public bool ProfileMapGeometry { get; set; } = false;
         public bool UseGpuMapGeometry { get; set; } = true;
         public bool EnableMapGeometry { get; set; } = true;
         public bool UseMapGeometryProxy { get; set; } = true;
@@ -116,6 +118,15 @@ namespace BattleMiniMap.Config
             Resolution = other.Resolution;
             AgentMarkerScale = other.AgentMarkerScale;
             HeroMarkerScale = other.HeroMarkerScale;
+            MapGpuDiagnosticMode = other.MapGpuDiagnosticMode;
+            MapGpuDiagnosticDepth = other.MapGpuDiagnosticDepth;
+            UseGpuMapGeometry = other.UseGpuMapGeometry;
+            TintGpuMapGeometry = other.TintGpuMapGeometry;
+            ProfileMapGeometry = other.ProfileMapGeometry;
+            EnableMapGeometry = other.EnableMapGeometry;
+            UseMapGeometryProxy = other.UseMapGeometryProxy;
+            CutMapGeometryByHeight = other.CutMapGeometryByHeight;
+            MapGeometryCeiling = other.MapGeometryCeiling;
             EdgeOpacityFactor = other.EdgeOpacityFactor;
             BackgroundOpacity = other.BackgroundOpacity;
             ForegroundOpacity = other.ForegroundOpacity;

@@ -52,6 +52,10 @@
     <string id="BattleMiniMap_geometry_hint" text="在已验证的对应城镇场景显示桥体；其他场景使用现有地图。" />
     <string id="BattleMiniMap_geometry_gpu" text="GPU几何地图" />
     <string id="BattleMiniMap_geometry_gpu_hint" text="关闭后使用CPU绘制；GPU显示异常时可关闭此项。" />
+    <string id="BattleMiniMap_geometry_tint" text="GPU验证着色" />
+    <string id="BattleMiniMap_geometry_tint_hint" text="GPU使用青色/紫色，CPU保留原色；关闭恢复正常配色。" />
+    <string id="BattleMiniMap_geometry_profile" text="记录地图渲染性能" />
+    <string id="BattleMiniMap_geometry_profile_hint" text="记录CPU更新及任务画面更新间隔，不是GPU执行时间；暂停或切换会重置窗口。" />
     <string id="BattleMiniMap_geometry_proxy" text="使用简化地图几何" />
     <string id="BattleMiniMap_geometry_proxy_hint" text="关闭后绘制保留的原始网格；不改变游戏碰撞。" />
     <string id="BattleMiniMap_geometry_cut" text="限制几何显示高度" />

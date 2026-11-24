@@ -49,6 +49,7 @@ namespace BattleMiniMap.View.Background.Map
 
         public override void OnMissionScreenTick(float dt)
         {
+            var mapTickEntry = BattleMiniMapConfig.Get().ProfileMapGeometry ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
             base.OnMissionScreenTick(dt);
 
             if (_boundaryChanged)
@@ -83,7 +84,7 @@ namespace BattleMiniMap.View.Background.Map
                                           (BattleMiniMapConfig.Get().ShowMap ^ toggleMapKeyDown ^
                                           (_isOrderViewEnabled && BattleMiniMapConfig.Get().ToggleMapWhenCommanding)));
 
-            _mapGeometry?.Update(MiniMap.Instance, _dataSource.IsEnabled);
+            _mapGeometry?.Update(MiniMap.Instance, _dataSource.IsEnabled, dt, mapTickEntry);
             _gpuDiagnostic?.Update(_mapGeometry?.CachedData);
             _dataSource.UpdateCamera();
             UpdateDynamicScale(dt, instantlyUpdateScale);
