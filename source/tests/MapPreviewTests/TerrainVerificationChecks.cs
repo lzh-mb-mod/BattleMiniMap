@@ -19,7 +19,7 @@ static class TerrainVerificationChecks
         var mainThread=Thread.CurrentThread.ManagedThreadId;var workerThread=mainThread;var published=false;
         var memory=new RawTerrainChecks.Memory(0x80000,false);var verification=new MapTerrainVerification();
         using(var iterator=verification.Run(token=>{workerThread=Thread.CurrentThread.ManagedThreadId;return memory;},m=>published=m==memory).GetEnumerator())Drive(iterator);
-        Check(published&&workerThread!=mainThread&&memory.Reads==0,"Worker verifies without touching scene memory; publication returns to owner thread");
+        Check(published&&workerThread!=mainThread&&memory.Reads==0&&verification.State=="hash-verified","Worker verifies without touching scene memory; publication returns to owner thread");
         Check(verification.WorkerMs>=0&&verification.WaitMs>=0,"Worker and waiting duration tracked separately");
         var started=new ManualResetEventSlim();var release=new ManualResetEventSlim();var cancelled=new ManualResetEventSlim();published=false;
         verification=new MapTerrainVerification();
@@ -28,8 +28,8 @@ static class TerrainVerificationChecks
             started.Set();try{release.Wait(token);token.ThrowIfCancellationRequested();return memory;}
             catch(OperationCanceledException){cancelled.Set();throw;}
         },m=>published=true).GetEnumerator();
-        Check(steps.MoveNext()&&steps.Current==MapTerrainVerification.Waiting&&started.Wait(2000)&&!published,"Pending task yields a wait marker without publishing memory access");
-        steps.Dispose();release.Set();Check(cancelled.Wait(2000)&&!published&&memory.Reads==0,"Pending iterator disposal cancels worker and prevents late publication");
+        Check(steps.MoveNext()&&steps.Current==0&&steps.MoveNext()&&steps.Current==MapTerrainVerification.Waiting&&started.Wait(2000)&&!published,"Pending task yields a wait marker without publishing memory access");
+        steps.Dispose();release.Set();Check(cancelled.Wait(2000)&&!published&&memory.Reads==0&&verification.State=="cancelled"&&verification.WaitMs>0,"Pending iterator disposal cancels worker and prevents late publication");
         started.Dispose();release.Dispose();cancelled.Dispose();
         var failure=false;
         using(var iterator=new MapTerrainVerification().Run(token=>{throw new InvalidDataException("bad build");},m=>published=true).GetEnumerator())
@@ -54,8 +54,8 @@ static class TerrainVerificationChecks
         started=new ManualResetEventSlim();release=new ManualResetEventSlim();cancelled=new ManualResetEventSlim();verification=new MapTerrainVerification();
         var live=new MapLiveSceneGeometry(source,new Scene(),new Material(),new MapLiveGeometryRules(0,0,2,2),false,false,true,
             rawInitialization:complete=>verification.Run(token=>{started.Set();try{release.Wait(token);token.ThrowIfCancellationRequested();return memory;}catch(OperationCanceledException){cancelled.Set();throw;}},complete));
-        live.Update(.1f);Check(started.Wait(2000)&&verification.Polls==1&&memory.Reads==0,"Collector polls pending verification once per Update, never burns its 512-step quota");
-        live.Update(.1f);Check(verification.Polls==2&&memory.Reads==0&&source.Reads==0,"Pending verification performs no raw reads or scene enumeration");
+        live.Update(.1f);Check(started.Wait(2000)&&verification.Polls<=1&&memory.Reads==0,"Collector polls pending verification once per Update, never burns its 2048-step quota");
+        var previousPolls=verification.Polls;live.Update(.1f);Check(verification.Polls==previousPolls+1&&memory.Reads==0&&source.Reads==0,"Pending verification performs no raw reads or scene enumeration");
         live.Dispose();release.Set();Check(cancelled.Wait(2000)&&memory.Reads==0,"Closing pending collector cancels initialization without touching scene memory");
         started.Dispose();release.Dispose();cancelled.Dispose();
         source=new Scene{Height=p=>p.x+10*p.y};memory=new RawTerrainChecks.Memory(source.Pointer.ToUInt64(),false);

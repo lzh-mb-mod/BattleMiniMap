@@ -13,6 +13,7 @@ class Program
         RawTerrainChecks.Run();
         TerrainOptimizationChecks.Run();
         TerrainVerificationChecks.Run();
+        TerrainModuleChecks.Run(args.Length>1?args[1]+".modules.json":null);
         if(args.Length>1)TerrainOptimizationChecks.ExistingSamples(args);
         var config=BattleMiniMapConfig.Get();
         config.UseLiveScenePreview=false;

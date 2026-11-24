@@ -24,19 +24,6 @@ namespace BattleMiniMap.View.MapGeometry
         public MapTerrainVerification Verification { get; private set; }
         private MapSelfTerrainMemory(ModuleIdentity native,ModuleIdentity physx)
         { NativeBase=native.Base;PhysxBase=physx.Base; }
-        private static ModuleIdentity[] LoadedModules()
-        {
-            var result=new ModuleIdentity[2];
-            using(var process=Process.GetCurrentProcess())
-            foreach(ProcessModule module in process.Modules)
-            {
-                var index=string.Equals(module.ModuleName,"TaleWorlds.Native.dll",StringComparison.OrdinalIgnoreCase)?0:
-                    string.Equals(module.ModuleName,"PhysXCommon_64.dll",StringComparison.OrdinalIgnoreCase)?1:-1;
-                if(index>=0)result[index]=new ModuleIdentity(module.FileName,unchecked((ulong)module.BaseAddress.ToInt64()),module.ModuleMemorySize);
-            }
-            if(result[0]==null||result[1]==null)throw new InvalidOperationException("Runtime terrain modules unavailable");
-            return result;
-        }
         internal static void VerifyFile(string path,string expected,CancellationToken token)
         {
             token.ThrowIfCancellationRequested();
@@ -51,20 +38,33 @@ namespace BattleMiniMap.View.MapGeometry
                 if(actual!=expected)throw new InvalidDataException("Unverified runtime terrain module: "+System.IO.Path.GetFileName(path));
             }
         }
-        public static IEnumerable<int> CreateSteps(Action<IMapTerrainMemory> complete)
+        public static IEnumerable<int> CreateSteps(Action<IMapTerrainMemory> complete,Action<string> phase=null,Action<MapTerrainVerification> started=null)
         {
             if(IntPtr.Size!=8||!BitConverter.IsLittleEndian)throw new InvalidOperationException("Raw terrain requires verified x64 layout");
-            var modules=LoadedModules();var verification=new MapTerrainVerification();IMapTerrainMemory verified=null;
-            foreach(var step in verification.Run(token=>
+            var verification=new MapTerrainVerification();started?.Invoke(verification);
+            phase?.Invoke("terrain-module-discovery");var discovery=Stopwatch.StartNew();
+            using(var modules=MapTerrainModuleLease.Pair.Acquire())
             {
-                VerifyFile(modules[0].Path,"27df81f6a94555bed79d9bd9a61bf523b64066e5fdb0dd9ac69d9eded20bbc26",token);
-                VerifyFile(modules[1].Path,"0ba29c719dcb0934fc4248af1f2fece794d11c293ee1b389a148b04962c692c1",token);
-                return new MapSelfTerrainMemory(modules[0],modules[1]){Verification=verification};
-            },value=>verified=value))yield return step;
-            // Executed back on the owning thread, after file verification and before memory reads.
-            var current=LoadedModules();
-            if(!modules[0].Matches(current[0])||!modules[1].Matches(current[1]))throw new InvalidDataException("Runtime terrain modules changed during verification");
-            complete(verified);
+                verification.DiscoveryMs=discovery.Elapsed.TotalMilliseconds;
+                var native=modules.Native.Identity;var physx=modules.Physx.Identity;
+                yield return 0;
+                IMapTerrainMemory verified=null;phase?.Invoke("terrain-verification-dispatch");
+                foreach(var step in verification.Run(token=>
+                {
+                    VerifyFile(native.Path,"27df81f6a94555bed79d9bd9a61bf523b64066e5fdb0dd9ac69d9eded20bbc26",token);
+                    VerifyFile(physx.Path,"0ba29c719dcb0934fc4248af1f2fece794d11c293ee1b389a148b04962c692c1",token);
+                    return new MapSelfTerrainMemory(native,physx){Verification=verification};
+                },value=>verified=value))
+                {yield return step;phase?.Invoke("terrain-verification-wait");}
+                // Only the owner calls Windows module APIs; worker uses immutable file names.
+                phase?.Invoke("terrain-module-recheck");var recheck=Stopwatch.StartNew();
+                using(var current=MapTerrainModuleLease.Pair.Acquire())
+                    if(!native.Matches(current.Native.Identity)||!physx.Matches(current.Physx.Identity))
+                        throw new InvalidDataException("Runtime terrain modules changed during verification");
+                verification.RecheckMs=recheck.Elapsed.TotalMilliseconds;
+                yield return 0;
+                complete(verified);
+            }
         }
         public byte[] Read(ulong address,int size)
             => ReadCurrentProcess(address,size);
