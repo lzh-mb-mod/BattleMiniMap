@@ -9,8 +9,9 @@ class Program
 {
     static int checks;
     static void Check(bool ok,string text){if(!ok)throw new Exception(text);++checks;Console.WriteLine("PASS framework: "+text);}
-    static void Main()
+    static void Main(string[] args)
     {
+        try { PrimitiveFrameworkChecks.Run(args.Contains("--record-primitives")); } catch(Exception ex) { Console.WriteLine("Framework primitive failure: "+ex.GetType().FullName+" "+ex.Message); Environment.Exit(1); }
         Check(IntPtr.Size==8,"Same net472 x64 target as game mod");
         using(var pair=MapTerrainModuleLease.Pair.Acquire("kernel32.dll","kernelbase.dll"))
         using(var process=Process.GetCurrentProcess())

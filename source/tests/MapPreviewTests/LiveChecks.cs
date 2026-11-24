@@ -17,7 +17,7 @@ static class LiveChecks
         try {new MapLiveGeometryRules(0,0,float.NaN,1);throw new Exception("NaN accepted");}catch(ArgumentException){}
         Check(MapLiveGeometryRules.CoarsestLod(0)==0,"Unknown LOD is not silently treated as all LODs");
         var sphere=MapLivePrimitiveGeometry.Capsule(new GeometryPoint(0,0,0),new GeometryPoint(0,0,0),2).ToArray();
-        Check(sphere.Length>0 && sphere.SelectMany(t=>t).All(p=>Math.Abs(Math.Sqrt(p.X*p.X+p.Y*p.Y+p.Z*p.Z)-2)<1e-5),"Sphere display vertices lie on requested radius without degenerate faces");
+        Check(sphere.Length>0 && sphere.SelectMany(t=>new[]{t[0],t[1],t[2]}).All(p=>Math.Abs(Math.Sqrt(p.X*p.X+p.Y*p.Y+p.Z*p.Z)-2)<1e-5),"Sphere display vertices lie on requested radius without degenerate faces");
         var source=new Scene();var target=new Scene();var material=new Material();
         var e=GameEntity.CreateEmpty(source,false,false); var meta=new MetaMesh();
         var high=new Mesh();var low=new Mesh();meta.Meshes.Add(high);meta.Meshes.Add(low);e.Metas.Add(meta);

@@ -15,6 +15,7 @@ class Program
         TerrainVerificationChecks.Run();
         ExtractionDiagnosticChecks.Run();
         ObjectProfilingChecks.Run();
+        PrimitiveAllocationChecks.Run(args.Length>1?args[1]+".primitives.json":null);
         TerrainModuleChecks.Run(args.Length>1?args[1]+".modules.json":null);
         if(args.Length>1){TerrainOptimizationChecks.ExistingSamples(args);RawTerrainChecks.Benchmark(args[1]+".collector.json");}
         var config=BattleMiniMapConfig.Get();

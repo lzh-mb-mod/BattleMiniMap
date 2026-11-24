@@ -3,7 +3,11 @@
     <OutputType>Exe</OutputType><TargetFramework>net472</TargetFramework>
     <PlatformTarget>x64</PlatformTarget><LangVersion>8</LangVersion>
   </PropertyGroup>
+  <PropertyGroup><PrimitiveImplementation Condition="'$(PrimitiveImplementation)' == ''">$(MSBuildThisFileDirectory)../../BattleMiniMap/src/View/MapGeometry/MapLivePrimitiveGeometry.cs</PrimitiveImplementation></PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(PrimitiveImplementation)" Link="MapLivePrimitiveGeometry.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLiveGeometryRules.cs" Link="MapLiveGeometryRules.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryData.cs" Link="MapGeometryData.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapObjectExtractionProfiler.cs" Link="ObjectProfiler.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapExtractionDiagnostics.cs" Link="ExtractionDiagnostics.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainModuleLease.cs" Link="ModuleLease.cs" />
