@@ -47,14 +47,15 @@ namespace BattleMiniMap.View.MapGeometry
         public MapRuntimeMainMap(Scene source) { _source = source; }
         private string Source => _diagnostic != 0 ? "main-depth-probe" : (_collision ? "runtime-collision" : "runtime-render");
         private void Report(string message) => Debug.Print("BattleMiniMap runtime main " + message +
-            " target=" + (_tableau?.Name ?? "none") + " source=" + Source);
+            " target=" + (_tableau?.Name ?? "none") + " source=" + Source +
+            " policy=" + (_diagnostic != 0 ? "continuous" : "demand"));
 
         public void Update(IMiniMap map, bool visible, float dt)
         {
             if (_disposed) return;
             AdvanceRetired();
             var c = BattleMiniMapConfig.Get();
-            var diagnostic = c.MapGpuDiagnosticMode == 4 || c.MapGpuDiagnosticMode == 5 ? c.MapGpuDiagnosticMode : 0;
+            var diagnostic = c.MapGpuDiagnosticMode >= 4 && c.MapGpuDiagnosticMode <= 7 ? c.MapGpuDiagnosticMode : 0;
             var ceiling = MapGeometryHeight.Ceiling(c.CutMapGeometryByHeight, c.MapGeometryCeiling);
             var changed = !_configured || _diagnostic != diagnostic || _enabled != c.EnableMapGeometry || _gpu != c.UseGpuMapGeometry ||
                 _tint != c.TintGpuMapGeometry || _collision != c.UseCollisionScenePreview || _raw != c.UseRawRuntimeTerrain || _simplify != c.SimplifyRuntimeTerrain ||
@@ -100,7 +101,9 @@ namespace BattleMiniMap.View.MapGeometry
                 var version = _collector?.ContentVersion ?? 0;
                 _collector?.Update(dt);
                 if (_collector?.Failure != null) throw new InvalidOperationException("collector: " + _collector.Failure);
-                _tableau.SetContentActive(active || (_collector?.IsActive ?? false) || version != (_collector?.ContentVersion ?? 0));
+                // Keep controlled probes drawing to exclude premature caching as
+                // a confounder. Hidden updates return before granting this permit.
+                _tableau.SetContentActive(_diagnostic != 0 || active || (_collector?.IsActive ?? false) || version != (_collector?.ContentVersion ?? 0));
                 _tableau.SetEnabled(true);
                 var ready = _backend.Update(_tableau.PaintCount, _tableau.Texture != null && _tableau.Texture.IsValid,
                     _tableau.Failure, _tableau.HasSubmittedCache);
@@ -141,7 +144,9 @@ namespace BattleMiniMap.View.MapGeometry
             ApplyProjection(projection);
             _white = TaleWorlds.Engine.Texture.CreateFromByteArray(new byte[] { 255, 255, 255, 255 }, 1, 1);
             if (_white == null || !_white.IsValid) throw new InvalidOperationException("No runtime main white texture");
-            _material = Material.GetDefaultMaterial().CreateCopy(); MapGeometryShader.Bind(_material);
+            _material = Material.GetDefaultMaterial().CreateCopy();
+            if (_diagnostic != 0) MapGeometryShader.BindDepthProbe(_material, _diagnostic >= 6);
+            else MapGeometryShader.Bind(_material);
             _material.SetShaderFlags(0); _material.SetTexture(Material.MBTextureType.DiffuseMap, _white);
             _material.Flags = MaterialFlags.TwoSided | MaterialFlags.DontCastShadow | MaterialFlags.RequiresForwardRendering;
             _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend); _material.SetAlphaTestValue(0);
@@ -156,6 +161,9 @@ namespace BattleMiniMap.View.MapGeometry
                 renderColor: _tint ? 0xffff46e6u : 0xffded4beu);
             GetTextureSize(_width, _height, out var textureWidth, out var textureHeight);
             _tableau.Initialize(textureWidth, textureHeight);
+            Report("material probe=" + _diagnostic + " shader=" + _material.GetShader().Name +
+                " flags=" + _material.Flags + " shaderFlags=" + _material.GetShaderFlags() +
+                " alphaBlend=" + _material.GetAlphaBlendMode());
             _backend.Reset();
             _publication = 0;
             Report("build staticFiles=False terrain=" + (_diagnostic != 0 ? "controlled-probe" : (_raw ? "raw-physx" : "GDI-base-only")) +
@@ -168,7 +176,7 @@ namespace BattleMiniMap.View.MapGeometry
         private float? ProjectionCeiling => _diagnostic != 0 ? null : _ceiling;
         private void BuildDepthDiagnostic()
         {
-            var planes=MapMainDepthDiagnosticGeometry.Create(_minX,_minY,_resolution,_width,_height,_lowest,_highest,_diagnostic==5);
+            var planes=MapMainDepthDiagnosticGeometry.Create(_minX,_minY,_resolution,_width,_height,_lowest,_highest,_diagnostic==5 || _diagnostic==7);
             var order=new List<string>();
             foreach(var plane in planes)
             {

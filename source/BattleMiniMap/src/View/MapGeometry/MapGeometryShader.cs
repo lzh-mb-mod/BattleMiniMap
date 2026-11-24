@@ -7,22 +7,29 @@ namespace BattleMiniMap.View.MapGeometry
     {
         // Resource key; simple_shading is the shader program name, not the resource key.
         internal const string ResourceName = "simple_shader";
+        internal const string DepthVertexColorResourceName = "notexture";
 
-        internal static void Bind(Material material)
+        internal static void Bind(Material material) => BindResource(material, ResourceName);
+        internal static void BindDepthProbe(Material material, bool vertexColor) =>
+            BindResource(material, vertexColor ? DepthVertexColorResourceName : ResourceName);
+
+        private static void BindResource(Material material, string resourceName)
         {
-            var shader = Shader.GetFromResource(ResourceName);
-            var resolved = RequireName(shader, "lookup");
+            if (resourceName != ResourceName && resourceName != DepthVertexColorResourceName)
+                throw new InvalidOperationException("Unsupported map shader resource: " + resourceName);
+            var shader = Shader.GetFromResource(resourceName);
+            var resolved = RequireName(shader, resourceName, "lookup");
             material.SetShader(shader);
-            var assigned = RequireName(material.GetShader(), "material readback");
-            TaleWorlds.Library.Debug.Print("BattleMiniMap GPU shader identity: requested=" + ResourceName +
+            var assigned = RequireName(material.GetShader(), resourceName, "material readback");
+            TaleWorlds.Library.Debug.Print("BattleMiniMap GPU shader identity: requested=" + resourceName +
                 " resolved=" + resolved + " assigned=" + assigned);
         }
 
-        private static string RequireName(Shader shader, string stage)
+        private static string RequireName(Shader shader, string resourceName, string stage)
         {
             var actual = shader != null && shader.IsValid ? shader.Name : "<invalid>";
-            if (!string.Equals(actual, ResourceName, StringComparison.Ordinal))
-                throw new InvalidOperationException("GPU shader " + stage + ": requested=" + ResourceName +
+            if (!string.Equals(actual, resourceName, StringComparison.Ordinal))
+                throw new InvalidOperationException("GPU shader " + stage + ": requested=" + resourceName +
                     " actual=" + actual + "; refusing fallback resource");
             return actual;
         }

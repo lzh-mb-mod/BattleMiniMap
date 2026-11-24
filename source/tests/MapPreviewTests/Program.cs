@@ -93,7 +93,9 @@ namespace BattleMiniMap.View.MapGeometry
     #if !RUNTIME_MAIN_TESTS
     class MapGeometryRenderer { public MapGeometryData Data; public int Reads; public MapGeometryData EnsureVerifiedCache(){++Reads;return Data;} }
     #endif
+    #if !RUNTIME_MAIN_TESTS
     static class MapGeometryShader { public static void Bind(TaleWorlds.Engine.Material material){} }
+    #endif
 }
 namespace TaleWorlds.Library
 {
@@ -159,7 +161,15 @@ namespace TaleWorlds.Engine
     {
         public enum MBTextureType { DiffuseMap } public enum MBAlphaBlendMode { NoAlphaBlend }
         public MaterialFlags Flags; public static Material GetDefaultMaterial()=>new Material(); public Material CreateCopy()=>new Material();
-        public void SetShaderFlags(int v){} public void SetTexture(MBTextureType t,Texture v){} public void SetAlphaBlendMode(MBAlphaBlendMode v){} public void SetAlphaTestValue(int v){} public void ManualInvalidate(){}
+        private Shader _shader;private ulong _shaderFlags;private MBAlphaBlendMode _blend;
+        public int ShaderFlagsReads,AlphaBlendReads;public Shader OverrideReadback;
+        public void SetShader(Shader shader){_shader=shader;}public Shader GetShader()=>OverrideReadback??_shader;
+        public ulong GetShaderFlags(){++ShaderFlagsReads;return _shaderFlags;}public MBAlphaBlendMode GetAlphaBlendMode(){++AlphaBlendReads;return _blend;}
+        public void SetShaderFlags(ulong v){_shaderFlags=v;} public void SetTexture(MBTextureType t,Texture v){} public void SetAlphaBlendMode(MBAlphaBlendMode v){_blend=v;} public void SetAlphaTestValue(int v){} public void ManualInvalidate(){}
+    }
+    public class Shader {
+        public bool IsValid=true;public string Name;public static Func<string,Shader> Resolver;
+        public static Shader GetFromResource(string name)=>Resolver==null?new Shader{Name=name}:Resolver(name);
     }
     public static class NativeProbe { public static Action<string> Before; public static void Call(string name){Before?.Invoke(name);} }
     public class MeshBuilder

@@ -62,7 +62,7 @@
     <string id="BattleMiniMap_geometry_cut_hint" text="裁去指定世界高度以上的几何以查看下层结构；不代表楼层或通行判定。" />
     <string id="BattleMiniMap_geometry_ceiling" text="几何显示高度上限（米）" />
     <string id="BattleMiniMap_gpu_diagnostic" text="GPU离屏诊断" />
-  <string id="BattleMiniMap_gpu_diagnostic_hint" text="前三项为右上角旧诊断窗口。主图深度正序/逆序仅作用运行时GPU主图：灰地面、黄高片、蓝低片，忽略高度裁切但保留用户设置。可临时关闭跟随查看全图；两种顺序的遮挡应相同。无场景几何采集。" />
+  <string id="BattleMiniMap_gpu_diagnostic_hint" text="前三项为右上角旧诊断窗口。主图深度4/5使用simple_shader正/逆序；顶点色6/7使用notexture正/逆序，均持续绘制同一灰地面、黄高片、蓝低片，不透明并忽略裁切但不改设置。可临时关闭跟随看全图。用于对照，尚未证明深度修复；无场景几何采集。" />
     <string id="BattleMiniMap_gpu_off" text="关闭" />
     <string id="BattleMiniMap_gpu_clear" text="仅清屏色" />
     <string id="BattleMiniMap_gpu_triangle" text="合成三角形" />
@@ -111,5 +111,7 @@
     <string id="BattleMiniMap_runtime_main_hint" text="默认从当前任务场景分帧提取，独立于大预览。关闭才使用旧桥缓存诊断。加载、失败或手动CPU时保留原GDI地形底图与标记，不读取旧桥缓存替代全场景。" />
     <string id="BattleMiniMap_main_depth_forward" text="主图深度：正序" />
     <string id="BattleMiniMap_main_depth_reverse" text="主图深度：逆序" />
+    <string id="BattleMiniMap_main_depth_vertex_forward" text="主图深度（顶点色）：正序" />
+    <string id="BattleMiniMap_main_depth_vertex_reverse" text="主图深度（顶点色）：逆序" />
   </strings>
 </base>

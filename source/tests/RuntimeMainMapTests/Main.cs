@@ -71,6 +71,8 @@ class MainChecks
             "Public scene/terrain height union uses normalized near/far");
         Check(mainScene.Entities.Single().Added.Color == 0xffded4beu && source.Entities.Single().Metas.Single().Meshes.Single().Color == 0,
             "Main render copy receives neutral object color without changing source");
+        Check(mainScene.Entities.Single().Added.Material.GetShader().Name=="simple_shader",
+            "Normal production owner retains default simple_shader binding");
         Check(target.NativeView.Skip && renderer.Texture != null, "Idle main parks only after submitted paints and becomes ready");
         source.Entities[0].Frame.origin.x += 20;
         Tick(renderer, map, 2, 1); // Starts refresh, even if the scan fits in a single tick.
@@ -273,6 +275,18 @@ class MainChecks
         Tick(r,map,5);
         Check(r.Texture!=null && r.SuppressGdiSelfRender && collectorField.GetValue(runtime)==null,
             "Submitted diagnostic target alone activates managed GDI self-render suppression without collector");
+        var tableauField=typeof(MapRuntimeMainMap).GetField("_tableau",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);
+        var forwardTableau=(MapGeometryTableau)tableauField.GetValue(runtime);var paints=forwardTableau.PaintCount;
+        Tick(r,map,8,0);
+        Check(forwardTableau.PaintCount==paints+8 && !first.NativeView.Skip && !forwardTableau.HasSubmittedCache,
+            "Visible forward probe keeps painting beyond initial submissions rather than parking");
+        paints=forwardTableau.PaintCount;
+        for(var i=0;i<8;++i){r.Update(map,false,0);first.Pump();}
+        Check(forwardTableau.PaintCount==paints && !first.NativeView.Enabled && first.NativeView.Skip && !r.SuppressGdiSelfRender,
+            "Hidden continuous probe stops callbacks and restores GDI self-render state");
+        r.Update(map,true,0);first.Pump();
+        Check(forwardTableau.PaintCount==paints+1 && first.NativeView.Enabled && !first.NativeView.Skip && r.SuppressGdiSelfRender,
+            "Showing continuous probe resumes its existing target without resetting publication");
         Check(c.MapGeometryCeiling==-50 && c.CutMapGeometryByHeight && c.FollowMode && Math.Abs(camera.Near-.1f/150)<1e-6,
             "Depth probe locally ignores clipping while preserving ceiling and follow configuration");
         var rules=new MapLiveGeometryRules(30,-70,230,230);
@@ -293,6 +307,9 @@ class MainChecks
             low.Corners.Min(p=>p.X)>=ground.Corners.Min(p=>p.X) && high.Corners.Max(p=>p.X)<=ground.Corners.Max(p=>p.X),
             "Low crosses ground left UV edge and high crosses right edge, both partly over ground");
         var signatures=scene.Entities.Select(e=>e.Added.UploadSignature).ToArray();
+        var simpleFlags=scene.Entities[0].Added.Material.Flags;
+        Check(scene.Entities[0].Added.Material.GetShader().Name=="simple_shader",
+            "Modes 4/5 retain original simple_shader control material");
         c.MapGpuDiagnosticMode=5;
         Check(!r.SuppressGdiSelfRender,"Changing probe order restores GDI immediately before next update");
         r.Update(map,true);var second=TableauView.Last;
@@ -300,6 +317,9 @@ class MainChecks
             second.NativeView.Scene.Entities.Select(e=>e.Added.UploadSignature).SequenceEqual(signatures.Reverse()),
             "Real reverse owner uploads identical meshes in reverse order and retires old target before publication");
         Tick(r,map,5);
+        var reverseTableau=(MapGeometryTableau)tableauField.GetValue(runtime);paints=reverseTableau.PaintCount;Tick(r,map,8,0);
+        Check(reverseTableau.PaintCount==paints+8 && !second.NativeView.Skip && !reverseTableau.HasSubmittedCache,
+            "Visible reverse probe also keeps painting instead of using two-paint cache");
         Check(first.IsReleased && r.SuppressGdiSelfRender && source.Reads==0 && source.HeightReads==0 &&
             second.NativeView.Camera.Right==camera.Right && second.NativeView.Camera.Bottom==camera.Bottom && second.NativeView.Camera.Near==camera.Near,
             "Reverse diagnostic retains main projection and delayed retirement without source reads");
@@ -309,12 +329,37 @@ class MainChecks
         Tick(r,map,125);
         Check(source.Reads==0 && source.HeightReads==0 && collectorField.GetValue(runtime)==null,
             "Nullable-collector diagnostic remains stable through status updates");
+        var lastProbe=second;
+        foreach(var mode in new[]{6,7})
+        {
+            c.MapGpuDiagnosticMode=mode;r.Update(map,true);lastProbe=TableauView.Last;
+            var material=lastProbe.NativeView.Scene.Entities[0].Added.Material;
+            Check(lastProbe.NativeView.Scene.Entities.Select(e=>e.Added.UploadSignature).SequenceEqual(mode==6?signatures:signatures.Reverse()) &&
+                material.GetShader().Name=="notexture" && material.Flags==simpleFlags && material.GetShaderFlags()==0 &&
+                material.GetAlphaBlendMode()==Material.MBAlphaBlendMode.NoAlphaBlend &&
+                lastProbe.NativeView.Camera.Near==camera.Near && lastProbe.NativeView.Camera.Right==camera.Right && lastProbe.NativeView.Width==2048,
+                "Vertex-color mode "+mode+" changes only shader profile while preserving corresponding geometry/order, opaque flags, camera and RT");
+            var probe=(MapGeometryTableau)tableauField.GetValue(runtime);paints=probe.PaintCount;Tick(r,map,5,0);
+            Check(probe.PaintCount==paints+5 && !lastProbe.NativeView.Skip && r.SuppressGdiSelfRender && collectorField.GetValue(runtime)==null,
+                "Vertex-color mode "+mode+" remains continuous without source extraction");
+            paints=probe.PaintCount;r.Update(map,false,0);lastProbe.Pump();
+            Check(probe.PaintCount==paints && !lastProbe.NativeView.Enabled && !r.SuppressGdiSelfRender,
+                "Vertex-color mode "+mode+" pauses when hidden and retains GDI state");
+            r.Update(map,true,0);lastProbe.Pump();
+            Check(material.ShaderFlagsReads==2 && material.AlphaBlendReads==2 &&
+                Debug.Messages.Count(s=>s.Contains("material probe="+mode+" shader=notexture") && s.Contains("target="+probe.Name))==1,
+                "Target material flags and alpha are actually read and logged once at initialization, never per tick");
+        }
         c.MapGpuDiagnosticMode=0;
         Check(!r.SuppressGdiSelfRender,"Leaving diagnostic restores GDI before route update");
         c.UseRawRuntimeTerrain=false;MapLiveCollisionGuard.Reject=false;r.Update(map,true);var normal=TableauView.Last;Tick(r,map);
-        Check(normal!=second && !second.NativeView.Enabled && collectorField.GetValue(runtime)!=null && source.Reads>0 &&
-            !r.SuppressGdiSelfRender && c.MapGeometryCeiling==69.15933f,
-            "Diagnostic exit rebuilds normal collector path and retains existing GDI policy/configured ceiling");
+        Check(normal!=lastProbe && !lastProbe.NativeView.Enabled && collectorField.GetValue(runtime)!=null && source.Reads>0 &&
+            !r.SuppressGdiSelfRender && c.MapGeometryCeiling==69.15933f && normal.NativeView.Skip &&
+            ((MapGeometryTableau)tableauField.GetValue(runtime)).HasSubmittedCache && normal.NativeView.Scene.Entities[0].Added.Material.GetShader().Name=="simple_shader",
+            "Diagnostic exit restores demand parking, normal collector and GDI policy/configured ceiling");
+        Check(Debug.Messages.Any(s=>s.Contains("source=main-depth-probe policy=continuous")) &&
+            Debug.Messages.Any(s=>s.Contains("source=runtime-collision policy=demand")),
+            "Main logs explicitly distinguish continuous probe policy from normal demand policy");
         Check(Debug.Messages.Any(s=>s.Contains("probe mode=4 order=ground-gray@worldZ=30,high-yellow@worldZ=42.5,low-blue@worldZ=17.5") && s.Contains("target=BattleMiniMap.MainGeometry.")) &&
             Debug.Messages.Any(s=>s.Contains("probe mode=5 order=low-blue@worldZ=17.5,high-yellow@worldZ=42.5,ground-gray@worldZ=30")),
             "Probe logs identify target, mode, order, world heights and UV ranges for visual acceptance");
