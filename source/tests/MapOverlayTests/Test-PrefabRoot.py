@@ -16,3 +16,9 @@ control=children.find('BattleMiniMap_MapWidget').find('.//MapControlWidget')
 assert control is not None and control.get('DoNotAcceptEvents','false')=='false'
 print('PASS: single root, map and diagnostic reachable as siblings, no circular map clipping; old two-root fixture drops diagnostic')
 print('PASS: fullscreen root and diagnostic ignore input; map interaction child remains reachable')
+
+preview=children.find('BattleMiniMap_GeometryPreviewWidget')
+assert preview is not None and preview.get('IsVisible')=='@GeometryPreviewVisible'
+assert children.find('BattleMiniMap_MapWidget').find('.//BattleMiniMap_GeometryPreviewWidget') is None
+assert preview.find('.//ButtonWidget').get('Command.Click')=='CloseGeometryPreview'
+print('PASS: independently hidden preview sibling with close command; no circular clipping')

@@ -68,5 +68,10 @@
     <string id="BattleMiniMap_gpu_triangle" text="合成三角形" />
     <string id="BattleMiniMap_gpu_bridge" text="缓存桥几何" />
     <string id="BattleMiniMap_gpu_depth" text="GPU诊断深度测试/写入" />
+  <string id="BattleMiniMap_geometry_preview" text="桥体三维预览" />
+  <string id="BattleMiniMap_geometry_preview_hint" text="仅预览已有桥体。左拖旋转，右拖平移，滚轮缩放，双击复位。退出场景后关闭。" />
+  <string id="BattleMiniMap_geometry_preview_controls" text="桥体 | 左拖旋转  右拖平移  滚轮缩放  双击复位" />
+  <string id="BattleMiniMap_geometry_preview_missing" text="当前场景无可用桥体预览。" />
+  <string id="BattleMiniMap_geometry_preview_close" text="关闭" />
 </strings>
 </base>

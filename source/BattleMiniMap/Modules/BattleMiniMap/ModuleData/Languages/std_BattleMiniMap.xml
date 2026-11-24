@@ -68,5 +68,10 @@
     <string id="BattleMiniMap_gpu_triangle" text="Synthetic triangle" />
     <string id="BattleMiniMap_gpu_bridge" text="Cached bridge geometry" />
     <string id="BattleMiniMap_gpu_depth" text="GPU diagnostic depth test/write" />
+  <string id="BattleMiniMap_geometry_preview" text="Bridge 3D preview" />
+  <string id="BattleMiniMap_geometry_preview_hint" text="Preview cached bridge only. Left drag: orbit; right drag: pan; wheel: zoom; double click: reset. Closes on mission exit." />
+  <string id="BattleMiniMap_geometry_preview_controls" text="Bridge | Left: orbit  Right: pan  Wheel: zoom  Double click: reset" />
+  <string id="BattleMiniMap_geometry_preview_missing" text="Bridge preview unavailable in this scene." />
+  <string id="BattleMiniMap_geometry_preview_close" text="Close" />
 </strings>
 </base>

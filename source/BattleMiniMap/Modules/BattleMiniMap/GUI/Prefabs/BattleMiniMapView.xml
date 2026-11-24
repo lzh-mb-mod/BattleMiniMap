@@ -17,6 +17,17 @@
           </Children>
         </BattleMiniMap_MapWidget>
         <BattleMiniMap_GpuDiagnosticWidget DoNotAcceptEvents="true" DoNotPassEventsToChildren="false" />
+        <BattleMiniMap_GeometryPreviewWidget IsVisible="@GeometryPreviewVisible" DoNotPassEventsToChildren="false">
+          <Children>
+            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="32" MarginRight="90" Brush="DefaultBrush" Brush.FontSize="18" Text="@GeometryPreviewHelp" DoNotAcceptEvents="true" />
+            <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="86" SuggestedHeight="32" HorizontalAlignment="Right" VerticalAlignment="Top" Command.Click="CloseGeometryPreview">
+              <Children>
+                <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="DefaultBrush" Brush.FontSize="20" Text="@GeometryPreviewClose" DoNotAcceptEvents="true" />
+              </Children>
+            </ButtonWidget>
+            <TextWidget IsVisible="@GeometryPreviewUnavailable" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="60" VerticalAlignment="Center" Brush="DefaultBrush" Brush.FontSize="24" Text="@GeometryPreviewMissing" DoNotAcceptEvents="true" />
+          </Children>
+        </BattleMiniMap_GeometryPreviewWidget>
       </Children>
     </Widget>
   </Window>

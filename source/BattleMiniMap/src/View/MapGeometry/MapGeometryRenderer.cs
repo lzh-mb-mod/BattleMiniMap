@@ -46,6 +46,15 @@ namespace BattleMiniMap.View.MapGeometry
         private Texture _displayFallback;
         private UiTexture _fallbackUi;
         internal MapGeometryData CachedData => _data;
+        internal MapGeometryData EnsureVerifiedCache()
+        {
+            if (!_attempted)
+            {
+                try { Load(); }
+                catch (Exception ex) { TaleWorlds.Library.Debug.Print("BattleMiniMap geometry cache unavailable: " + ex.Message); }
+            }
+            return _data;
+        }
         public UiTexture Texture { get; private set; }
         public MapGeometryRenderer(string sceneName) { _sceneName = sceneName; Active = this; }
 
@@ -67,7 +76,7 @@ namespace BattleMiniMap.View.MapGeometry
         }
         private void RecordPerformance(BattleMiniMapConfig config, bool visible, float dt, long started, long tickEntryTimestamp)
         {
-            if (tickEntryTimestamp <= 0 || _performanceFailed || !config.ProfileMapGeometry || !visible || _failed || _data == null || !config.EnableMapGeometry ||
+            if (config.ShowGeometryPreview || tickEntryTimestamp <= 0 || _performanceFailed || !config.ProfileMapGeometry || !visible || _failed || _data == null || !config.EnableMapGeometry ||
                 _selectedBackend == null || (_selectedBackend == "CPU" && config.UseGpuMapGeometry && !_gpuFailed))
                 _performance.Reset();
             else
@@ -172,8 +181,7 @@ namespace BattleMiniMap.View.MapGeometry
                 " target=" + (_gpu?.Name ?? "none") + " paints=" + (_gpu?.PaintCount ?? 0));
         }
         private static float? Ceiling(BattleMiniMapConfig config) =>
-            config.CutMapGeometryByHeight && !float.IsNaN(config.MapGeometryCeiling) && !float.IsInfinity(config.MapGeometryCeiling)
-                ? (float?)Math.Max(-50, Math.Min(1000, config.MapGeometryCeiling)) : null;
+            MapGeometryHeight.Ceiling(config.CutMapGeometryByHeight,config.MapGeometryCeiling);
 
         private void Load()
         {

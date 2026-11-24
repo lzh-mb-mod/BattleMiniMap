@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net9.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryHeight.cs" Link="Height.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryPreviewRenderer.cs" Link="Renderer.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryPreviewCamera.cs" Link="Camera.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryData.cs" Link="Data.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGpuDiagnosticGeometry.cs" Link="Normalization.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryCleanup.cs" Link="Cleanup.cs" />
+  </ItemGroup>
+</Project>

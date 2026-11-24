@@ -46,3 +46,7 @@ You can get it at [github.com](https://github.com/lzh-mb-mod/BattleMiniMap).
   - lizhenhuan1019@outlook.com
 
   - lizhenhuan1019@qq.com
+
+## Experimental bridge 3D preview
+
+With a matching verified bridge cache installed, enable **Bridge 3D preview** in the minimap menu (`L`). Left drag orbits, right drag pans, the wheel zooms, and double click resets. Use **Close** to dismiss it. The preview closes on mission exit and does not load new scene geometry. It shows the cached bridge, not the whole town; proxy/original and height ceiling options also apply. Its interactive rendering is separate from the small map's cached GPU texture and CPU fallback. Native preview validation is pending.

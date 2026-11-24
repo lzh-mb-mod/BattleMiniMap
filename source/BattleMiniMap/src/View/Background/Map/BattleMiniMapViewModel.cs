@@ -1,4 +1,4 @@
-﻿using BattleMiniMap.Config;
+using BattleMiniMap.Config;
 using BattleMiniMap.View.AgentMarkers;
 using BattleMiniMap.View.CameraMarker;
 using BattleMiniMap.View.MapTerrain;
@@ -58,6 +58,25 @@ namespace BattleMiniMap.View.Background.Map
         }
 
         public CameraMarkerViewModel CameraMarkerLeft { get; }
+        private bool _geometryPreviewVisible, _geometryPreviewUnavailable;
+        [DataSourceProperty]
+        public bool GeometryPreviewVisible => _geometryPreviewVisible;
+        [DataSourceProperty]
+        public bool GeometryPreviewUnavailable => _geometryPreviewUnavailable;
+        [DataSourceProperty]
+        public string GeometryPreviewHelp => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_geometry_preview_controls").ToString();
+        [DataSourceProperty]
+        public string GeometryPreviewMissing => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_geometry_preview_missing").ToString();
+        [DataSourceProperty]
+        public string GeometryPreviewClose => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_geometry_preview_close").ToString();
+        public void CloseGeometryPreview() { BattleMiniMapConfig.Get().ShowGeometryPreview = false; UpdateGeometryPreview(); }
+        public void UpdateGeometryPreview()
+        {
+            var visible=BattleMiniMapConfig.Get().ShowGeometryPreview;
+            var unavailable=visible && !(BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active?.Available ?? false);
+            if (_geometryPreviewVisible!=visible) { _geometryPreviewVisible=visible; OnPropertyChanged(nameof(GeometryPreviewVisible)); }
+            if (_geometryPreviewUnavailable!=unavailable) { _geometryPreviewUnavailable=unavailable; OnPropertyChanged(nameof(GeometryPreviewUnavailable)); }
+        }
         public CameraMarkerViewModel CameraMarkerRight { get; }
 
         public AgentMarkerCollection NonHeroAgentMarkers { get; private set; }

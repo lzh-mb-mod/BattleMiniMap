@@ -54,6 +54,8 @@ namespace BattleMiniMap.Config
         public float HeroMarkerScale { get; set; } = 2.5f;
 
         public int MapGpuDiagnosticMode { get; set; } = 0;
+        [System.Xml.Serialization.XmlIgnore]
+        public bool ShowGeometryPreview { get; set; } = false;
         public bool MapGpuDiagnosticDepth { get; set; } = false;
 
         public bool TintGpuMapGeometry { get; set; } = false;
@@ -119,6 +121,7 @@ namespace BattleMiniMap.Config
             AgentMarkerScale = other.AgentMarkerScale;
             HeroMarkerScale = other.HeroMarkerScale;
             MapGpuDiagnosticMode = other.MapGpuDiagnosticMode;
+            ShowGeometryPreview = other.ShowGeometryPreview;
             MapGpuDiagnosticDepth = other.MapGpuDiagnosticDepth;
             UseGpuMapGeometry = other.UseGpuMapGeometry;
             TintGpuMapGeometry = other.TintGpuMapGeometry;

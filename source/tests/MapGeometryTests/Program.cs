@@ -12,6 +12,22 @@ static class Program
     static void Reject(Action action, string message) { bool rejected = false; try { action(); } catch { rejected = true; } Check(rejected, message); }
     static void Main(string[] args)
     {
+        Check(MapGeometryHeight.Ceiling(true,float.NaN)==null && MapGeometryHeight.Ceiling(true,float.PositiveInfinity)==null,"Nonfinite height disabled for both views");
+        Check(MapGeometryHeight.Ceiling(false,5)==null && MapGeometryHeight.Ceiling(true,-100)==-50 && MapGeometryHeight.Ceiling(true,2000)==1000,"Shared ceiling enabled and bounded");
+        var orbit = new MapGeometryPreviewCamera();
+        float length(GeometryPoint v) => (float)Math.Sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z);
+        var eye=orbit.Eye; var right=orbit.Right; var up=orbit.Up;
+        Check(Math.Abs(length(eye)-4.5f)<1e-5f, "Preview default camera distance");
+        Check(Math.Abs(length(right)-1)<1e-5f && Math.Abs(length(up)-1)<1e-5f && Math.Abs(right.X*up.X+right.Y*up.Y+right.Z*up.Z)<1e-5f, "Preview orthonormal screen basis");
+        orbit.Orbit(100000,100000); Check(Math.Abs(orbit.Pitch-80*Math.PI/180)<1e-5, "Preview upper pitch bound");
+        orbit.Orbit(-100000,-100000); Check(Math.Abs(orbit.Pitch-15*Math.PI/180)<1e-5, "Preview lower pitch bound");
+        for(var k=0;k<100;k++)orbit.Zoom(10); Check(orbit.Distance==1.8f,"Preview near zoom bound");
+        for(var k=0;k<100;k++)orbit.Zoom(-10); Check(orbit.Distance==16,"Preview far zoom bound");
+        orbit.Pan(float.MaxValue,float.MaxValue,1); Check(Math.Abs(orbit.Target.X)<=3 && Math.Abs(orbit.Target.Y)<=3 && Math.Abs(orbit.Target.Z)<=3,"Preview pan bounded");
+        orbit.Reset(); orbit.Orbit(float.NaN,float.PositiveInfinity); orbit.Zoom(float.NaN); orbit.Pan(float.NaN,0,1);
+        Check(orbit.Distance==4.5f && length(orbit.Target)==0 && !float.IsNaN(orbit.Eye.X),"Preview rejects nonfinite input");
+        orbit.Pan(10,20,600); Check(length(orbit.Target)>0,"Preview camera-plane pan");
+        orbit.Reset(); Check(length(orbit.Target)==0 && orbit.Distance==4.5f,"Preview reset");
         var path = Path.GetFullPath(args[0]); var data = MapGeometryData.Load(path);
         Check(MapGeometryData.HashFile(path) == MapGeometryManifest.CacheSha256, "Cache fingerprint");
         Check(data.Layers.Count == 5, "Five source instances");

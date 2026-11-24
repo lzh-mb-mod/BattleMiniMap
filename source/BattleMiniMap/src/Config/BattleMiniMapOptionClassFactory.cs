@@ -36,6 +36,8 @@ namespace BattleMiniMap.Config
                             new SelectionItem(true,"str_battle_mini_map_gpu_triangle"), new SelectionItem(true,"str_battle_mini_map_gpu_bridge") }), false));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_gpu_depth"),
                     null, () => BattleMiniMapConfig.Get().MapGpuDiagnosticDepth, b => BattleMiniMapConfig.Get().MapGpuDiagnosticDepth = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_preview"),
+                    GameTexts.FindText("str_battle_mini_map_geometry_preview_hint"), () => BattleMiniMapConfig.Get().ShowGeometryPreview, b => BattleMiniMapConfig.Get().ShowGeometryPreview = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry"),
                     GameTexts.FindText("str_battle_mini_map_geometry_hint"), () => BattleMiniMapConfig.Get().EnableMapGeometry, b => BattleMiniMapConfig.Get().EnableMapGeometry = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_gpu"),

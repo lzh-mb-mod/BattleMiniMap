@@ -15,6 +15,8 @@ namespace BattleMiniMap.View.Background.Map
     {
         private BattleMiniMap.View.MapGeometry.MapGpuDiagnosticRenderer _gpuDiagnostic;
         private BattleMiniMap.View.MapGeometry.MapGeometryRenderer _mapGeometry;
+        private BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer _geometryPreview;
+        private bool _previewMouseVisible;
         private BattleMiniMapViewModel _dataSource;
         private GauntletLayer _layer;
         private MissionTimer _timer;
@@ -38,6 +40,8 @@ namespace BattleMiniMap.View.Background.Map
 
             _mapGeometry = new BattleMiniMap.View.MapGeometry.MapGeometryRenderer(Mission.SceneName);
             _gpuDiagnostic = new BattleMiniMap.View.MapGeometry.MapGpuDiagnosticRenderer();
+            BattleMiniMapConfig.Get().ShowGeometryPreview = false;
+            _geometryPreview = new BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer();
             var movieName = nameof(BattleMiniMapView);
             _layer = new GauntletLayer(movieName, 12);
             _layer.LoadMovie(movieName, _dataSource);
@@ -86,6 +90,14 @@ namespace BattleMiniMap.View.Background.Map
 
             _mapGeometry?.Update(MiniMap.Instance, _dataSource.IsEnabled, dt, mapTickEntry);
             _gpuDiagnostic?.Update(_mapGeometry?.CachedData);
+            _geometryPreview?.Update(_mapGeometry);
+            _dataSource.UpdateGeometryPreview();
+            var previewOpen=BattleMiniMapConfig.Get().ShowGeometryPreview;
+            if (_previewMouseVisible!=previewOpen)
+            {
+                _previewMouseVisible=previewOpen;
+                _layer.InputRestrictions.SetMouseVisibility(previewOpen);
+            }
             _dataSource.UpdateCamera();
             UpdateDynamicScale(dt, instantlyUpdateScale);
 
@@ -145,6 +157,8 @@ namespace BattleMiniMap.View.Background.Map
             base.OnMissionScreenFinalize();
 
             MissionScreen.RemoveLayer(_layer);
+            _geometryPreview?.Dispose();
+            _geometryPreview = null;
             _gpuDiagnostic?.Dispose();
             _gpuDiagnostic = null;
             _mapGeometry?.Dispose();
