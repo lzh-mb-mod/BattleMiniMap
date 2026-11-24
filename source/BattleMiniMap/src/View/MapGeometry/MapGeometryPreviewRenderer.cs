@@ -100,7 +100,7 @@ namespace BattleMiniMap.View.MapGeometry
                 var hasTerrain=dimensions.X>0 && dimensions.Y>0 && nodeSize>0 && MapLiveGeometryRules.Finite(nodeSize);
                 var rules=hasTerrain ? new MapLiveGeometryRules(0,0,dimensions.X*nodeSize,dimensions.Y*nodeSize)
                     : new MapLiveGeometryRules(_minX,_minY,_maxX,_maxY);
-                _live=new MapLiveSceneGeometry(_runtimeSource,_scene,_material,rules,hasTerrain,_collisionMode,_rawTerrainMode,simplifyTerrain:_simplifyTerrainMode);
+                _live=new MapLiveSceneGeometry(_runtimeSource,_scene,_material,rules,hasTerrain,_collisionMode,_rawTerrainMode,simplifyTerrain:_simplifyTerrainMode,profile:BattleMiniMapConfig.Get().ProfileMapGeometry);
                 BuildTarget();
                 Report("build: target="+_binding.Name+" source="+(_collisionMode?"runtime-collision":"runtime-render")+" staticFiles=False policy=interactive");
                 return;

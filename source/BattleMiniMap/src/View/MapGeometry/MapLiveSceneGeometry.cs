@@ -25,6 +25,8 @@ namespace BattleMiniMap.View.MapGeometry
         private long _rawSourceTriangles;
         private double _terrainError,_terrainWallMs,_terrainWorkMs,_activeWorkMs;
         private string _phase="initialization",_slowestPhase="none";
+        private readonly MapExtractionDiagnostics _diagnostics;
+        private int _tileIndex=-1,_chunkX=-1,_chunkY=-1,_patchX=-1,_patchY=-1;
         private readonly Func<IMapTerrainMemory> _rawMemory;
         private readonly Func<Action<IMapTerrainMemory>,IEnumerable<int>> _rawInitialization;
         private MapTerrainVerification _verification;
@@ -78,8 +80,9 @@ namespace BattleMiniMap.View.MapGeometry
         public int TerrainPercent => _rawTerrain ? (_rawTilesTotal==0?0:Math.Min(100,(int)(100f*(_rawTilesDone+(_rawTileCells==0?0:_rawTileCellsDone/(float)_rawTileCells))/_rawTilesTotal))) : _terrainRead*100/(_rules.GridX*_rules.GridY);
         public string TerrainSource => _rawTerrain?"raw-physx":"sampled";
         public string Failure { get; private set; }
-        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null,bool simplifyTerrain=false,Func<Action<IMapTerrainMemory>,IEnumerable<int>> rawInitialization=null)
+        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null,bool simplifyTerrain=false,Func<Action<IMapTerrainMemory>,IEnumerable<int>> rawInitialization=null,bool profile=false)
         {
+            _diagnostics=profile?new MapExtractionDiagnostics():null;
             _source=source??throw new ArgumentNullException(nameof(source));
             _target=target; _material=material; _rules=rules;
             _hasTerrain=hasTerrain; _terrainDone=!hasTerrain && !rawTerrain;
@@ -100,13 +103,20 @@ namespace BattleMiniMap.View.MapGeometry
             }
             var terrainTick=_rawTerrain&&!_terrainDone;var waiting=false;var stepLimit=terrainTick?2048:64;
             var tick=Stopwatch.StartNew(); var count=0; _activeWorkMs=_workMs; _activeTick=tick;
+            _diagnostics?.BeginTick();
             try
             {
                 while(count<(_rawTerrain&&!_terrainDone?2048:64) && tick.Elapsed.TotalMilliseconds<2)
                 {
-                    var step=Stopwatch.StartNew(); var more=_steps.MoveNext();
-                    _phaseMax[_phase]=Math.Max(_phaseMax.TryGetValue(_phase,out var phaseMax)?phaseMax:0,step.Elapsed.TotalMilliseconds);
-                    if(step.Elapsed.TotalMilliseconds>_maxStepMs){_maxStepMs=step.Elapsed.TotalMilliseconds;_slowestPhase=_phase;} ++count;
+                    var started=Stopwatch.GetTimestamp();var more=_steps.MoveNext();
+                    var stepMs=(Stopwatch.GetTimestamp()-started)*1000d/Stopwatch.Frequency;
+                    _phaseMax[_phase]=Math.Max(_phaseMax.TryGetValue(_phase,out var phaseMax)?phaseMax:0,stepMs);
+                    if(stepMs>_maxStepMs){_maxStepMs=stepMs;_slowestPhase=_phase;}++count;
+                    if(_diagnostics!=null&&stepMs>=MapExtractionDiagnostics.SlowStepMs)
+                    {
+                        var context=_diagnostics.SlowStep(stepMs,tick.Elapsed.TotalMilliseconds);
+                        if(context!=null)Report("slow step: phase="+_phase+" tile="+_tileIndex+" chunk="+_chunkX+","+_chunkY+" patch="+_patchX+","+_patchY+" stepsInTick="+count+" generatedFaces="+_rawTriangles+" "+context);
+                    }
                     if (!more) { _steps.Dispose(); _steps=null; break; }
                     if(_steps.Current==MapTerrainVerification.Waiting){waiting=true;break;}
                 }
@@ -115,6 +125,11 @@ namespace BattleMiniMap.View.MapGeometry
             {
                 Failure=ex.Message; Partial=true; var failedSteps=_steps; _steps=null;
                 MapGeometryCleanup.Run(null,()=>failedSteps?.Dispose()); Report("failed: "+ex.Message);
+            }
+            if(_diagnostics!=null)
+            {
+                _diagnostics.EndTick();var context=_diagnostics.SlowTick(tick.Elapsed.TotalMilliseconds);
+                if(context!=null)Report("slow tick: phase="+_phase+" tile="+_tileIndex+" chunk="+_chunkX+","+_chunkY+" patch="+_patchX+","+_patchY+" stepsInTick="+count+" generatedFaces="+_rawTriangles+" "+context);
             }
             if(terrainTick)
             {
@@ -366,7 +381,7 @@ namespace BattleMiniMap.View.MapGeometry
             Report("raw terrain layout: mode="+reader.Mode+" tiles="+reader.TileCount+" scalarDataSource=False");
             for(var index=0;index<reader.TileCount;++index)
             {
-                _phase="terrain-copy";
+                _tileIndex=index;_phase="terrain-copy";
                 MapTerrainHeightfield tile=null;
                 foreach(var step in ReadRawTileSteps(reader,index,value=>tile=value))yield return step;
                 _nodeFloatBuffersMissing=reader.NodeFloatBuffersMissing;_rawAttemptedSamples=reader.AttemptedSamples;yield return 0;
@@ -392,13 +407,15 @@ namespace BattleMiniMap.View.MapGeometry
                 for(var by=0;by<tile.Rows-1;by+=64) for(var bx=0;bx<tile.Columns-1;bx+=64)
                 {
                     var w=Math.Min(64,tile.Columns-1-bx);var h=Math.Min(64,tile.Rows-1-by);
-                    var corners=new Dictionary<int,int>();var builder=new MeshBuilder();var count=0;var work=0;var indices=new int[3];
+                    _chunkX=bx;_chunkY=by;
+                    var corners=new int[(w+1)*(h+1)];var builder=new MeshBuilder();var count=0;var work=0;var indices=new int[3];
+                    var selected=new List<MapTerrainPatch>(4);Action<MapTerrainPatch> collect=selected.Add;
                     for(var py=by;py<by+h;py+=8)for(var px=bx;px<bx+w;px+=8)
                     {
                         var pw=Math.Min(8,bx+w-px);var ph=Math.Min(8,by+h-py);
-                        var selected=new List<MapTerrainPatch>();
+                        _patchX=px;_patchY=py;selected.Clear();
                         _phase="terrain-simplification";
-                        foreach(var step in MapTerrainPatch.Select(tile,px,py,pw,ph,_simplifyTerrain,patch=>selected.Add(patch)))yield return step;
+                        foreach(var step in MapTerrainPatch.Select(tile,px,py,pw,ph,_simplifyTerrain,collect))yield return step;
                         foreach(var patch in selected)
                         {
                             if(patch.Simplified){++_patchAccepted;_terrainError=Math.Max(_terrainError,patch.Error);}
@@ -410,10 +427,14 @@ namespace BattleMiniMap.View.MapGeometry
                                 for(var k=0;k<3;++k)
                                 {
                                     var sampleIndex=face[k];
-                                    if(!corners.TryGetValue(sampleIndex,out var corner))
+                                    var local=(sampleIndex/tile.Columns-by)*(w+1)+sampleIndex%tile.Columns-bx;
+                                    var corner=corners[local]-1;
+                                    if(corner<0)
                                     {
                                         var p=_rules.Normalize(tile.Vertex(sampleIndex));
-                                        corner=builder.AddFaceCorner(new Vec3(p.X,p.Y,p.Z),Vec3.Up,new Vec2(0,0),0xffb5b09bu);corners.Add(sampleIndex,corner);
+                                        corner=builder.AddFaceCorner(new Vec3(p.X,p.Y,p.Z),Vec3.Up,new Vec2(0,0),0xffb5b09bu);
+                                        if(corner<0)throw new InvalidOperationException("No raw terrain vertex");
+                                        corners[local]=corner+1;
                                     }
                                     indices[k]=corner;
                                 }
@@ -529,7 +550,7 @@ namespace BattleMiniMap.View.MapGeometry
             " rawHoles="+_rawHoles+" validationQueries="+_rawChecks+" validationMaxError="+_rawMaxError.ToString("R",CultureInfo.InvariantCulture)+
             " "+VerificationStatus()+" terrainUpdateTicks="+_terrainUpdates+" terrainStepLimited="+_terrainStepLimited+" terrainTimeLimited="+_terrainTimeLimited+" terrainWaitTicks="+_terrainWaitTicks+" terrainMaxStepsUsed="+_terrainMaxSteps+
             " rawFailures="+_rawFailures+" nodeFloatBuffersMissing="+_nodeFloatBuffersMissing+
-            " errorReasons="+Reasons(_errorReasons)+" errorResourceSummaries="+_resourceExamples+" stepMaxByPhase="+PhaseTimes()+" errorShapes="+_errorShapes.Count+" errorExamples="+_errorExamples+" phase="+_phase+" slowestPhase="+_slowestPhase+" terrainWallMs="+Ms(_terrainWallMs)+" terrainWorkMs="+Ms(_terrainWorkMs)+
+            " "+(_diagnostics?.Summary??"slowDiagnostics=off")+" errorReasons="+Reasons(_errorReasons)+" errorResourceSummaries="+_resourceExamples+" stepMaxByPhase="+PhaseTimes()+" errorShapes="+_errorShapes.Count+" errorExamples="+_errorExamples+" phase="+_phase+" slowestPhase="+_slowestPhase+" terrainWallMs="+Ms(_terrainWallMs)+" terrainWorkMs="+Ms(_terrainWorkMs)+
             " wallMs="+Ms(_wall.Elapsed.TotalMilliseconds)+" workMs="+Ms(_workMs)+" maxTickMs="+Ms(_maxTickMs)+" maxStepMs="+Ms(_maxStepMs);
         private string VerificationStatus()=>"verificationState="+(_verification?.State??"none")+" verificationWorkerMs="+Ms(_verification?.WorkerMs??0)+" verificationWaitMs="+Ms(_verification?.WaitMs??0)+" verificationPolls="+(_verification?.Polls??0)+
             " discoveryMs="+Ms(_verification?.DiscoveryMs??0)+" dispatchMs="+Ms(_verification?.DispatchMs??0)+" recheckMs="+Ms(_verification?.RecheckMs??0)+" readerBindMs="+Ms(_verification?.ReaderBindMs??0);

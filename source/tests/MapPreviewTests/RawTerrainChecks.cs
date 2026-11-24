@@ -80,6 +80,23 @@ static class RawTerrainChecks
         finally { Marshal.FreeHGlobal(own); }
         Console.WriteLine("PASS: "+checks+" raw-heightfield checks; simulated memory, not engine execution");
     }
+    internal static void Benchmark(string report)
+    {
+        var rows=new List<object>();
+        foreach(var simplify in new[]{false,true})for(var run=0;run<3;++run)
+        {
+            var source=new Scene{Height=v=>v.x+10*v.y};var target=new Scene();var memory=new Memory(source.Pointer.ToUInt64(),false,129);
+            var rules=new MapLiveGeometryRules(0,0,128,128);var material=new Material();
+            var allocated=GC.GetAllocatedBytesForCurrentThread();var watch=System.Diagnostics.Stopwatch.StartNew();
+            var live=new MapLiveSceneGeometry(source,target,material,rules,false,false,true,()=>memory,simplify);
+            for(var i=0;i<1000&&!live.InitialFinished;++i)live.Update(.01f);
+            var ms=watch.Elapsed.TotalMilliseconds;var bytes=GC.GetAllocatedBytesForCurrentThread()-allocated;
+            if(!live.InitialFinished||live.Partial)throw new Exception("Collector benchmark incomplete");
+            var meshes=target.Entities.ConvertAll(e=>new {signature=e.Added.UploadSignature.ToString("x16"),vertices=e.Added.UploadVertices,faces=e.Added.UploadFaces});
+            rows.Add(new {simplify,run,wallMs=ms,allocatedBytes=bytes,displayFaces=live.TerrainTriangles,sourceFaces=live.SourceTerrainTriangles,meshes});live.Dispose();
+        }
+        System.IO.File.WriteAllText(report,System.Text.Json.JsonSerializer.Serialize(rows,new System.Text.Json.JsonSerializerOptions{WriteIndented=true}));
+    }
     internal sealed class Memory : IMapTerrainMemory
     {
         public ulong NativeBase=>0x180000000;

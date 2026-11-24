@@ -13,12 +13,14 @@ class Program
         RawTerrainChecks.Run();
         TerrainOptimizationChecks.Run();
         TerrainVerificationChecks.Run();
+        ExtractionDiagnosticChecks.Run();
         TerrainModuleChecks.Run(args.Length>1?args[1]+".modules.json":null);
-        if(args.Length>1)TerrainOptimizationChecks.ExistingSamples(args);
+        if(args.Length>1){TerrainOptimizationChecks.ExistingSamples(args);RawTerrainChecks.Benchmark(args[1]+".collector.json");}
         var config=BattleMiniMapConfig.Get();
         config.UseLiveScenePreview=false;
         config.UseRawRuntimeTerrain=false;
         config.SimplifyRuntimeTerrain=false;
+        config.ProfileMapGeometry=false;
         Scene.Created=0;
         var source=new MapGeometryRenderer { Data=MapGeometryData.Load(args[0]) };
         var preview=new MapGeometryPreviewRenderer();
@@ -70,7 +72,7 @@ namespace BattleMiniMap.Config
     class BattleMiniMapConfig
     {
         static readonly BattleMiniMapConfig Value=new BattleMiniMapConfig(); public static BattleMiniMapConfig Get()=>Value;
-        public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview, UseRawRuntimeTerrain, SimplifyRuntimeTerrain; public float MapGeometryCeiling;
+        public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview, UseRawRuntimeTerrain, SimplifyRuntimeTerrain, ProfileMapGeometry; public float MapGeometryCeiling;
     }
 }
 namespace BattleMiniMap.View.MapGeometry
@@ -135,11 +137,15 @@ namespace TaleWorlds.Engine
     public class MeshBuilder
     {
         public static int Builds,Faces,Corners; int _faces,_corners;
-        public int AddFaceCorner(Vec3 p,Vec3 n,Vec2 uv,uint color)=>_corners++; public void AddFace(int a,int b,int c){++_faces;}
-        public Mesh Finalize(){++Builds;Faces=_faces;Corners=_corners;return new Mesh();}
+        private ulong _signature=14695981039346656037UL;
+        private void Mix(uint value){unchecked{_signature=(_signature^value)*1099511628211UL;}}
+        public int AddFaceCorner(Vec3 p,Vec3 n,Vec2 uv,uint color){Mix(0x56455254);Mix((uint)BitConverter.SingleToInt32Bits(p.x));Mix((uint)BitConverter.SingleToInt32Bits(p.y));Mix((uint)BitConverter.SingleToInt32Bits(p.z));Mix(color);return _corners++;}
+        public void AddFace(int a,int b,int c){Mix(0x46414345);Mix((uint)a);Mix((uint)b);Mix((uint)c);++_faces;}
+        public Mesh Finalize(){++Builds;Faces=_faces;Corners=_corners;return new Mesh{UploadSignature=_signature,UploadFaces=_faces,UploadVertices=_corners};}
     }
     public class Mesh {
         public UIntPtr Pointer {get;}=Ids.Next(); public bool IsValid=true; public uint Color;
+        public ulong UploadSignature;public int UploadFaces,UploadVertices;
         public MatrixFrame Local=MatrixFrame.Identity; public Material Material; public int Copies, Releases;
         public Mesh CreateCopy(){++Copies;return new Mesh{Local=Local};}
         public MatrixFrame GetLocalFrame()=>Local; public void SetLocalFrame(MatrixFrame f){Local=f;}

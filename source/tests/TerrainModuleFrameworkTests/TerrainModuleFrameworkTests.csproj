@@ -4,6 +4,7 @@
     <PlatformTarget>x64</PlatformTarget><LangVersion>8</LangVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapExtractionDiagnostics.cs" Link="ExtractionDiagnostics.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainModuleLease.cs" Link="ModuleLease.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapSelfTerrainMemory.cs" Link="SelfMemory.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainVerification.cs" Link="Verification.cs" />

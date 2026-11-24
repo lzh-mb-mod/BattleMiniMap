@@ -41,6 +41,10 @@ class Program
             while(steps.MoveNext()){if(clock.Elapsed.TotalSeconds>5)throw new Exception("Timed out");Thread.Sleep(1);}
         }
         Check(published&&worker!=owner,"Framework verification dispatch and completion use expected threads");
+        var sample=MapExtractionSample.Capture();
+        Check(sample.ThreadCpu100Ns>=0&&sample.HeapBytes>=0,"Framework own-thread CPU/heap/GC snapshot succeeds");
+        var probeClock=Stopwatch.StartNew();for(var i=0;i<1000;++i)MapExtractionSample.Capture();
+        Console.WriteLine("FRAMEWORK PROBE averageMs="+(probeClock.Elapsed.TotalMilliseconds/1000).ToString("F6",System.Globalization.CultureInfo.InvariantCulture));
         Console.WriteLine("PASS: "+checks+" net472 x64 module/verification checks; system modules only, no game extraction");
     }
     private class Memory:IMapTerrainMemory

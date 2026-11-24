@@ -3,6 +3,7 @@
   <ItemGroup>
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLiveGeometryRules.cs" Link="LiveRules.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLivePrimitiveGeometry.cs" Link="Primitives.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapExtractionDiagnostics.cs" Link="ExtractionDiagnostics.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLiveSceneGeometry.cs" Link="LiveGeometry.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainModuleLease.cs" Link="TerrainModuleLease.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainVerification.cs" Link="TerrainVerification.cs" />
