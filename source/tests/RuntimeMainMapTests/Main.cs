@@ -71,8 +71,8 @@ class MainChecks
             "Public scene/terrain height union uses normalized near/far");
         Check(mainScene.Entities.Single().Added.Color == 0xffded4beu && source.Entities.Single().Metas.Single().Meshes.Single().Color == 0,
             "Main render copy receives neutral object color without changing source");
-        Check(mainScene.Entities.Single().Added.Material.GetShader().Name=="simple_shader",
-            "Normal production owner retains default simple_shader binding");
+        Check(mainScene.Entities.Single().Added.Material.GetShader().Name=="notexture",
+            "Normal production owner requests notexture through explicit runtime-main binding");
         Check(target.NativeView.Skip && renderer.Texture != null, "Idle main parks only after submitted paints and becomes ready");
         source.Entities[0].Frame.origin.x += 20;
         Tick(renderer, map, 2, 1); // Starts refresh, even if the scan fits in a single tick.
@@ -321,6 +321,7 @@ class MainChecks
         Check(reverseTableau.PaintCount==paints+8 && !second.NativeView.Skip && !reverseTableau.HasSubmittedCache,
             "Visible reverse probe also keeps painting instead of using two-paint cache");
         Check(first.IsReleased && r.SuppressGdiSelfRender && source.Reads==0 && source.HeightReads==0 &&
+            second.NativeView.Scene.Entities[0].Added.Material.GetShader().Name=="simple_shader" &&
             second.NativeView.Camera.Right==camera.Right && second.NativeView.Camera.Bottom==camera.Bottom && second.NativeView.Camera.Near==camera.Near,
             "Reverse diagnostic retains main projection and delayed retirement without source reads");
         c.MapGeometryCeiling=69.15933f;r.Update(map,true);
@@ -355,7 +356,7 @@ class MainChecks
         c.UseRawRuntimeTerrain=false;MapLiveCollisionGuard.Reject=false;r.Update(map,true);var normal=TableauView.Last;Tick(r,map);
         Check(normal!=lastProbe && !lastProbe.NativeView.Enabled && collectorField.GetValue(runtime)!=null && source.Reads>0 &&
             !r.SuppressGdiSelfRender && c.MapGeometryCeiling==69.15933f && normal.NativeView.Skip &&
-            ((MapGeometryTableau)tableauField.GetValue(runtime)).HasSubmittedCache && normal.NativeView.Scene.Entities[0].Added.Material.GetShader().Name=="simple_shader",
+            ((MapGeometryTableau)tableauField.GetValue(runtime)).HasSubmittedCache && normal.NativeView.Scene.Entities[0].Added.Material.GetShader().Name=="notexture",
             "Diagnostic exit restores demand parking, normal collector and GDI policy/configured ceiling");
         Check(Debug.Messages.Any(s=>s.Contains("source=main-depth-probe policy=continuous")) &&
             Debug.Messages.Any(s=>s.Contains("source=runtime-collision policy=demand")),

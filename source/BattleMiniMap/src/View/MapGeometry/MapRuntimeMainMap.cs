@@ -146,7 +146,7 @@ namespace BattleMiniMap.View.MapGeometry
             if (_white == null || !_white.IsValid) throw new InvalidOperationException("No runtime main white texture");
             _material = Material.GetDefaultMaterial().CreateCopy();
             if (_diagnostic != 0) MapGeometryShader.BindDepthProbe(_material, _diagnostic >= 6);
-            else MapGeometryShader.Bind(_material);
+            else MapGeometryShader.BindRuntimeMain(_material);
             _material.SetShaderFlags(0); _material.SetTexture(Material.MBTextureType.DiffuseMap, _white);
             _material.Flags = MaterialFlags.TwoSided | MaterialFlags.DontCastShadow | MaterialFlags.RequiresForwardRendering;
             _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend); _material.SetAlphaTestValue(0);

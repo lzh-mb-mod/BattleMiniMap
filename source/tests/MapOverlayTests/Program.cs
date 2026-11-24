@@ -26,6 +26,9 @@ class Program
   Rejected(()=>MapGeometryShader.BindDepthProbe(material,true),"notexture material readback rejects wrong assigned resource");
   material.OverrideReadback=null;TaleWorlds.Engine.Shader.Resolved=new TaleWorlds.Engine.Shader{Name="simple_shader"};MapGeometryShader.Bind(material);
   Check(material.GetShader().Name=="simple_shader" && TaleWorlds.Engine.Shader.Requested=="simple_shader","default Bind remains simple_shader after explicit depth profile");
+  Rejected(()=>MapGeometryShader.BindRuntimeMain(material),"runtime-main lookup rejects simple_shader fallback instead of notexture");
+  TaleWorlds.Engine.Shader.Resolved=new TaleWorlds.Engine.Shader{Name="notexture"};material.OverrideReadback=new TaleWorlds.Engine.Shader{Name="simple_shader"};
+  Rejected(()=>MapGeometryShader.BindRuntimeMain(material),"runtime-main readback rejects incorrectly assigned shader");material.OverrideReadback=null;
 
   var config=BattleMiniMap.Config.BattleMiniMapConfig.Get();var ui=new UIContext();var context=new TwoDimensionContext();var draw=new TwoDimensionDrawContext();
   var widget=new BattleMiniMap_GeometryWidget(ui);MapGeometryRenderer.Active=new MapGeometryRenderer{Texture=new Texture()};
