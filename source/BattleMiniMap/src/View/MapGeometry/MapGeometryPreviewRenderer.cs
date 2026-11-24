@@ -87,7 +87,7 @@ namespace BattleMiniMap.View.MapGeometry
                 if (_binding.Failure!=null) throw new InvalidOperationException(_binding.Failure);
                 var eye=Orbit.Eye; var at=Orbit.Target;
                 _camera.LookAt(ToVec(eye),ToVec(at),Vec3.Up);
-                _camera.SetFovVertical((float)Math.PI/4,_aspect,.05f,64);
+                _camera.SetFovVertical((float)Math.PI/4,_aspect,Orbit.NearPlane,64);
                 _view.SetDoNotRenderThisFrame(false); _view.SetEnable(true);
             }
             catch (Exception ex)
@@ -103,7 +103,7 @@ namespace BattleMiniMap.View.MapGeometry
             if (_camera==null) throw new InvalidOperationException("No preview camera");
             // Initialize before registering a callback; Update applies the current pose.
             _camera.LookAt(ToVec(Orbit.Eye),ToVec(Orbit.Target),Vec3.Up);
-            _camera.SetFovVertical((float)Math.PI/4,_aspect,.05f,64);
+            _camera.SetFovVertical((float)Math.PI/4,_aspect,Orbit.NearPlane,64);
             _white=TaleWorlds.Engine.Texture.CreateFromByteArray(new byte[]{255,255,255,255},1,1);
             if (_white==null || !_white.IsValid) throw new InvalidOperationException("No preview white texture");
             _material=Material.GetDefaultMaterial().CreateCopy();

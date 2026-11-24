@@ -8,6 +8,7 @@ namespace BattleMiniMap.View.MapGeometry
         public float Yaw { get; private set; }
         public float Pitch { get; private set; }
         public float Distance { get; private set; }
+        public float NearPlane => Math.Max(.0002f, Math.Min(.05f, Distance*.01f));
         public GeometryPoint Target { get; private set; }
         public MapGeometryPreviewCamera() { Reset(); }
         public void Reset() { Yaw = (float)Math.PI / 4; Pitch = 35 * (float)Math.PI / 180; Distance = 4.5f; Target = new GeometryPoint(0,0,0); }
@@ -34,7 +35,7 @@ namespace BattleMiniMap.View.MapGeometry
         }
         public void Zoom(float direction)
         {
-            if (Finite(direction)) Distance = Clamp(Distance*(float)Math.Exp(-Clamp(direction,-10,10)*.15f),1.8f,16);
+            if (Finite(direction)) Distance = Clamp(Distance*(float)Math.Exp(-Clamp(direction,-10,10)*.15f),.02f,16);
         }
     }
 }

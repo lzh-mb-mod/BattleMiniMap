@@ -17,12 +17,12 @@ static class Program
         var orbit = new MapGeometryPreviewCamera();
         float length(GeometryPoint v) => (float)Math.Sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z);
         var eye=orbit.Eye; var right=orbit.Right; var up=orbit.Up;
-        Check(Math.Abs(length(eye)-4.5f)<1e-5f, "Preview default camera distance");
+        Check(Math.Abs(length(eye)-4.5f)<1e-5f && Math.Abs(orbit.NearPlane-.045f)<1e-7f, "Preview default camera distance and adaptive near");
         Check(Math.Abs(length(right)-1)<1e-5f && Math.Abs(length(up)-1)<1e-5f && Math.Abs(right.X*up.X+right.Y*up.Y+right.Z*up.Z)<1e-5f, "Preview orthonormal screen basis");
         orbit.Orbit(100000,100000); Check(Math.Abs(orbit.Pitch-80*Math.PI/180)<1e-5, "Preview upper pitch bound");
         orbit.Orbit(-100000,-100000); Check(Math.Abs(orbit.Pitch-15*Math.PI/180)<1e-5, "Preview lower pitch bound");
-        for(var k=0;k<100;k++)orbit.Zoom(10); Check(orbit.Distance==1.8f,"Preview near zoom bound");
-        for(var k=0;k<100;k++)orbit.Zoom(-10); Check(orbit.Distance==16,"Preview far zoom bound");
+        for(var k=0;k<100;k++)orbit.Zoom(10); Check(orbit.Distance==.02f && orbit.NearPlane>0 && orbit.NearPlane<orbit.Distance && Math.Abs(orbit.NearPlane-.0002f)<1e-8f,"Preview close zoom bound and positive near below distance");
+        for(var k=0;k<100;k++)orbit.Zoom(-10); Check(orbit.Distance==16 && orbit.NearPlane==.05f,"Preview far zoom bound and capped near");
         orbit.Pan(float.MaxValue,float.MaxValue,1); Check(Math.Abs(orbit.Target.X)<=3 && Math.Abs(orbit.Target.Y)<=3 && Math.Abs(orbit.Target.Z)<=3,"Preview pan bounded");
         orbit.Reset(); orbit.Orbit(float.NaN,float.PositiveInfinity); orbit.Zoom(float.NaN); orbit.Pan(float.NaN,0,1);
         Check(orbit.Distance==4.5f && length(orbit.Target)==0 && !float.IsNaN(orbit.Eye.X),"Preview rejects nonfinite input");

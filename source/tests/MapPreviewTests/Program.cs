@@ -40,6 +40,11 @@ class Program
         var meshBuilds=MeshBuilder.Builds;
         var eye=camera.Eye; preview.Orbit.Orbit(100,50); preview.Update(source);
         Check(!view.Skip && camera.Eye.x!=eye.x && MeshBuilder.Builds==meshBuilds,"Camera changes redraw without mesh upload");
+        var scenes=Scene.Created;
+        for(var k=0;k<8;++k)preview.Orbit.Zoom(10);preview.Update(source);
+        Check(preview.Orbit.Distance==.02f && Math.Abs(camera.Near-.0002f)<1e-8f && camera.Near<preview.Orbit.Distance && camera.Far==64 &&
+            TableauView.Last==target && Scene.Created==scenes && MeshBuilder.Builds==meshBuilds,
+            "Production preview close zoom passes adaptive near to camera without rebuilding scene, target or meshes");
         config.CutMapGeometryByHeight=true; config.MapGeometryCeiling=float.NaN;
         preview.Update(source); preview.Update(source);
         Check(TableauView.Last==target,"Nonfinite height cannot cause dirty-target rebuild loop");
@@ -145,7 +150,7 @@ namespace TaleWorlds.Engine
         public void DisableStaticShadows(bool value){} public void SetName(string value){} public void EnsurePostfxSystem(){} public void SetShadow(bool value){}
         public void ClearAll(){if(ThrowOnClear)throw new Exception("fake clear failure");Entities.Clear();} public void ManualInvalidate(){++Invalidated;}
     }
-    public class Camera { public static int Releases; public Vec3 Eye; public MatrixFrame Frame; public float Right,Bottom,Near,Far; public float Aspect; public void SetViewVolume(bool perspective,float left,float right,float bottom,float top,float near,float far){Right=right;Bottom=bottom;Near=near;Far=far;} public Vec3 WorldPointToViewPortPoint(ref Vec3 p)=>new Vec3((p.x-Eye.x)/Right,(p.y-Eye.y)/Bottom,0); public static Camera CreateCamera()=>new Camera(); public void LookAt(Vec3 eye,Vec3 at,Vec3 up){Eye=eye;} public void SetFovVertical(float f,float a,float n,float z){Aspect=a;} public void ReleaseCamera(){++Releases;} }
+    public class Camera { public static int Releases; public Vec3 Eye; public MatrixFrame Frame; public float Right,Bottom,Near,Far; public float Aspect; public void SetViewVolume(bool perspective,float left,float right,float bottom,float top,float near,float far){Right=right;Bottom=bottom;Near=near;Far=far;} public Vec3 WorldPointToViewPortPoint(ref Vec3 p)=>new Vec3((p.x-Eye.x)/Right,(p.y-Eye.y)/Bottom,0); public static Camera CreateCamera()=>new Camera(); public void LookAt(Vec3 eye,Vec3 at,Vec3 up){Eye=eye;} public void SetFovVertical(float f,float a,float n,float z){Aspect=a;Near=n;Far=z;} public void ReleaseCamera(){++Releases;} }
     public class Texture
     {
         public static bool FailWhite;
