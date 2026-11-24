@@ -11,9 +11,12 @@ class Program
     {
         LiveChecks.Run(args[0]);
         RawTerrainChecks.Run();
+        TerrainOptimizationChecks.Run();
+        if(args.Length>1)TerrainOptimizationChecks.ExistingSamples(args);
         var config=BattleMiniMapConfig.Get();
         config.UseLiveScenePreview=false;
         config.UseRawRuntimeTerrain=false;
+        config.SimplifyRuntimeTerrain=false;
         Scene.Created=0;
         var source=new MapGeometryRenderer { Data=MapGeometryData.Load(args[0]) };
         var preview=new MapGeometryPreviewRenderer();
@@ -65,7 +68,7 @@ namespace BattleMiniMap.Config
     class BattleMiniMapConfig
     {
         static readonly BattleMiniMapConfig Value=new BattleMiniMapConfig(); public static BattleMiniMapConfig Get()=>Value;
-        public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview, UseRawRuntimeTerrain; public float MapGeometryCeiling;
+        public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview, UseRawRuntimeTerrain, SimplifyRuntimeTerrain; public float MapGeometryCeiling;
     }
 }
 namespace BattleMiniMap.View.MapGeometry
@@ -75,7 +78,7 @@ namespace BattleMiniMap.View.MapGeometry
 }
 namespace TaleWorlds.Library
 {
-    public static class Debug { public static void Print(string value){} }
+    public static class Debug { public static readonly System.Collections.Generic.List<string> Messages=new System.Collections.Generic.List<string>(); public static void Print(string value){Messages.Add(value);} }
     public struct Vec2 { public float x,y; public Vec2(float x,float y){this.x=x;this.y=y;} }
     public struct Vec2i { public int X,Y; }
     public struct Vec3
@@ -163,13 +166,14 @@ namespace TaleWorlds.Engine
     public struct CapsuleData { public Vec3 P1,P2;public float Radius; }
     public class PhysicsShape {
         public UIntPtr Pointer {get;}=Ids.Next(); public bool IsValid=true,Ready=true; public int Reads,Prepared,Released,Copies;
+        public int TriangleKind; public float TestRadius=1; public Vec3 TestOrigin;
         public int MeshN=1,SphereN,CapsuleN; public PhysicsShape Original; public int TriangleMeshCount()=>MeshN; public int TriangleCountInTriangleMesh(int i)=>1;
         public int SphereCount()=>SphereN; public int CapsuleCount()=>CapsuleN;
-        public void GetSphere(ref SphereData s,int i){s.Origin=new Vec3(0,0,0);s.Radius=1;}
+        public void GetSphere(ref SphereData s,int i){s.Origin=TestOrigin;s.Radius=TestRadius;}
         public void GetCapsule(ref CapsuleData c,int i){c.P1=new Vec3(0,0,0);c.P2=new Vec3(0,0,2);c.Radius=.5f;}
-        public PhysicsShape CreateCopy(){++Copies;return new PhysicsShape{Original=this,Ready=Ready,MeshN=MeshN,SphereN=SphereN,CapsuleN=CapsuleN};}
+        public PhysicsShape CreateCopy(){++Copies;return new PhysicsShape{Original=this,Ready=Ready,MeshN=MeshN,SphereN=SphereN,CapsuleN=CapsuleN,TriangleKind=TriangleKind,TestRadius=TestRadius,TestOrigin=TestOrigin};}
         public void Prepare(){++Prepared;}
-        public void GetTriangle(Vec3[] t,int m,int i){++Original.Reads;t[0]=new Vec3(0,0,0);t[1]=new Vec3(1,0,0);t[2]=new Vec3(0,1,0);}
+        public void GetTriangle(Vec3[] t,int m,int i){++Original.Reads;t[0]=new Vec3(0,0,0);t[1]=new Vec3(1,0,0);t[2]=TriangleKind==1?t[1]:TriangleKind==2?new Vec3(float.NaN,1,0):new Vec3(0,1,0);}
         public void ManualInvalidate(){++Released;}
     }
     public class View { public enum ViewRenderOptions { ClearColor,ClearDepth } }

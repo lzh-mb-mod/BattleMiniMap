@@ -44,6 +44,8 @@ namespace BattleMiniMap.Config
                     GameTexts.FindText("str_battle_mini_map_collision_preview_hint"), () => BattleMiniMapConfig.Get().UseCollisionScenePreview, b => BattleMiniMapConfig.Get().UseCollisionScenePreview = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_raw_terrain"),
                     GameTexts.FindText("str_battle_mini_map_raw_terrain_hint"), () => BattleMiniMapConfig.Get().UseRawRuntimeTerrain, b => BattleMiniMapConfig.Get().UseRawRuntimeTerrain = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_simplify_terrain"),
+                    GameTexts.FindText("str_battle_mini_map_simplify_terrain_hint"), () => BattleMiniMapConfig.Get().SimplifyRuntimeTerrain, b => BattleMiniMapConfig.Get().SimplifyRuntimeTerrain = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry"),
                     GameTexts.FindText("str_battle_mini_map_geometry_hint"), () => BattleMiniMapConfig.Get().EnableMapGeometry, b => BattleMiniMapConfig.Get().EnableMapGeometry = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_gpu"),

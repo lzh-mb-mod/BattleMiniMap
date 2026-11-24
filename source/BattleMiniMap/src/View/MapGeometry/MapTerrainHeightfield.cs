@@ -28,6 +28,8 @@ namespace BattleMiniMap.View.MapGeometry
             return new GeometryPoint(OriginX+(index%Columns)*Step,OriginY+(index/Columns)*Step,raw*HeightScale+HeightOffset);
         }
         // Retains the original per-cell diagonal and each triangle's hole bit.
+        internal bool Hole(int row,int col,int half)=>(_samples[(row*Columns+col)*4+2+half]&127)==127;
+        internal bool AlternateDiagonal(int row,int col)=>(_samples[(row*Columns+col)*4+2]&128)!=0;
         public bool Triangle(int row,int col,int half,out int a,out int b,out int c)
         {
             a=b=c=0;

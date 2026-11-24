@@ -87,5 +87,7 @@
   <string id="BattleMiniMap_raw_terrain_hint" text="读取已加载的PhysX原始高度场，保留洞和对角线。需要已验证的引擎/物理库版本，不自动转采样或磁盘数据。" />
   <string id="BattleMiniMap_raw_terrain_source" text="原始地形" />
   <string id="BattleMiniMap_sampled_terrain_source" text="采样地形" />
+  <string id="BattleMiniMap_simplify_terrain" text="简化运行时地形（关闭：完整拓扑）" />
+  <string id="BattleMiniMap_simplify_terrain_hint" text="仅原始运行时高度场。保留边界与洞，最大垂直误差0.10米；不满足条件的局部保留原始三角形。" />
 </strings>
 </base>

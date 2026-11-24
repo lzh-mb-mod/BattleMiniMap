@@ -87,5 +87,7 @@
   <string id="BattleMiniMap_raw_terrain_hint" text="Copy the loaded PhysX heightfield, retaining holes and diagonals. Requires the verified engine/physics build. No automatic sampled or disk-data fallback." />
   <string id="BattleMiniMap_raw_terrain_source" text="Raw terrain" />
   <string id="BattleMiniMap_sampled_terrain_source" text="Sampled terrain" />
+  <string id="BattleMiniMap_simplify_terrain" text="Simplify runtime terrain (off: full topology)" />
+  <string id="BattleMiniMap_simplify_terrain_hint" text="Raw runtime terrain only. Keep borders and holes; accept patches within 0.10 m vertical error, otherwise retain original triangles." />
 </strings>
 </base>

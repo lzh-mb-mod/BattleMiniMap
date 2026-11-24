@@ -58,13 +58,17 @@ static class RawTerrainChecks
         live=new MapLiveSceneGeometry(source,new Scene(),new Material(),new MapLiveGeometryRules(0,0,2,2),false,false,true,()=>m);
         for(var i=0;i<1000&&!live.InitialFinished;++i)live.Update(.01f);
         Check(live.InitialFinished&&!live.Partial&&source.HeightReads==5,"Raw physics field can load when render-terrain metadata is unavailable");live.Dispose();
-        source=new Scene{Height=v=>v.x+10*v.y};target=new Scene();m=new Memory(source.Pointer.ToUInt64(),false,65);
-        live=new MapLiveSceneGeometry(source,target,new Material(),new MapLiveGeometryRules(0,0,64,64),true,false,true,()=>m);
+        source=new Scene{Height=v=>v.x+10*v.y};target=new Scene();m=new Memory(source.Pointer.ToUInt64(),false,129);
+        live=new MapLiveSceneGeometry(source,target,new Material(),new MapLiveGeometryRules(0,0,128,128),true,false,true,()=>m);
         for(var i=0;i<1000&&target.Entities.Count==0;++i)live.Update(.01f);
         Check(target.Entities.Count>0&&!live.InitialFinished,"Cancellation fixture reaches published terrain while extraction is still pending");
         Check(live.TerrainPercent>0&&live.TerrainPercent<100,"Single global-size tile reports gradual cell progress while publishing chunks");
         var published=target.Entities.ConvertAll(e=>e.Added);reads=m.Reads;target.ClearAll();live.Dispose();live.Update(1);
         Check(m.Reads==reads&&target.Entities.Count==0&&published.TrueForAll(mesh=>mesh.Releases==1),"Mid-extraction teardown detaches entities, frees published meshes and prevents further reads");
+        source=new Scene{Height=v=>v.x+10*v.y};target=new Scene();m=new Memory(source.Pointer.ToUInt64(),false,129);
+        live=new MapLiveSceneGeometry(source,target,new Material(),new MapLiveGeometryRules(0,0,128,128),false,false,true,()=>m,true);
+        for(var i=0;i<1000&&!live.InitialFinished;++i)live.Update(.01f);
+        Check(live.InitialFinished&&!live.Partial&&source.HeightReads==5&&target.Entities.Count==4&&live.SourceTerrainTriangles==32768&&live.TerrainTriangles==8192,"Optimized raw collector publishes four batches and 75 percent fewer faces without more height queries");live.Dispose();
         var own=Marshal.AllocHGlobal(16);
         try
         {
