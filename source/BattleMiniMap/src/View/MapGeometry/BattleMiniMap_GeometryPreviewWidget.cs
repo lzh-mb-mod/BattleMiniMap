@@ -63,8 +63,8 @@ namespace BattleMiniMap.View.MapGeometry
             var delta=(position-_previous)/Math.Max(.01f,_scaleToUse); _previous=position;
             _dragDistance+=Math.Abs(delta.x)+Math.Abs(delta.y);
             var renderer=MapGeometryPreviewRenderer.Active;
-            if (_drag==1) renderer?.Orbit.Orbit(delta.x,delta.y);
-            else if (_drag==2) renderer?.Orbit.Pan(delta.x,delta.y,Viewport.Height/Math.Max(.01f,_scaleToUse));
+            if (_drag==1) renderer?.Orbit.Orbit(-delta.x,-delta.y);
+            else if (_drag==2) renderer?.Orbit.Pan(-delta.x,-delta.y,Viewport.Height/Math.Max(.01f,_scaleToUse));
         }
         protected override void OnMousePressed() { base.OnMousePressed(); _drag=PointerInViewport()?1:0; _dragDistance=0; _previous=Widgets.Utility.GetMousePosition(EventManager); }
         protected override void OnMouseAlternatePressed() { base.OnMouseAlternatePressed(); _drag=PointerInViewport()?2:0; _previous=Widgets.Utility.GetMousePosition(EventManager); }

@@ -59,17 +59,18 @@ static class PreviewControlsChecks
         }
         ui.EventManager.MousePosition=widget.GlobalPosition+new Vector2(50,100);
         Check((bool)widget.GetType().GetMethod("OnPreviewMouseScroll",BindingFlags.NonPublic|BindingFlags.Instance).Invoke(widget,null),"Image viewport remains a wheel event candidate");
+        var beforeDragYaw=preview.Orbit.Yaw;var beforeDragPitch=preview.Orbit.Pitch;
         Invoke(widget,"OnMousePressed");
         ui.EventManager.MousePosition=widget.GlobalPosition+new Vector2(70,470);Invoke(widget,"OnUpdate",0f);Invoke(widget,"OnMouseReleased",true);
         var stopped=preview.Orbit.Yaw;ui.EventManager.MousePosition+=new Vector2(20,0);Invoke(widget,"OnUpdate",0f);
-        Check(preview.Orbit.Yaw==stopped,"Drag started in image ends outside image");
+        Check(preview.Orbit.Yaw==stopped && stopped<beforeDragYaw && preview.Orbit.Pitch<beforeDragPitch,"Both orbit drag axes reverse and release outside image still ends capture");
         ui.EventManager.MousePosition=widget.GlobalPosition+new Vector2(50,100);Invoke(widget,"OnMouseAlternatePressed");
         var expected=new MapGeometryPreviewCamera();
         // Compare to a clone of the same pose using the production pan denominator.
         expected.Orbit((preview.Orbit.Yaw-expected.Yaw)/.006f,(preview.Orbit.Pitch-expected.Pitch)/.006f);
-        expected.Pan(10,5,480-64-60);
+        expected.Pan(-10,-5,480-64-60);
         ui.EventManager.MousePosition+=new Vector2(10,5);Invoke(widget,"OnMouseAlternateReleased",true);
-        Check(Math.Abs(preview.Orbit.Target.X-expected.Target.X)<.0001f && Math.Abs(preview.Orbit.Target.Z-expected.Target.Z)<.0001f,"Production pan uses image height");
+        Check(Math.Abs(preview.Orbit.Target.X-expected.Target.X)<.0001f && Math.Abs(preview.Orbit.Target.Z-expected.Target.Z)<.0001f,"Both pan drag axes reverse while retaining image height denominator");
         var old=TableauView.Last;preview.Orbit.Zoom(1);var eye=preview.Orbit.Eye;var at=preview.Orbit.Target;
         Check(preview.SwitchRuntimeSource() && config.UseCollisionScenePreview && preview.Texture==null && preview.Live==null && !old.NativeView.Enabled && !old.NativeView.Continuous,"Explicit switch detaches stale texture/collector and retires target immediately");
         var gets=old.ViewGets;old.Paint();Check(old.ViewGets==gets,"Source-switched callback cannot touch native view");
