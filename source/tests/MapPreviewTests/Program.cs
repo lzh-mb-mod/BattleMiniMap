@@ -14,6 +14,7 @@ class Program
         TerrainOptimizationChecks.Run();
         TerrainVerificationChecks.Run();
         ExtractionDiagnosticChecks.Run();
+        ObjectProfilingChecks.Run();
         TerrainModuleChecks.Run(args.Length>1?args[1]+".modules.json":null);
         if(args.Length>1){TerrainOptimizationChecks.ExistingSamples(args);RawTerrainChecks.Benchmark(args[1]+".collector.json");}
         var config=BattleMiniMapConfig.Get();
@@ -134,6 +135,7 @@ namespace TaleWorlds.Engine
         public MaterialFlags Flags; public static Material GetDefaultMaterial()=>new Material(); public Material CreateCopy()=>new Material();
         public void SetShaderFlags(int v){} public void SetTexture(MBTextureType t,Texture v){} public void SetAlphaBlendMode(MBAlphaBlendMode v){} public void SetAlphaTestValue(int v){} public void ManualInvalidate(){}
     }
+    public static class NativeProbe { public static Action<string> Before; public static void Call(string name){Before?.Invoke(name);} }
     public class MeshBuilder
     {
         public static int Builds,Faces,Corners; int _faces,_corners;
@@ -141,13 +143,13 @@ namespace TaleWorlds.Engine
         private void Mix(uint value){unchecked{_signature=(_signature^value)*1099511628211UL;}}
         public int AddFaceCorner(Vec3 p,Vec3 n,Vec2 uv,uint color){Mix(0x56455254);Mix((uint)BitConverter.SingleToInt32Bits(p.x));Mix((uint)BitConverter.SingleToInt32Bits(p.y));Mix((uint)BitConverter.SingleToInt32Bits(p.z));Mix(color);return _corners++;}
         public void AddFace(int a,int b,int c){Mix(0x46414345);Mix((uint)a);Mix((uint)b);Mix((uint)c);++_faces;}
-        public Mesh Finalize(){++Builds;Faces=_faces;Corners=_corners;return new Mesh{UploadSignature=_signature,UploadFaces=_faces,UploadVertices=_corners};}
+        public Mesh Finalize(){NativeProbe.Call("Upload");++Builds;Faces=_faces;Corners=_corners;return new Mesh{UploadSignature=_signature,UploadFaces=_faces,UploadVertices=_corners};}
     }
     public class Mesh {
         public UIntPtr Pointer {get;}=Ids.Next(); public bool IsValid=true; public uint Color;
         public ulong UploadSignature;public int UploadFaces,UploadVertices;
         public MatrixFrame Local=MatrixFrame.Identity; public Material Material; public int Copies, Releases;
-        public Mesh CreateCopy(){++Copies;return new Mesh{Local=Local};}
+        public Mesh CreateCopy(){NativeProbe.Call("RenderCopy");++Copies;return new Mesh{Local=Local};}
         public MatrixFrame GetLocalFrame()=>Local; public void SetLocalFrame(MatrixFrame f){Local=f;}
         public uint GetFaceCount()=>12; public void UpdateBoundingBox(){} public void SetMaterial(Material value){Material=value;}
         public void ManualInvalidate(){++Releases;}
@@ -157,11 +159,11 @@ namespace TaleWorlds.Engine
         public PhysicsShape Shape; public MatrixFrame Frame=MatrixFrame.Identity;
         public readonly System.Collections.Generic.List<MetaMesh> Metas=new System.Collections.Generic.List<MetaMesh>();
         public Mesh Added;
-        public static GameEntity CreateEmpty(Scene s,bool createPhysics,bool callScriptCallbacks){var e=new GameEntity{Scene=s};s.Entities.Add(e);return e;}
+        public static GameEntity CreateEmpty(Scene s,bool createPhysics,bool callScriptCallbacks){NativeProbe.Call("CreateInstance");var e=new GameEntity{Scene=s};s.Entities.Add(e);return e;}
         public UIntPtr GetScenePointer()=>Scene.Pointer; public bool IsVisibleIncludeParents()=>Visible;
-        public MatrixFrame GetGlobalFrame()=>Frame; public MatrixFrame GetBodyWorldTransform()=>Frame;
+        public MatrixFrame GetGlobalFrame()=>Frame; public MatrixFrame GetBodyWorldTransform(){NativeProbe.Call("BodyFrame");return Frame;}
         public int MultiMeshComponentCount=>Metas.Count; public MetaMesh GetMetaMesh(int i)=>Metas[i]; public PhysicsShape GetBodyShape()=>Shape;
-        public void SetFrame(ref MatrixFrame f){Frame=f;} public void AddMesh(Mesh m,bool recomputeBoundingBox){Added=m;}
+        public void SetFrame(ref MatrixFrame f){NativeProbe.Call("UpdateInstance");Frame=f;} public void AddMesh(Mesh m,bool recomputeBoundingBox){Added=m;}
         public void SetVisibilityExcludeParents(bool v){Visible=v;} public void SetReadyToRender(bool v){}
     }
     public static class Ids {static ulong id;public static UIntPtr Next()=>new UIntPtr(++id);}
@@ -179,10 +181,10 @@ namespace TaleWorlds.Engine
         public int SphereCount()=>SphereN; public int CapsuleCount()=>CapsuleN;
         public void GetSphere(ref SphereData s,int i){s.Origin=TestOrigin;s.Radius=TestRadius;}
         public void GetCapsule(ref CapsuleData c,int i){c.P1=new Vec3(0,0,0);c.P2=new Vec3(0,0,2);c.Radius=.5f;}
-        public PhysicsShape CreateCopy(){++Copies;return new PhysicsShape{Original=this,Ready=Ready,MeshN=MeshN,SphereN=SphereN,CapsuleN=CapsuleN,TriangleKind=TriangleKind,TestRadius=TestRadius,TestOrigin=TestOrigin};}
-        public void Prepare(){++Prepared;}
-        public void GetTriangle(Vec3[] t,int m,int i){++Original.Reads;t[0]=new Vec3(0,0,0);t[1]=new Vec3(1,0,0);t[2]=TriangleKind==1?t[1]:TriangleKind==2?new Vec3(float.NaN,1,0):new Vec3(0,1,0);}
-        public void ManualInvalidate(){++Released;}
+        public PhysicsShape CreateCopy(){NativeProbe.Call("CopyShape");++Copies;return new PhysicsShape{Original=this,Ready=Ready,MeshN=MeshN,SphereN=SphereN,CapsuleN=CapsuleN,TriangleKind=TriangleKind,TestRadius=TestRadius,TestOrigin=TestOrigin};}
+        public void Prepare(){NativeProbe.Call("PrepareShape");++Prepared;}
+        public void GetTriangle(Vec3[] t,int m,int i){NativeProbe.Call("TriangleBuild");++Original.Reads;t[0]=new Vec3(0,0,0);t[1]=new Vec3(1,0,0);t[2]=TriangleKind==1?t[1]:TriangleKind==2?new Vec3(float.NaN,1,0):new Vec3(0,1,0);}
+        public void ManualInvalidate(){NativeProbe.Call("ReleaseShape");++Released;}
     }
     public class View { public enum ViewRenderOptions { ClearColor,ClearDepth } }
     public class TableauView

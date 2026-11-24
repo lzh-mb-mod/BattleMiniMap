@@ -43,6 +43,9 @@ class Program
         Check(published&&worker!=owner,"Framework verification dispatch and completion use expected threads");
         var sample=MapExtractionSample.Capture();
         Check(sample.ThreadCpu100Ns>=0&&sample.HeapBytes>=0,"Framework own-thread CPU/heap/GC snapshot succeeds");
+        long stamp=0;var stages=new MapObjectExtractionProfiler(()=>stamp,1000);
+        stages.BeginStep();stages.Mark(MapObjectStage.PrepareShape,10,20);stamp=12;stages.EndStep();
+        Check(stages.StepContext.Contains("objectSegment=PrepareShape")&&stages.StepContext.Contains("objectSegmentMs=12.000"),"Framework object segment timer and context format use actual production code");
         var probeClock=Stopwatch.StartNew();for(var i=0;i<1000;++i)MapExtractionSample.Capture();
         Console.WriteLine("FRAMEWORK PROBE averageMs="+(probeClock.Elapsed.TotalMilliseconds/1000).ToString("F6",System.Globalization.CultureInfo.InvariantCulture));
         Console.WriteLine("PASS: "+checks+" net472 x64 module/verification checks; system modules only, no game extraction");
