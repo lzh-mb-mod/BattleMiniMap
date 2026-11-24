@@ -71,11 +71,13 @@ static class TerrainOptimizationChecks
                     quantization=Math.Max(quantization,Math.Abs(input[i]-((float)n*scale+offset)));
                 }
                 var f=new MapTerrainHeightfield(ys.Length,xs.Length,data,(float)xs[0],(float)ys[0],(float)step,scale,offset);
-                var watch=System.Diagnostics.Stopwatch.StartNew();long faces=0;var accepted=0;var exact=0;double maxAccepted=0,maxSampleError=0;
+                var watch=System.Diagnostics.Stopwatch.StartNew();long faces=0,algorithmTicks=0,algorithmAllocated=0;var accepted=0;var exact=0;double maxAccepted=0,maxSampleError=0;
+                var topology=System.Security.Cryptography.IncrementalHash.CreateHash(System.Security.Cryptography.HashAlgorithmName.SHA256);
                 for(var y=0;y<ys.Length-1;y+=8)for(var x=0;x<xs.Length-1;x+=8)
                 {
-                    var w=Math.Min(8,xs.Length-1-x);var h=Math.Min(8,ys.Length-1-y);var selected=new List<MapTerrainPatch>();foreach(var tick in MapTerrainPatch.Select(f,x,y,w,h,true,p=>selected.Add(p))){}
-                    var output=selected.SelectMany(p=>p.Faces()).ToArray();faces+=output.Length;
+                    var w=Math.Min(8,xs.Length-1-x);var h=Math.Min(8,ys.Length-1-y);var allocatedBefore=GC.GetAllocatedBytesForCurrentThread();var algorithmStart=System.Diagnostics.Stopwatch.GetTimestamp();var selected=new List<MapTerrainPatch>();foreach(var tick in MapTerrainPatch.Select(f,x,y,w,h,true,p=>selected.Add(p))){}
+                    var output=selected.SelectMany(p=>p.Faces()).ToArray();algorithmTicks+=System.Diagnostics.Stopwatch.GetTimestamp()-algorithmStart;algorithmAllocated+=GC.GetAllocatedBytesForCurrentThread()-allocatedBefore;faces+=output.Length;
+                    foreach(var face in output){topology.AppendData(BitConverter.GetBytes(face.A));topology.AppendData(BitConverter.GetBytes(face.B));topology.AppendData(BitConverter.GetBytes(face.C));}
                     foreach(var patch in selected){if(patch.Simplified){++accepted;maxAccepted=Math.Max(maxAccepted,patch.Error);}else ++exact;}
                     // Compare against original recorded heights, including S16 encoding error.
                     for(var py=0;py<=h;++py)for(var px=0;px<=w;++px)
@@ -86,7 +88,8 @@ static class TerrainOptimizationChecks
                 }
                 if(maxSampleError>.10001+quantization)throw new Exception("Existing sample exceeded error bound");
                 var sourceFaces=2L*(xs.Length-1)*(ys.Length-1);
-                report.Add(new {path,bytes=bytes.Length,sha256=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant(),columns=xs.Length,rows=ys.Length,step,diagonalAssumption=diagonal,holes="not recorded; no-hole reconstructed test surface",sourceFaces,displayFaces=faces,accepted,exact,maxAccepted,maxSampleError,quantization,algorithmMs=watch.Elapsed.TotalMilliseconds,uploadBlocks=((xs.Length-2)/64+1)*((ys.Length-2)/64+1)});
+                report.Add(new {path,bytes=bytes.Length,sha256=Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(bytes)).ToLowerInvariant(),columns=xs.Length,rows=ys.Length,step,diagonalAssumption=diagonal,holes="not recorded; no-hole reconstructed test surface",sourceFaces,displayFaces=faces,accepted,exact,maxAccepted,maxSampleError,quantization,offlineValidationMs=watch.Elapsed.TotalMilliseconds,simplificationMs=algorithmTicks*1000d/System.Diagnostics.Stopwatch.Frequency,simplificationAllocatedBytes=algorithmAllocated,topologySha256=Convert.ToHexString(topology.GetHashAndReset()).ToLowerInvariant(),uploadBlocks=((xs.Length-2)/64+1)*((ys.Length-2)/64+1)});
+                topology.Dispose();
                 Console.WriteLine("EXISTING HEIGHTS "+System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(path))+" diagonal="+diagonal+" faces="+sourceFaces+" -> "+faces+" maxSampleError="+maxSampleError.ToString("F6",System.Globalization.CultureInfo.InvariantCulture));
             }
         }

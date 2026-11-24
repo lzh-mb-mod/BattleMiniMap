@@ -24,8 +24,13 @@ namespace BattleMiniMap.View.MapGeometry
         public GeometryPoint Vertex(int index)
         {
             if(index<0||index>=SampleCount)throw new ArgumentOutOfRangeException(nameof(index));
+            return new GeometryPoint(OriginX+(index%Columns)*Step,OriginY+(index/Columns)*Step,Height(index));
+        }
+        internal float Height(int index)
+        {
+            if(index<0||index>=SampleCount)throw new ArgumentOutOfRangeException(nameof(index));
             var raw=(short)(_samples[index*4]|(_samples[index*4+1]<<8));
-            return new GeometryPoint(OriginX+(index%Columns)*Step,OriginY+(index/Columns)*Step,raw*HeightScale+HeightOffset);
+            return raw*HeightScale+HeightOffset;
         }
         // Retains the original per-cell diagonal and each triangle's hole bit.
         internal bool Hole(int row,int col,int half)=>(_samples[(row*Columns+col)*4+2+half]&127)==127;

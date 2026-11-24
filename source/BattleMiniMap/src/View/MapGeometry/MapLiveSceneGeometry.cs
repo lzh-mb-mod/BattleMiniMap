@@ -26,6 +26,8 @@ namespace BattleMiniMap.View.MapGeometry
         private double _terrainError,_terrainWallMs,_terrainWorkMs,_activeWorkMs;
         private string _phase="initialization",_slowestPhase="none";
         private readonly Func<IMapTerrainMemory> _rawMemory;
+        private readonly Func<Action<IMapTerrainMemory>,IEnumerable<int>> _rawInitialization;
+        private MapTerrainVerification _verification;
         private bool _collisionVerified;
         private sealed class CollisionResource
         {
@@ -71,13 +73,13 @@ namespace BattleMiniMap.View.MapGeometry
         public int TerrainPercent => _rawTerrain ? (_rawTilesTotal==0?0:Math.Min(100,(int)(100f*(_rawTilesDone+(_rawTileCells==0?0:_rawTileCellsDone/(float)_rawTileCells))/_rawTilesTotal))) : _terrainRead*100/(_rules.GridX*_rules.GridY);
         public string TerrainSource => _rawTerrain?"raw-physx":"sampled";
         public string Failure { get; private set; }
-        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null,bool simplifyTerrain=false)
+        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null,bool simplifyTerrain=false,Func<Action<IMapTerrainMemory>,IEnumerable<int>> rawInitialization=null)
         {
             _source=source??throw new ArgumentNullException(nameof(source));
             _target=target; _material=material; _rules=rules;
             _hasTerrain=hasTerrain; _terrainDone=!hasTerrain && !rawTerrain;
             _collision=collision;
-            _simplifyTerrain=simplifyTerrain;_rawTerrain=rawTerrain;_rawMemory=rawMemory??(()=>new MapSelfTerrainMemory());
+            _simplifyTerrain=simplifyTerrain;_rawTerrain=rawTerrain;_rawMemory=rawMemory;_rawInitialization=rawInitialization;
             _steps=Extract().GetEnumerator();
             Report("started: source="+(collision?"runtime-collision":"runtime-render")+" terrainAvailable="+hasTerrain+" terrain="+TerrainSource+" simplifyTerrain="+_simplifyTerrain+" budgetMs=2 terrainSteps=512 objectSteps=64 domain="+
                 rules.MinX+","+rules.MinY+","+rules.MaxX+","+rules.MaxY+" grid="+rules.GridX+"x"+rules.GridY);
@@ -100,6 +102,7 @@ namespace BattleMiniMap.View.MapGeometry
                     _phaseMax[_phase]=Math.Max(_phaseMax.TryGetValue(_phase,out var phaseMax)?phaseMax:0,step.Elapsed.TotalMilliseconds);
                     if(step.Elapsed.TotalMilliseconds>_maxStepMs){_maxStepMs=step.Elapsed.TotalMilliseconds;_slowestPhase=_phase;} ++count;
                     if (!more) { _steps.Dispose(); _steps=null; break; }
+                    if(_steps.Current==MapTerrainVerification.Waiting)break;
                 }
             }
             catch(Exception ex)
@@ -293,10 +296,31 @@ namespace BattleMiniMap.View.MapGeometry
             if(_rawTerrain) { foreach(var step in RawTerrain()) yield return step; }
             else { foreach(var step in SampledTerrain()) yield return step; }
         }
-        private MapRuntimeTerrainReader StartRawTerrain()
+        private IEnumerable<int> InitializeRawMemory(Action<IMapTerrainMemory> complete)
         {
-            try { return new MapRuntimeTerrainReader(_rawMemory(),_source.Pointer.ToUInt64()); }
-            catch(Exception ex) { ++_rawFailures;Partial=true;Report("raw terrain unavailable: "+ex.Message);return null; }
+            if(_rawInitialization!=null){foreach(var step in _rawInitialization(complete))yield return step;}
+            else if(_rawMemory!=null)complete(_rawMemory());
+            else {foreach(var step in MapSelfTerrainMemory.CreateSteps(complete))yield return step;}
+        }
+        private IEnumerable<int> StartRawTerrain(Action<MapRuntimeTerrainReader> complete)
+        {
+            IMapTerrainMemory memory=null;
+            using(var steps=InitializeRawMemory(value=>memory=value).GetEnumerator())
+            while(true)
+            {
+                bool more;
+                try {more=steps.MoveNext();}
+                catch(Exception ex){++_rawFailures;Partial=true;Report("raw terrain unavailable: "+ex.Message);yield break;}
+                if(!more)break;
+                yield return steps.Current;
+            }
+            try
+            {
+                _verification=(memory as MapSelfTerrainMemory)?.Verification;
+                if(_verification!=null)Report("terrain verification completed: workerMs="+Ms(_verification.WorkerMs)+" waitMs="+Ms(_verification.WaitMs)+" polls="+_verification.Polls);
+                complete(new MapRuntimeTerrainReader(memory,_source.Pointer.ToUInt64()));
+            }
+            catch(Exception ex){++_rawFailures;Partial=true;Report("raw terrain unavailable: "+ex.Message);}
         }
         private IEnumerable<int> ReadRawTileSteps(MapRuntimeTerrainReader reader,int index,Action<MapTerrainHeightfield> complete)
         {
@@ -315,7 +339,9 @@ namespace BattleMiniMap.View.MapGeometry
         private IEnumerable<int> RawTerrain()
         {
             _phase="terrain-reader-init";
-            var reader=StartRawTerrain();yield return 0;
+            MapRuntimeTerrainReader reader=null;
+            foreach(var step in StartRawTerrain(value=>reader=value))yield return step;
+            yield return 0;
             if(reader==null)yield break;
             _rawTilesTotal=reader.TileCount;
             Report("raw terrain layout: mode="+reader.Mode+" tiles="+reader.TileCount+" scalarDataSource=False");
@@ -482,6 +508,7 @@ namespace BattleMiniMap.View.MapGeometry
             " rawAttemptedSamples="+_rawAttemptedSamples+" rawSourceTriangles="+_rawSourceTriangles+" simplifiedPatches="+_patchAccepted+" exactPatches="+_patchExact+" holePatches="+_patchHoles+" acceptedMaxError="+_terrainError.ToString("R",CultureInfo.InvariantCulture)+
             " rawCells="+_rawTileCellsDone+"/"+_rawTileCells+" terrainMeshes="+_terrainMeshes.Count+
             " rawHoles="+_rawHoles+" validationQueries="+_rawChecks+" validationMaxError="+_rawMaxError.ToString("R",CultureInfo.InvariantCulture)+
+            " verificationWorkerMs="+Ms(_verification?.WorkerMs??0)+" verificationWaitMs="+Ms(_verification?.WaitMs??0)+" verificationPolls="+(_verification?.Polls??0)+
             " rawFailures="+_rawFailures+" nodeFloatBuffersMissing="+_nodeFloatBuffersMissing+
             " errorReasons="+Reasons(_errorReasons)+" errorResourceSummaries="+_resourceExamples+" stepMaxByPhase="+PhaseTimes()+" errorShapes="+_errorShapes.Count+" errorExamples="+_errorExamples+" phase="+_phase+" slowestPhase="+_slowestPhase+" terrainWallMs="+Ms(_terrainWallMs)+" terrainWorkMs="+Ms(_terrainWorkMs)+
             " wallMs="+Ms(_wall.Elapsed.TotalMilliseconds)+" workMs="+Ms(_workMs)+" maxTickMs="+Ms(_maxTickMs)+" maxStepMs="+Ms(_maxStepMs);

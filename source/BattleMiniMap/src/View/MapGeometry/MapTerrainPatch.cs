@@ -15,13 +15,54 @@ namespace BattleMiniMap.View.MapGeometry
         private readonly MapTerrainHeightfield _tile;
         private readonly int _x,_y,_w,_h;
         private double _error;
+        private float[] _heights;
+        private ulong _readyLow,_readyHigh;
+        private Plan _plan;
+        private sealed class Plan
+        {
+            public readonly Tuple<int,int>[] Border;
+            public readonly double[][] Cuts;
+            public Plan(int w,int h)
+            {
+                var border=new List<Tuple<int,int>>();
+                for(var x=0;x<w;++x)border.Add(Tuple.Create(x,0));
+                for(var y=0;y<h;++y)border.Add(Tuple.Create(w,y));
+                for(var x=w;x>0;--x)border.Add(Tuple.Create(x,h));
+                for(var y=h;y>0;--y)border.Add(Tuple.Create(0,y));
+                Border=border.ToArray();Cuts=new double[Border.Length][];
+                for(var edge=0;edge<Border.Length;++edge)
+                {
+                    var dx=Border[edge].Item1-w/2d;var dy=Border[edge].Item2-h/2d;var cuts=new List<double>{0,1};
+                    if(dx!=0)for(var x=1;x<w;++x){var t=(x-w/2d)/dx;if(t>0&&t<1)cuts.Add(t);}
+                    if(dy!=0)for(var y=1;y<h;++y){var t=(y-h/2d)/dy;if(t>0&&t<1)cuts.Add(t);}
+                    cuts.Sort();Cuts[edge]=cuts.ToArray();
+                }
+            }
+        }
+        private static readonly Lazy<Plan>[,] Plans=CreatePlans();
+        private static Lazy<Plan>[,] CreatePlans()
+        {
+            var plans=new Lazy<Plan>[3,3];
+            for(var w=4;w<=8;w+=2)for(var h=4;h<=8;h+=2)
+            {var width=w;var height=h;plans[(w-4)/2,(h-4)/2]=new Lazy<Plan>(()=>new Plan(width,height));}
+            return plans;
+        }
+        private Plan GeometryPlan=>_plan??(_plan=Plans[(_w-4)/2,(_h-4)/2].Value);
         public bool Simplified { get; private set; }
         public bool HasHoles { get; private set; }
         public double Error => _error;
         public MapTerrainPatch(MapTerrainHeightfield tile,int x,int y,int w,int h)
         { _tile=tile;_x=x;_y=y;_w=w;_h=h; }
         private int Index(int x,int y)=>(_y+y)*_tile.Columns+_x+x;
-        private double Z(int x,int y)=>_tile.Vertex(Index(x,y)).Z;
+        private double Z(int x,int y)
+        {
+            var index=y*(_w+1)+x;var bit=1UL<<(index&63);
+            if(_heights==null)_heights=new float[(_w+1)*(_h+1)];
+            if(index<64)
+            {if((_readyLow&bit)==0){_heights[index]=_tile.Height(Index(x,y));_readyLow|=bit;}}
+            else if((_readyHigh&bit)==0){_heights[index]=_tile.Height(Index(x,y));_readyHigh|=bit;}
+            return _heights[index];
+        }
         private bool Measure(double a,double b,double tolerance)
         {
             var d=Math.Abs(a-b);
@@ -58,19 +99,12 @@ namespace BattleMiniMap.View.MapGeometry
                 return fx>=fy ? z00*(1-fx)+z10*(fx-fy)+z11*fy : z00*(1-fy)+z01*(fy-fx)+z11*fx;
             return fx+fy<=1 ? z00*(1-fx-fy)+z10*fx+z01*fy : z11*(fx+fy-1)+z01*(1-fx)+z10*(1-fy);
         }
-        private IEnumerable<Tuple<int,int>> Border()
-        {
-            for(var x=0;x<_w;++x)yield return Tuple.Create(x,0);
-            for(var y=0;y<_h;++y)yield return Tuple.Create(_w,y);
-            for(var x=_w;x>0;--x)yield return Tuple.Create(x,_h);
-            for(var y=_h;y>0;--y)yield return Tuple.Create(0,y);
-        }
         // Overlay vertices are source vertices plus fan radial intersections with source edges.
         // Work is split at each cell/edge; the collector controls the frame budget.
         public IEnumerable<int> Evaluate(bool enable,double tolerance=.10)
         {
             var work=0;
-            if(!enable||_w<4||_h<4||(_w&1)!=0||(_h&1)!=0)yield break;
+            if(!enable||_w<4||_h<4||_w>8||_h>8||(_w&1)!=0||(_h&1)!=0)yield break;
             for(var y=0;y<_h;++y)for(var x=0;x<_w;++x)
             {
                 if(_tile.Hole(_y+y,_x+x,0)||_tile.Hole(_y+y,_x+x,1)){HasHoles=true;yield break;}
@@ -84,18 +118,17 @@ namespace BattleMiniMap.View.MapGeometry
                 if(++work%32==0)yield return 0;
             }
             var cx=_w/2d;var cy=_h/2d;var zc=Z(_w/2,_h/2);
-            foreach(var end in Border())
+            var plan=GeometryPlan;
+            for(var edge=0;edge<plan.Border.Length;++edge)
             {
+                var end=plan.Border[edge];
                 var dx=end.Item1-cx;var dy=end.Item2-cy;var ze=Z(end.Item1,end.Item2);
-                var cuts=new List<double>{0,1};
-                if(dx!=0)for(var x=1;x<_w;++x){var t=(x-cx)/dx;if(t>0&&t<1)cuts.Add(t);}
-                if(dy!=0)for(var y=1;y<_h;++y){var t=(y-cy)/dy;if(t>0&&t<1)cuts.Add(t);}
-                cuts.Sort();
-                for(var i=0;i<cuts.Count;++i)
+                var cuts=plan.Cuts[edge];
+                for(var i=0;i<cuts.Length;++i)
                 {
                     var t=cuts[i];
                     if(!Measure(Original(cx+dx*t,cy+dy*t),zc*(1-t)+ze*t,limit))yield break;
-                    if(i+1<cuts.Count&&cuts[i+1]-t>1e-12)
+                    if(i+1<cuts.Length&&cuts[i+1]-t>1e-12)
                     {
                         var next=cuts[i+1];var mid=(t+next)/2;
                         var ix=Math.Min(_w-1,Math.Max(0,(int)Math.Floor(cx+dx*mid)));
@@ -130,9 +163,9 @@ namespace BattleMiniMap.View.MapGeometry
         {
             if(Simplified)
             {
-                var border=new List<Tuple<int,int>>(Border());var centre=Index(_w/2,_h/2);
-                for(var i=0;i<border.Count;++i)
-                {var a=border[i];var b=border[(i+1)%border.Count];yield return new MapTerrainFace(centre,Index(a.Item1,a.Item2),Index(b.Item1,b.Item2));}
+                var border=GeometryPlan.Border;var centre=Index(_w/2,_h/2);
+                for(var i=0;i<border.Length;++i)
+                {var a=border[i];var b=border[(i+1)%border.Length];yield return new MapTerrainFace(centre,Index(a.Item1,a.Item2),Index(b.Item1,b.Item2));}
             }
             else for(var y=0;y<_h;++y)for(var x=0;x<_w;++x)for(var half=0;half<2;++half)
                 if(_tile.Triangle(_y+y,_x+x,half,out var a,out var b,out var c))yield return new MapTerrainFace(a,b,c);

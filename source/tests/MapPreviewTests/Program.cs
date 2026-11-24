@@ -12,6 +12,7 @@ class Program
         LiveChecks.Run(args[0]);
         RawTerrainChecks.Run();
         TerrainOptimizationChecks.Run();
+        TerrainVerificationChecks.Run();
         if(args.Length>1)TerrainOptimizationChecks.ExistingSamples(args);
         var config=BattleMiniMapConfig.Get();
         config.UseLiveScenePreview=false;

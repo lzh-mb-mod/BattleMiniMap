@@ -80,7 +80,7 @@ static class RawTerrainChecks
         finally { Marshal.FreeHGlobal(own); }
         Console.WriteLine("PASS: "+checks+" raw-heightfield checks; simulated memory, not engine execution");
     }
-    sealed class Memory : IMapTerrainMemory
+    internal sealed class Memory : IMapTerrainMemory
     {
         public ulong NativeBase=>0x180000000;
         public ulong PhysxBase=>0x190000000;
