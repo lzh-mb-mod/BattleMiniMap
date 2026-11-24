@@ -36,6 +36,7 @@ namespace BattleMiniMap.View.MapGeometry
         private bool _collisionMode;
         private bool _rawTerrainMode,_simplifyTerrainMode;
         public UiTexture Texture { get; private set; }
+        public MapPreviewProblem Problem { get; private set; }
         public bool Available => Texture != null && !_failed;
         public MapGeometryPreviewRenderer(Scene runtimeSource=null,float minX=0,float minY=0,float maxX=1,float maxY=1)
         { _runtimeSource=runtimeSource; _minX=minX; _minY=minY; _maxX=maxX; _maxY=maxY; Active = this; }
@@ -49,24 +50,27 @@ namespace BattleMiniMap.View.MapGeometry
             var config=BattleMiniMapConfig.Get();
             if (!config.ShowGeometryPreview)
             {
-                if (_open) { Clear(true); _failed=false; _open=false; }
+                if (_open) { Clear(true); _failed=false; Problem=MapPreviewProblem.None; _open=false; }
                 return;
             }
             if (!_open) { _open=true; Orbit.Reset(); }
             if (_failed) return;
+            var failure=MapPreviewProblem.InitializationFailed;
             try
             {
                 var live=config.UseLiveScenePreview;
                 var data=live ? null : source?.EnsureVerifiedCache();
-                if (live && _runtimeSource==null) return;
-                if (!live && data==null) return;
+                if ((live && _runtimeSource==null) || (!live && data==null))
+                { Clear(true); Problem=MapPreviewProblem.SourceUnavailable; _failed=true; return; }
                 var ceiling=MapGeometryHeight.Ceiling(config.CutMapGeometryByHeight,config.MapGeometryCeiling);
                 if (_view==null || live!=_liveMode || (live && (_collisionMode!=config.UseCollisionScenePreview || _rawTerrainMode!=config.UseRawRuntimeTerrain || (_rawTerrainMode&&_simplifyTerrainMode!=config.SimplifyRuntimeTerrain))) || (!live && (_proxy!=config.UseMapGeometryProxy || _ceiling!=ceiling)))
                 {
                     Clear(true); _liveMode=live; _collisionMode=config.UseCollisionScenePreview; _rawTerrainMode=config.UseRawRuntimeTerrain; _simplifyTerrainMode=config.SimplifyRuntimeTerrain; _proxy=config.UseMapGeometryProxy; _ceiling=ceiling; Build(data);
                 }
+                failure=MapPreviewProblem.CollectionFailed;
                 _live?.Update(dt);
                 if (_live?.Failure!=null) throw new InvalidOperationException(_live.Failure);
+                failure=MapPreviewProblem.RenderingFailed;
                 if (_binding.Failure!=null) throw new InvalidOperationException(_binding.Failure);
                 var eye=Orbit.Eye; var at=Orbit.Target;
                 _camera.LookAt(ToVec(eye),ToVec(at),Vec3.Up);
@@ -74,7 +78,7 @@ namespace BattleMiniMap.View.MapGeometry
                 _view.SetDoNotRenderThisFrame(false); _view.SetEnable(true);
             }
             catch (Exception ex)
-            { _failed=true; Clear(true); Report("disabled; main map retained: "+ex.Message); }
+            { _failed=true; Problem=failure; Clear(true); Report("disabled; main map retained: "+ex.Message); }
         }
         private static Vec3 ToVec(GeometryPoint p) => new Vec3(p.X,p.Y,p.Z);
         private void Build(MapGeometryData data)
@@ -178,6 +182,7 @@ namespace BattleMiniMap.View.MapGeometry
             Texture=null;
             var view=_view; var scene=_scene; var camera=_camera; var material=_material;
             var white=_white; var target=_target; var meshes=_meshes.ToArray(); var entities=_entities.ToArray(); var live=_live;
+            live?.Stop();
             _live=null;
             _view=null; _scene=null; _camera=null; _material=null; _white=null; _target=null; _meshes.Clear(); _entities.Clear();
             Action<Exception> report=ex=>Report("cleanup: "+ex.Message);

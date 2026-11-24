@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net9.0</TargetFramework></PropertyGroup>
   <ItemGroup>
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapPreviewStatus.cs" Link="PreviewStatus.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLiveGeometryRules.cs" Link="LiveRules.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLivePrimitiveGeometry.cs" Link="Primitives.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapObjectExtractionProfiler.cs" Link="ObjectProfiler.cs" />

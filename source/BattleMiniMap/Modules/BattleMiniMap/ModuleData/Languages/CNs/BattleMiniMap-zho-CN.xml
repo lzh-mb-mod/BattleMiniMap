@@ -71,16 +71,30 @@
   <string id="BattleMiniMap_geometry_preview" text="三维地图预览" />
   <string id="BattleMiniMap_geometry_preview_hint" text="运行时场景预览。左拖旋转，右拖平移，滚轮缩放，双击复位。退出场景后关闭。" />
   <string id="BattleMiniMap_geometry_preview_controls" text="地图 | 左拖旋转  右拖平移  滚轮缩放  双击复位" />
-  <string id="BattleMiniMap_geometry_preview_missing" text="地图预览不可用，请检查来源选项和提取日志。" />
+  <string id="BattleMiniMap_geometry_preview_missing" text="地图预览不可用。" />
   <string id="BattleMiniMap_geometry_preview_close" text="关闭" />
   <string id="BattleMiniMap_live_preview" text="动态提取当前场景" />
   <string id="BattleMiniMap_live_preview_hint" text="分帧读取当前已加载场景，不读取离线几何。关闭后仅检查旧桥缓存。旧桥代理与高度裁切不作用于动态来源。" />
   <string id="BattleMiniMap_collision_preview" text="使用碰撞网格（关闭：渲染网格）" />
   <string id="BattleMiniMap_collision_preview_hint" text="仅作用于动态来源。在已验证的引擎版本读取准备后的碰撞副本。球和胶囊使用显示近似，不支持的形状记为部分覆盖。" />
-  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE} | {STATE} | 网格：{MESHES}  地形读取：{TERRAIN}%" />
+  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE}：{TERRAINSTATE}（{TERRAIN}%）| {OBJECTSTATE} | 网格 {MESHES}&#xA;{COVERAGE} | 拒绝项 {REJECTED}；跳过项 {SKIPPED}；未支持形状 {UNSUPPORTED}；地形失败项 {TERRAINFAILURES}" />
   <string id="BattleMiniMap_live_preview_loading" text="正在提取" />
   <string id="BattleMiniMap_live_preview_partial" text="本轮扫描结束，覆盖尚不完整" />
   <string id="BattleMiniMap_live_preview_scanned" text="本轮扫描结束，覆盖待验证" />
+  <string id="BattleMiniMap_live_preview_terrain_reading" text="读取中" />
+  <string id="BattleMiniMap_live_preview_terrain_ended" text="读取结束" />
+  <string id="BattleMiniMap_live_preview_terrain_gaps" text="读取结束，有缺口" />
+  <string id="BattleMiniMap_live_preview_terrain_unavailable" text="不可用" />
+  <string id="BattleMiniMap_live_preview_objects_waiting" text="对象待初扫" />
+  <string id="BattleMiniMap_live_preview_objects_scanning" text="对象初扫中" />
+  <string id="BattleMiniMap_live_preview_objects_ended" text="对象初扫结束" />
+  <string id="BattleMiniMap_live_preview_coverage_gaps" text="已知缺口" />
+  <string id="BattleMiniMap_live_preview_coverage_unverified" text="覆盖待核验" />
+  <string id="BattleMiniMap_live_preview_source_unavailable" text="选定来源不可用，请关闭预览后重新打开以重试。" />
+  <string id="BattleMiniMap_live_preview_initialization_failed" text="预览初始化失败，请关闭预览后重新打开以重试。" />
+  <string id="BattleMiniMap_live_preview_collection_failed" text="场景提取失败，请关闭预览后重新打开以重试。" />
+  <string id="BattleMiniMap_live_preview_rendering_failed" text="预览绘制失败，请关闭预览后重新打开以重试。" />
+  <string id="BattleMiniMap_live_preview_cache_diagnostic" text="旧桥缓存：仅手动诊断，不代表运行时场景覆盖。" />
   <string id="BattleMiniMap_live_preview_collision" text="碰撞网格" />
   <string id="BattleMiniMap_live_preview_render" text="渲染网格" />
   <string id="BattleMiniMap_raw_terrain" text="直接读取原始地形（关闭：逐点高度）" />

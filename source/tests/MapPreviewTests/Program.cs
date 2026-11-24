@@ -9,6 +9,7 @@ class Program
     static void Check(bool ok,string message) { if(!ok)throw new Exception(message); ++checks; Console.WriteLine("PASS: "+message); }
     static void Main(string[] args)
     {
+        CoverageChecks.Run(args[0]);
         LiveChecks.Run(args[0]);
         RawTerrainChecks.Run();
         TerrainOptimizationChecks.Run();
@@ -29,6 +30,7 @@ class Program
         preview.Update(source); Check(Scene.Created==0 && source.Reads==0,"Closed preview neither loads cache nor creates scene");
         config.ShowGeometryPreview=true;
         preview.Update(new MapGeometryRenderer()); Check(Scene.Created==0 && !preview.Available,"Unavailable cache leaves closeable empty panel without native allocation");
+        config.ShowGeometryPreview=false;preview.Update(source);config.ShowGeometryPreview=true;
         preview.Update(source); var target=TableauView.Last; var view=target.NativeView; var camera=view.Camera;
         Check(preview.Available && MeshBuilder.Faces==218,"Verified proxy uploaded to independent preview");
         target.Pump(); Check(view.Skip && view.Continuous,"Interactive callback stops until next update permits");
@@ -60,10 +62,14 @@ class Program
         before=Scene.Invalidated; broken.Update(source);
         broken.Update(source); broken.Update(source);
         Check(!broken.Available && Scene.Invalidated>before,"Partial allocation failure isolated and released");
+        Check(broken.Problem==MapPreviewProblem.InitializationFailed,"Allocation failure retains initialization category");
+        before=Scene.Created;broken.Update(source);Check(Scene.Created==before,"Initialization failure cannot auto retry");
         Texture.FailWhite=false; config.ShowGeometryPreview=false; broken.Update(source); config.ShowGeometryPreview=true; broken.Update(source);
         Check(broken.Available,"Explicit close and reopen retries failed preview");
         var failedTarget=TableauView.Last; failedTarget.NativeView.Throw=true; failedTarget.Paint(); broken.Update(source);
         Check(!broken.Available && !failedTarget.NativeView.Enabled,"Callback failure disables only preview");
+        Check(broken.Problem==MapPreviewProblem.RenderingFailed,"Callback failure retains rendering category");
+        before=Scene.Created;broken.Update(source);Check(Scene.Created==before,"Rendering failure cannot auto retry");
         broken.Dispose();
         Console.WriteLine("PASS: "+checks+" actual preview renderer checks with fake native boundary; no GPU execution proof");
     }

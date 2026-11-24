@@ -71,16 +71,30 @@
   <string id="BattleMiniMap_geometry_preview" text="3D map preview" />
   <string id="BattleMiniMap_geometry_preview_hint" text="Runtime scene preview. Left drag: orbit; right drag: pan; wheel: zoom; double click: reset. Closes on mission exit." />
   <string id="BattleMiniMap_geometry_preview_controls" text="Map | Left: orbit  Right: pan  Wheel: zoom  Double click: reset" />
-  <string id="BattleMiniMap_geometry_preview_missing" text="Map preview unavailable. Check source selection and extraction log." />
+  <string id="BattleMiniMap_geometry_preview_missing" text="Map preview unavailable." />
   <string id="BattleMiniMap_geometry_preview_close" text="Close" />
   <string id="BattleMiniMap_live_preview" text="Extract the current scene at runtime" />
   <string id="BattleMiniMap_live_preview_hint" text="Read the loaded scene in small steps without offline geometry files. Disable only to inspect the old bridge cache. Bridge proxy and height clipping options do not apply to runtime sources." />
   <string id="BattleMiniMap_collision_preview" text="Use collision geometry (off: render geometry)" />
   <string id="BattleMiniMap_collision_preview_hint" text="Runtime source only. Collision reads prepared shape copies on the verified engine build. Spheres and capsules use display approximations; unsupported shapes are reported as partial coverage." />
-  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE} | {STATE} | Map meshes: {MESHES}  Terrain samples: {TERRAIN}%" />
+  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE}: {TERRAINSTATE} ({TERRAIN}%) | {OBJECTSTATE} | Meshes {MESHES}&#xA;{COVERAGE} | Rejected items {REJECTED}; skipped items {SKIPPED}; unsupported shapes {UNSUPPORTED}; terrain failures {TERRAINFAILURES}" />
   <string id="BattleMiniMap_live_preview_loading" text="Extracting" />
   <string id="BattleMiniMap_live_preview_partial" text="Scan finished; coverage incomplete" />
   <string id="BattleMiniMap_live_preview_scanned" text="Scan finished; coverage requires validation" />
+  <string id="BattleMiniMap_live_preview_terrain_reading" text="reading" />
+  <string id="BattleMiniMap_live_preview_terrain_ended" text="read ended" />
+  <string id="BattleMiniMap_live_preview_terrain_gaps" text="read ended with gaps" />
+  <string id="BattleMiniMap_live_preview_terrain_unavailable" text="unavailable" />
+  <string id="BattleMiniMap_live_preview_objects_waiting" text="Objects: waiting" />
+  <string id="BattleMiniMap_live_preview_objects_scanning" text="Objects: initial scan" />
+  <string id="BattleMiniMap_live_preview_objects_ended" text="Objects: scan ended" />
+  <string id="BattleMiniMap_live_preview_coverage_gaps" text="Known gaps" />
+  <string id="BattleMiniMap_live_preview_coverage_unverified" text="Coverage unverified" />
+  <string id="BattleMiniMap_live_preview_source_unavailable" text="Selected source unavailable. Close and reopen to retry." />
+  <string id="BattleMiniMap_live_preview_initialization_failed" text="Preview initialization failed. Close and reopen to retry." />
+  <string id="BattleMiniMap_live_preview_collection_failed" text="Scene extraction failed. Close and reopen to retry." />
+  <string id="BattleMiniMap_live_preview_rendering_failed" text="Preview rendering failed. Close and reopen to retry." />
+  <string id="BattleMiniMap_live_preview_cache_diagnostic" text="Old bridge cache: manual diagnostic only; no runtime scene coverage." />
   <string id="BattleMiniMap_live_preview_collision" text="Collision mesh" />
   <string id="BattleMiniMap_live_preview_render" text="Render mesh" />
   <string id="BattleMiniMap_raw_terrain" text="Read original runtime terrain (off: height queries)" />

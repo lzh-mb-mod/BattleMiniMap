@@ -79,13 +79,24 @@ namespace BattleMiniMap.View.Background.Map
             var unavailable=visible && !(BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active?.Available ?? false);
             if (_geometryPreviewVisible!=visible) { _geometryPreviewVisible=visible; OnPropertyChanged(nameof(GeometryPreviewVisible)); }
             if (_geometryPreviewUnavailable!=unavailable) { _geometryPreviewUnavailable=unavailable; OnPropertyChanged(nameof(GeometryPreviewUnavailable)); }
-            var live=BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active?.Live;
-            var status=visible && live!=null ? TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_status")
-                .SetTextVariable("SOURCE",TaleWorlds.Core.GameTexts.FindText(live.IsCollision ? "str_battle_mini_map_live_preview_collision" : "str_battle_mini_map_live_preview_render"))
-                .SetTextVariable("TERRAINSOURCE",TaleWorlds.Core.GameTexts.FindText(live.TerrainSource=="raw-physx" ? "str_battle_mini_map_raw_terrain_source" : "str_battle_mini_map_sampled_terrain_source"))
-                .SetTextVariable("MESHES",live.DisplayMeshes).SetTextVariable("TERRAIN",live.TerrainPercent)
-                .SetTextVariable("STATE",TaleWorlds.Core.GameTexts.FindText(live.InitialFinished ?
-                    (live.Partial ? "str_battle_mini_map_live_preview_partial" : "str_battle_mini_map_live_preview_scanned") : "str_battle_mini_map_live_preview_loading")).ToString() : "";
+            var preview=BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active;
+            var live=preview?.Live;
+            var problem=BattleMiniMap.View.MapGeometry.MapPreviewStatus.ProblemText(preview?.Problem ?? BattleMiniMap.View.MapGeometry.MapPreviewProblem.None);
+            string Text(string key) => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_"+key).ToString();
+            var status="";
+            if (visible && problem!=null) status=Text(problem);
+            else if (visible && live!=null)
+            {
+                var coverage=live.Coverage;
+                status=TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_status")
+                    .SetTextVariable("SOURCE",Text(live.IsCollision ? "collision" : "render"))
+                    .SetTextVariable("TERRAINSOURCE",TaleWorlds.Core.GameTexts.FindText(live.TerrainSource=="raw-physx" ? "str_battle_mini_map_raw_terrain_source" : "str_battle_mini_map_sampled_terrain_source"))
+                    .SetTextVariable("MESHES",live.DisplayMeshes).SetTextVariable("TERRAINSTATE",Text(coverage.TerrainText)).SetTextVariable("TERRAIN",coverage.TerrainPercent)
+                    .SetTextVariable("OBJECTSTATE",Text(coverage.ObjectsText)).SetTextVariable("COVERAGE",Text(coverage.CoverageText))
+                    .SetTextVariable("REJECTED",coverage.Rejected).SetTextVariable("SKIPPED",coverage.Skipped)
+                    .SetTextVariable("UNSUPPORTED",coverage.Unsupported).SetTextVariable("TERRAINFAILURES",coverage.TerrainFailures).ToString();
+            }
+            else if (visible && preview?.Available==true) status=Text("cache_diagnostic");
             if (_geometryPreviewStatus!=status) { _geometryPreviewStatus=status; OnPropertyChanged(nameof(GeometryPreviewStatus)); }
         }
         public CameraMarkerViewModel CameraMarkerRight { get; }

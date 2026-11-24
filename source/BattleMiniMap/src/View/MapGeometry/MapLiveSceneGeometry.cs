@@ -59,7 +59,7 @@ namespace BattleMiniMap.View.MapGeometry
         public int TerrainTimeLimitedTicks=>_terrainTimeLimited;
         public int TerrainWaitTicks=>_terrainWaitTicks;
         public int TerrainMaxStepsUsed=>_terrainMaxSteps;
-        private bool _disposed,_terrainDone;
+        private bool _disposed,_stopped,_terrainDone,_terrainUnavailable,_terrainHasGaps;
         private readonly bool _hasTerrain;
         private float _refresh;
         private int _terrainRead,_terrainInvalid;
@@ -81,6 +81,12 @@ namespace BattleMiniMap.View.MapGeometry
         public int TerrainPercent => _rawTerrain ? (_rawTilesTotal==0?0:Math.Min(100,(int)(100f*(_rawTilesDone+(_rawTileCells==0?0:_rawTileCellsDone/(float)_rawTileCells))/_rawTilesTotal))) : _terrainRead*100/(_rules.GridX*_rules.GridY);
         public string TerrainSource => _rawTerrain?"raw-physx":"sampled";
         public string Failure { get; private set; }
+        public MapPreviewStatus Coverage => new MapPreviewStatus {
+            TerrainEnded=_terrainDone, TerrainUnavailable=_terrainUnavailable || (!_hasTerrain && !_rawTerrain),
+            TerrainHasGaps=_terrainHasGaps,
+            TerrainPercent=TerrainPercent, InitialFinished=InitialFinished, Partial=Partial,
+            Rejected=Errors, Skipped=Skipped, Unsupported=_unsupportedShapes, TerrainFailures=_rawFailures+_terrainInvalid
+        };
         public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null,bool simplifyTerrain=false,Func<Action<IMapTerrainMemory>,IEnumerable<int>> rawInitialization=null,bool profile=false)
         {
             _diagnostics=profile?new MapExtractionDiagnostics():null;
@@ -96,7 +102,7 @@ namespace BattleMiniMap.View.MapGeometry
         }
         public void Update(float dt)
         {
-            if (_disposed || Failure!=null) return;
+            if (_disposed || _stopped || Failure!=null) return;
             if (_steps==null)
             {
                 if (MapLiveGeometryRules.Finite(dt) && dt>0) _refresh+=Math.Min(dt,1);
@@ -164,7 +170,7 @@ namespace BattleMiniMap.View.MapGeometry
             _source.GetEntities(ref all); EntityCount=all.Count;
             yield return 0; // GetEntities is atomic: its time is included in maxStepMs.
             if (all.Count>200000) { Partial=true; throw new InvalidOperationException("Runtime entity limit exceeded"); }
-            var scanSkipped=0; long faces=0;
+            Skipped=0; long faces=0;
             _phase="objects";
             foreach(var entity in all)
             {
@@ -176,39 +182,39 @@ namespace BattleMiniMap.View.MapGeometry
                     continue;
                 }
                 // Strong wrappers are held only during this scan; no raw pointers are dereferenced.
-                if (entity.GetScenePointer()!=_source.Pointer || !entity.IsVisibleIncludeParents()) { ++scanSkipped; yield return 0; continue; }
-                if (entity.Skeleton!=null) { ++scanSkipped; Partial=true; yield return 0; continue; }
+                if (entity.GetScenePointer()!=_source.Pointer || !entity.IsVisibleIncludeParents()) { ++Skipped; yield return 0; continue; }
+                if (entity.Skeleton!=null) { ++Skipped; Partial=true; yield return 0; continue; }
                 _objectProfile?.Mark(MapObjectStage.RenderMetadata,entity.Pointer.ToUInt64());
                 var global=entity.GetGlobalFrame(); var components=entity.MultiMeshComponentCount;
                 yield return 0;
-                if (components<0 || components>256) { ++scanSkipped; Partial=true; continue; }
+                if (components<0 || components>256) { ++Skipped; Partial=true; continue; }
                 for(var m=0;m<components;++m)
                 {
                     _objectProfile?.Mark(MapObjectStage.RenderMetadata,entity.Pointer.ToUInt64(),mesh:m);
                     var meta=entity.GetMetaMesh(m); yield return 0;
-                    if (meta==null || !meta.IsValid) { ++scanSkipped; Partial=true; continue; }
+                    if (meta==null || !meta.IsValid) { ++Skipped; Partial=true; continue; }
                     _objectProfile?.Mark(MapObjectStage.RenderMetadata,entity.Pointer.ToUInt64(),mesh:m);
                     var n=meta.MeshCount; var metaFrame=meta.Frame; yield return 0;
-                    if (n<0 || n>1024) { ++scanSkipped; Partial=true; continue; }
+                    if (n<0 || n>1024) { ++Skipped; Partial=true; continue; }
                     var masks=new int[n]; var combined=0;
                     for(var i=0;i<n;++i) { _objectProfile?.Mark(MapObjectStage.RenderMetadata,entity.Pointer.ToUInt64(),mesh:m,item:i); masks[i]=meta.GetLodMaskForMeshAtIndex(i); combined|=masks[i]; yield return 0; }
                     var selected=MapLiveGeometryRules.CoarsestLod(combined);
-                    if (selected==0) { ++scanSkipped; Partial=true; continue; }
+                    if (selected==0) { ++Skipped; Partial=true; continue; }
                     for(var i=0;i<n;++i)
                     {
                         _objectProfile?.Mark(MapObjectStage.RenderMetadata,entity.Pointer.ToUInt64(),mesh:m,item:i);
                         if ((masks[i]&selected)==0) continue;
                         var mesh=meta.GetMeshAtIndex(i); yield return 0;
                         _objectProfile?.Mark(MapObjectStage.RenderMetadata,entity.Pointer.ToUInt64(),mesh:m,item:i);
-                        if (mesh==null || !mesh.IsValid) { ++scanSkipped; Partial=true; continue; }
+                        if (mesh==null || !mesh.IsValid) { ++Skipped; Partial=true; continue; }
                         var key=entity.Pointer.ToUInt64().ToString("X")+":"+meta.Pointer.ToUInt64().ToString("X")+":"+mesh.Pointer.ToUInt64().ToString("X")+":"+i;
                         var frame=global*metaFrame*mesh.GetLocalFrame();
-                        if (!Valid(frame)) { ++scanSkipped; Partial=true; continue; }
+                        if (!Valid(frame)) { ++Skipped; Partial=true; continue; }
                         frame=Normalize(frame); faces+=mesh.GetFaceCount(); yield return 0;
                         _objectProfile?.Mark(MapObjectStage.InstanceLookup,entity.Pointer.ToUInt64(),mesh:m,item:i);
                         if (!_copies.TryGetValue(key,out var copy))
                         {
-                            if (_copies.Count>=40000) { ++scanSkipped; Partial=true; continue; }
+                            if (_copies.Count>=40000) { ++Skipped; Partial=true; continue; }
                             _objectProfile?.Mark(MapObjectStage.RenderCopy,entity.Pointer.ToUInt64(),mesh:m,item:i);
                             var owned=mesh.CreateCopy();
                             if (owned==null || !owned.IsValid) { RejectCollision("render_copy_invalid",entity,0,-1,-1,""); continue; }
@@ -233,7 +239,7 @@ namespace BattleMiniMap.View.MapGeometry
             foreach(var copy in _copies.Values)
             { _objectProfile?.Mark(MapObjectStage.HideStale,copy.Entity==null?0:copy.Entity.Pointer.ToUInt64()); if (copy.Seen!=_generation && copy.Entity!=null) copy.Entity.SetVisibilityExcludeParents(false); yield return 0; }
             _objectProfile?.Mark(MapObjectStage.Complete);
-            Skipped=scanSkipped; SourceFaces=faces;
+            SourceFaces=faces;
             InitialFinished=true;
             GC.KeepAlive(all);
         }
@@ -374,7 +380,7 @@ namespace BattleMiniMap.View.MapGeometry
             {
                 bool more;
                 try {more=steps.MoveNext();}
-                catch(Exception ex){++_rawFailures;Partial=true;Report("raw terrain unavailable: "+ex.Message);yield break;}
+                catch(Exception ex){++_rawFailures;_terrainUnavailable=true;Partial=true;Report("raw terrain unavailable: "+ex.Message);yield break;}
                 if(!more)break;
                 yield return steps.Current;
             }
@@ -390,7 +396,7 @@ namespace BattleMiniMap.View.MapGeometry
                 }
                 complete(reader);
             }
-            catch(Exception ex){++_rawFailures;Partial=true;Report("raw terrain unavailable: "+ex.Message);}
+            catch(Exception ex){++_rawFailures;_terrainUnavailable=true;Partial=true;Report("raw terrain unavailable: "+ex.Message);}
         }
         private IEnumerable<int> ReadRawTileSteps(MapRuntimeTerrainReader reader,int index,Action<MapTerrainHeightfield> complete)
         {
@@ -422,7 +428,7 @@ namespace BattleMiniMap.View.MapGeometry
                 foreach(var step in ReadRawTileSteps(reader,index,value=>tile=value))yield return step;
                 _nodeFloatBuffersMissing=reader.NodeFloatBuffersMissing;_rawAttemptedSamples=reader.AttemptedSamples;yield return 0;
                 if(tile==null){++_rawTilesDone;if(reader.BudgetExhausted)yield break;continue;}
-                if(_rawSamples+(long)tile.SampleCount>8000000){Partial=true;Report("raw terrain sample budget reached");yield break;}
+                if(_rawSamples+(long)tile.SampleCount>8000000){_terrainHasGaps=true;Partial=true;Report("raw terrain sample budget reached");yield break;}
                 _rawSamples+=tile.SampleCount;
                 var valid=true;
                 // Coordinates are checked using five queries; geometry is solely from raw samples.
@@ -459,7 +465,7 @@ namespace BattleMiniMap.View.MapGeometry
                             _phase="terrain-topology";
                             foreach(var face in patch.Faces())
                             {
-                                if(_rawTriangles>=12000000){Partial=true;Report("raw terrain face budget reached");yield break;}
+                                if(_rawTriangles>=12000000){_terrainHasGaps=true;Partial=true;Report("raw terrain face budget reached");yield break;}
                                 for(var k=0;k<3;++k)
                                 {
                                     var sampleIndex=face[k];
@@ -592,10 +598,15 @@ namespace BattleMiniMap.View.MapGeometry
             " discoveryMs="+Ms(_verification?.DiscoveryMs??0)+" dispatchMs="+Ms(_verification?.DispatchMs??0)+" recheckMs="+Ms(_verification?.RecheckMs??0)+" readerBindMs="+Ms(_verification?.ReaderBindMs??0);
         private static string Ms(double ms) => ms.ToString("F3",CultureInfo.InvariantCulture);
         private static void Report(string text) { TaleWorlds.Library.Debug.Print("BattleMiniMap live extraction "+text); }
+        // Stop reads immediately; owned display resources remain until the target is detached.
+        public void Stop()
+        {
+            if(_stopped)return; _stopped=true; var steps=_steps; _steps=null;
+            MapGeometryCleanup.Run(null,()=>steps?.Dispose()); Report("cancelled: "+Status());
+        }
         public void Dispose()
         {
-            if(_disposed)return; _disposed=true; var steps=_steps; _steps=null;
-            MapGeometryCleanup.Run(null,()=>steps?.Dispose()); Report("cancelled: "+Status());
+            if(_disposed)return; _disposed=true; Stop();
             var meshes=new HashSet<Mesh>();
             foreach(var copy in _copies.Values) if(copy.Mesh!=null) meshes.Add(copy.Mesh);
             foreach(var resource in _collisionResources.Values) foreach(var mesh in resource.Meshes) meshes.Add(mesh);
