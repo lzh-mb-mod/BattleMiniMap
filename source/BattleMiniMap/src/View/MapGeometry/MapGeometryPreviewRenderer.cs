@@ -41,7 +41,18 @@ namespace BattleMiniMap.View.MapGeometry
         public MapGeometryPreviewRenderer(Scene runtimeSource=null,float minX=0,float minY=0,float maxX=1,float maxY=1)
         { _runtimeSource=runtimeSource; _minX=minX; _minY=minY; _maxX=maxX; _maxY=maxY; Active = this; }
         public MapLiveSceneGeometry Live => _live;
-        public void SetAspect(float aspect) { if (aspect > .1f && aspect < 10) _aspect = aspect; }
+        // Only a deliberate source change may retry a failed open preview.
+        public bool SwitchRuntimeSource()
+        {
+            var config=BattleMiniMapConfig.Get();
+            if (!config.ShowGeometryPreview || !config.UseLiveScenePreview) return false;
+            config.UseCollisionScenePreview=!config.UseCollisionScenePreview;
+            Clear(true);
+            _failed=false;
+            Problem=MapPreviewProblem.None;
+            return true;
+        }
+        public void SetAspect(float aspect) { if (aspect > 0 && !float.IsNaN(aspect) && !float.IsInfinity(aspect)) _aspect = aspect; }
         public void Update(MapGeometryRenderer source,float dt=0)
         {
             ++_tick;

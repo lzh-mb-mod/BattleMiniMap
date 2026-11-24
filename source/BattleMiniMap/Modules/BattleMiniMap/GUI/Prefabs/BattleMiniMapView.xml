@@ -19,14 +19,44 @@
         <BattleMiniMap_GpuDiagnosticWidget DoNotAcceptEvents="true" DoNotPassEventsToChildren="false" />
         <BattleMiniMap_GeometryPreviewWidget IsVisible="@GeometryPreviewVisible" DoNotPassEventsToChildren="false">
           <Children>
-            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="32" MarginRight="90" Brush="DefaultBrush" Brush.FontSize="18" Text="@GeometryPreviewHelp" DoNotAcceptEvents="true" />
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="64" VerticalAlignment="Top" Sprite="BlankWhiteSquare" Color="#121820FF" DoNotAcceptEvents="true" />
+            <Widget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="60" VerticalAlignment="Bottom" Sprite="BlankWhiteSquare" Color="#121820FF" DoNotAcceptEvents="true" />
+            <ButtonWidget IsVisible="@GeometryPreviewCanSwitchSource" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="110" SuggestedHeight="32" HorizontalAlignment="Left" VerticalAlignment="Top" Command.Click="SwitchGeometryPreviewSource">
+              <Children>
+                <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="DefaultBrush" Brush.FontSize="18" Text="@GeometryPreviewSourceAction" DoNotAcceptEvents="true" />
+              </Children>
+            </ButtonWidget>
+            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="32" MarginTop="32" Brush="DefaultBrush" Brush.FontSize="18" Text="@GeometryPreviewHelp" DoNotAcceptEvents="true" />
             <ButtonWidget WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="86" SuggestedHeight="32" HorizontalAlignment="Right" VerticalAlignment="Top" Command.Click="CloseGeometryPreview">
               <Children>
                 <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" Brush="DefaultBrush" Brush.FontSize="20" Text="@GeometryPreviewClose" DoNotAcceptEvents="true" />
               </Children>
             </ButtonWidget>
             <TextWidget IsVisible="@GeometryPreviewUnavailable" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="60" VerticalAlignment="Center" Brush="DefaultBrush" Brush.FontSize="24" Text="@GeometryPreviewMissing" DoNotAcceptEvents="true" />
-            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="54" VerticalAlignment="Bottom" MarginLeft="8" MarginRight="8" MarginBottom="6" Brush="DefaultBrush" Brush.FontSize="16" Text="@GeometryPreviewStatus" DoNotAcceptEvents="true" />
+            <Widget Id="PreviewFooter" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="60" VerticalAlignment="Bottom" DoNotAcceptEvents="true" DoNotPassEventsToChildren="false">
+              <Children>
+                <ScrollablePanel Id="StatusScroll" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" MarginLeft="8" MarginRight="20" MarginTop="2" MarginBottom="6" AutoHideScrollBarHandle="true" AutoHideScrollBars="false" ClipRect="ClipRect" InnerPanel="ClipRect\InnerPanel" VerticalScrollbar="..\StatusScrollbar">
+                  <Children>
+                    <Widget Id="ClipRect" WidthSizePolicy="StretchToParent" HeightSizePolicy="StretchToParent" ClipContents="true" DoNotAcceptEvents="true" DoNotPassEventsToChildren="false">
+                      <Children>
+                        <ListPanel Id="InnerPanel" WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" LayoutImp.LayoutMethod="VerticalTopToBottom">
+                          <Children>
+                            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" CanBreakWords="true" Brush="DefaultBrush" Brush.FontSize="16" Text="@GeometryPreviewStatus" DoNotAcceptEvents="true" />
+                            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="CoverChildren" CanBreakWords="true" Brush="DefaultBrush" Brush.FontSize="16" Text="@GeometryPreviewDetails" DoNotAcceptEvents="true" />
+                          </Children>
+                        </ListPanel>
+                      </Children>
+                    </Widget>
+                  </Children>
+                </ScrollablePanel>
+                <ScrollbarWidget Id="StatusScrollbar" WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="8" HorizontalAlignment="Right" MarginRight="4" MarginTop="2" MarginBottom="6" AlignmentAxis="Vertical" Handle="Handle" MaxValue="100" MinValue="0">
+                  <Children>
+                    <Widget WidthSizePolicy="Fixed" HeightSizePolicy="StretchToParent" SuggestedWidth="4" HorizontalAlignment="Center" Sprite="BlankWhiteSquare_9" Color="#5A4033FF" />
+                    <ImageWidget Id="Handle" WidthSizePolicy="Fixed" HeightSizePolicy="Fixed" SuggestedWidth="8" SuggestedHeight="10" HorizontalAlignment="Center" Brush="FaceGen.Scrollbar.Handle" />
+                  </Children>
+                </ScrollbarWidget>
+              </Children>
+            </Widget>
           </Children>
         </BattleMiniMap_GeometryPreviewWidget>
       </Children>

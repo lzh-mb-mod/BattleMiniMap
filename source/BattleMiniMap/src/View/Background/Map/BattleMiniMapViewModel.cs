@@ -69,7 +69,19 @@ namespace BattleMiniMap.View.Background.Map
         public string GeometryPreviewMissing => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_geometry_preview_missing").ToString();
         [DataSourceProperty]
         public string GeometryPreviewClose => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_geometry_preview_close").ToString();
-        private string _geometryPreviewStatus="";
+        private string _geometryPreviewStatus="", _geometryPreviewDetails="", _geometryPreviewSourceAction="";
+        private bool _geometryPreviewCanSwitchSource;
+        [DataSourceProperty]
+        public string GeometryPreviewDetails => _geometryPreviewDetails;
+        [DataSourceProperty]
+        public string GeometryPreviewSourceAction => _geometryPreviewSourceAction;
+        [DataSourceProperty]
+        public bool GeometryPreviewCanSwitchSource => _geometryPreviewCanSwitchSource;
+        public void SwitchGeometryPreviewSource()
+        {
+            BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active?.SwitchRuntimeSource();
+            UpdateGeometryPreview();
+        }
         [DataSourceProperty]
         public string GeometryPreviewStatus => _geometryPreviewStatus;
         public void CloseGeometryPreview() { BattleMiniMapConfig.Get().ShowGeometryPreview = false; UpdateGeometryPreview(); }
@@ -80,23 +92,32 @@ namespace BattleMiniMap.View.Background.Map
             if (_geometryPreviewVisible!=visible) { _geometryPreviewVisible=visible; OnPropertyChanged(nameof(GeometryPreviewVisible)); }
             if (_geometryPreviewUnavailable!=unavailable) { _geometryPreviewUnavailable=unavailable; OnPropertyChanged(nameof(GeometryPreviewUnavailable)); }
             var preview=BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active;
+            var config=BattleMiniMapConfig.Get();
+            var canSwitch=visible && config.UseLiveScenePreview && preview!=null;
+            if (_geometryPreviewCanSwitchSource!=canSwitch) { _geometryPreviewCanSwitchSource=canSwitch; OnPropertyChanged(nameof(GeometryPreviewCanSwitchSource)); }
+            var action=TaleWorlds.Core.GameTexts.FindText(config.UseCollisionScenePreview ? "str_battle_mini_map_preview_switch_render" : "str_battle_mini_map_preview_switch_collision").ToString();
+            if (_geometryPreviewSourceAction!=action) { _geometryPreviewSourceAction=action; OnPropertyChanged(nameof(GeometryPreviewSourceAction)); }
             var live=preview?.Live;
             var problem=BattleMiniMap.View.MapGeometry.MapPreviewStatus.ProblemText(preview?.Problem ?? BattleMiniMap.View.MapGeometry.MapPreviewProblem.None);
             string Text(string key) => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_"+key).ToString();
             var status="";
+            var details="";
             if (visible && problem!=null) status=Text(problem);
             else if (visible && live!=null)
             {
                 var coverage=live.Coverage;
-                status=TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_status")
+                status=TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_summary")
                     .SetTextVariable("SOURCE",Text(live.IsCollision ? "collision" : "render"))
                     .SetTextVariable("TERRAINSOURCE",TaleWorlds.Core.GameTexts.FindText(live.TerrainSource=="raw-physx" ? "str_battle_mini_map_raw_terrain_source" : "str_battle_mini_map_sampled_terrain_source"))
                     .SetTextVariable("MESHES",live.DisplayMeshes).SetTextVariable("TERRAINSTATE",Text(coverage.TerrainText)).SetTextVariable("TERRAIN",coverage.TerrainPercent)
-                    .SetTextVariable("OBJECTSTATE",Text(coverage.ObjectsText)).SetTextVariable("COVERAGE",Text(coverage.CoverageText))
+                    .SetTextVariable("OBJECTSTATE",Text(coverage.ObjectsText)).ToString();
+                details=TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_details")
+                    .SetTextVariable("COVERAGE",Text(coverage.CoverageText))
                     .SetTextVariable("REJECTED",coverage.Rejected).SetTextVariable("SKIPPED",coverage.Skipped)
                     .SetTextVariable("UNSUPPORTED",coverage.Unsupported).SetTextVariable("TERRAINFAILURES",coverage.TerrainFailures).ToString();
             }
             else if (visible && preview?.Available==true) status=Text("cache_diagnostic");
+            if (_geometryPreviewDetails!=details) { _geometryPreviewDetails=details; OnPropertyChanged(nameof(GeometryPreviewDetails)); }
             if (_geometryPreviewStatus!=status) { _geometryPreviewStatus=status; OnPropertyChanged(nameof(GeometryPreviewStatus)); }
         }
         public CameraMarkerViewModel CameraMarkerRight { get; }

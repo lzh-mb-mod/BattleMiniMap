@@ -9,6 +9,7 @@ class Program
     static void Check(bool ok,string message) { if(!ok)throw new Exception(message); ++checks; Console.WriteLine("PASS: "+message); }
     static void Main(string[] args)
     {
+        PreviewControlsChecks.Run();
         CoverageChecks.Run(args[0]);
         LiveChecks.Run(args[0]);
         RawTerrainChecks.Run();
@@ -91,7 +92,7 @@ namespace BattleMiniMap.View.MapGeometry
 namespace TaleWorlds.Library
 {
     public static class Debug { public static readonly System.Collections.Generic.List<string> Messages=new System.Collections.Generic.List<string>(); public static void Print(string value){Messages.Add(value);} }
-    public struct Vec2 { public float x,y; public Vec2(float x,float y){this.x=x;this.y=y;} }
+    public struct Vec2 { public float x,y; public Vec2(float x,float y){this.x=x;this.y=y;} public static Vec2 operator -(Vec2 a,Vec2 b)=>new Vec2(a.x-b.x,a.y-b.y); public static Vec2 operator /(Vec2 a,float b)=>new Vec2(a.x/b,a.y/b); }
     public struct Vec2i { public int X,Y; }
     public struct Vec3
     {
@@ -125,7 +126,7 @@ namespace TaleWorlds.Engine
         public void DisableStaticShadows(bool value){} public void SetName(string value){} public void EnsurePostfxSystem(){} public void SetShadow(bool value){}
         public void ClearAll(){if(ThrowOnClear)throw new Exception("fake clear failure");Entities.Clear();} public void ManualInvalidate(){++Invalidated;}
     }
-    public class Camera { public static int Releases; public Vec3 Eye; public static Camera CreateCamera()=>new Camera(); public void LookAt(Vec3 eye,Vec3 at,Vec3 up){Eye=eye;} public void SetFovVertical(float f,float a,float n,float z){} public void ReleaseCamera(){++Releases;} }
+    public class Camera { public static int Releases; public Vec3 Eye; public float Aspect; public static Camera CreateCamera()=>new Camera(); public void LookAt(Vec3 eye,Vec3 at,Vec3 up){Eye=eye;} public void SetFovVertical(float f,float a,float n,float z){Aspect=a;} public void ReleaseCamera(){++Releases;} }
     public class Texture
     {
         public static bool FailWhite; public bool IsValid=true,IsReleased; public object UserData; public int ViewGets;

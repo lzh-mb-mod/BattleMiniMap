@@ -78,6 +78,10 @@
   <string id="BattleMiniMap_collision_preview" text="使用碰撞网格（关闭：渲染网格）" />
   <string id="BattleMiniMap_collision_preview_hint" text="仅作用于动态来源。在已验证的引擎版本读取准备后的碰撞副本。球和胶囊使用显示近似，不支持的形状记为部分覆盖。" />
   <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE}：{TERRAINSTATE}（{TERRAIN}%）| {OBJECTSTATE} | 网格 {MESHES}&#xA;{COVERAGE} | 拒绝项 {REJECTED}；跳过项 {SKIPPED}；未支持形状 {UNSUPPORTED}；地形失败项 {TERRAINFAILURES}" />
+  <string id="BattleMiniMap_live_preview_summary" text="{SOURCE} / {TERRAINSOURCE}：{TERRAINSTATE}（{TERRAIN}%）| {OBJECTSTATE} | 网格 {MESHES}" />
+  <string id="BattleMiniMap_live_preview_details" text="{COVERAGE} | 拒绝项 {REJECTED}；跳过项 {SKIPPED}；未支持形状 {UNSUPPORTED}；地形失败项 {TERRAINFAILURES}" />
+  <string id="BattleMiniMap_preview_switch_render" text="切换至渲染" />
+  <string id="BattleMiniMap_preview_switch_collision" text="切换至碰撞" />
   <string id="BattleMiniMap_live_preview_loading" text="正在提取" />
   <string id="BattleMiniMap_live_preview_partial" text="本轮扫描结束，覆盖尚不完整" />
   <string id="BattleMiniMap_live_preview_scanned" text="本轮扫描结束，覆盖待验证" />

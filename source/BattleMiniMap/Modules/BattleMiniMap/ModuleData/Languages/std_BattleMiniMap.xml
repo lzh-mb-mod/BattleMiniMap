@@ -78,6 +78,10 @@
   <string id="BattleMiniMap_collision_preview" text="Use collision geometry (off: render geometry)" />
   <string id="BattleMiniMap_collision_preview_hint" text="Runtime source only. Collision reads prepared shape copies on the verified engine build. Spheres and capsules use display approximations; unsupported shapes are reported as partial coverage." />
   <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE}: {TERRAINSTATE} ({TERRAIN}%) | {OBJECTSTATE} | Meshes {MESHES}&#xA;{COVERAGE} | Rejected items {REJECTED}; skipped items {SKIPPED}; unsupported shapes {UNSUPPORTED}; terrain failures {TERRAINFAILURES}" />
+  <string id="BattleMiniMap_live_preview_summary" text="{SOURCE} / {TERRAINSOURCE}: {TERRAINSTATE} ({TERRAIN}%) | {OBJECTSTATE} | Meshes {MESHES}" />
+  <string id="BattleMiniMap_live_preview_details" text="{COVERAGE} | Rejected items {REJECTED}; skipped items {SKIPPED}; unsupported shapes {UNSUPPORTED}; terrain failures {TERRAINFAILURES}" />
+  <string id="BattleMiniMap_preview_switch_render" text="Use render" />
+  <string id="BattleMiniMap_preview_switch_collision" text="Use collision" />
   <string id="BattleMiniMap_live_preview_loading" text="Extracting" />
   <string id="BattleMiniMap_live_preview_partial" text="Scan finished; coverage incomplete" />
   <string id="BattleMiniMap_live_preview_scanned" text="Scan finished; coverage requires validation" />
