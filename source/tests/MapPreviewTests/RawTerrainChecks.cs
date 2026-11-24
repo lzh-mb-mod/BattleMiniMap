@@ -47,7 +47,7 @@ static class RawTerrainChecks
         var source=new Scene{Height=v=>v.x+10*v.y};var target=new Scene();m=new Memory(source.Pointer.ToUInt64(),false);
         var live=new MapLiveSceneGeometry(source,target,new Material(),new MapLiveGeometryRules(0,0,2,2),true,false,true,()=>m);
         for(var i=0;i<1000&&!live.InitialFinished;++i)live.Update(.01f);
-        Check(live.InitialFinished && !live.Partial && live.TerrainSource=="raw-physx" && source.HeightReads==5,"Collector uses raw samples, only five scalar queries for coordinate validation");
+        Check(live.InitialFinished && !live.Partial && live.TerrainSource=="raw-physx" && source.HeightReads==5 && source.HoleCheckedHeightReads==0,"Collector uses raw samples, five unfiltered height queries validate coordinates independently of holes");
         Check(target.Entities.Count==1&&MeshBuilder.Faces==8&&MeshBuilder.Corners==9,"Terrain shares original grid vertices with indexed topology");
         var reads=m.Reads;live.Dispose();live.Update(1);Check(m.Reads==reads,"Cancelled collector does not read runtime memory again");
         source=new Scene{Height=v=>999};target=new Scene();m=new Memory(source.Pointer.ToUInt64(),false);

@@ -103,7 +103,8 @@ namespace TaleWorlds.Engine
         public Func<Vec2,float> Height;
         public void GetEntities(ref System.Collections.Generic.List<GameEntity> result){++Reads;result.AddRange(Entities);}
         public void GetTerrainData(out Vec2i d,out float size,out int layers,out int version){d=new Vec2i();size=0;layers=0;version=0;}
-        public float GetTerrainHeight(Vec2 p,bool checkHoles){++HeightReads;return Height==null?p.x+p.y:Height(p);}
+        public int HoleCheckedHeightReads;
+        public float GetTerrainHeight(Vec2 p,bool checkHoles){++HeightReads;if(checkHoles)++HoleCheckedHeightReads;return Height==null?p.x+p.y:Height(p);}
 
         public static Scene CreateNewScene(bool initialize_physics,bool enable_decals){++Created;return new Scene();}
         public void DisableStaticShadows(bool value){} public void SetName(string value){} public void EnsurePostfxSystem(){} public void SetShadow(bool value){}

@@ -310,7 +310,8 @@ namespace BattleMiniMap.View.MapGeometry
                 var probes=new[]{0,tile.Columns-1,(tile.Rows-1)*tile.Columns,tile.SampleCount-1,(tile.Rows/2)*tile.Columns+tile.Columns/2};
                 foreach(var probe in probes)
                 {
-                    var p=tile.Vertex(probe);var actual=_source.GetTerrainHeight(new Vec2(p.X,p.Y),checkHoles:true);
+                    // Validate the underlying field, not a hole-filtered replacement height.
+                    var p=tile.Vertex(probe);var actual=_source.GetTerrainHeight(new Vec2(p.X,p.Y),checkHoles:false);
                     var error=Math.Abs(actual-p.Z);++_rawChecks;
                     if(!MapLiveGeometryRules.Finite(actual)||!MapLiveGeometryRules.Finite(error)||error>Math.Max(.02f,tile.HeightScale*1.1f))valid=false;
                     if(MapLiveGeometryRules.Finite(error))_rawMaxError=Math.Max(_rawMaxError,error);
