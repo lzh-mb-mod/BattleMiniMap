@@ -64,14 +64,14 @@ namespace BattleMiniMap.View.MapGeometry
     }
     internal struct MapGeometryPerformanceContext : IEquatable<MapGeometryPerformanceContext>
     {
-        public bool Gpu, Proxy, Tint, Follow, Dynamic, DiagnosticDepth, MarkersRequested, MarkerProfile;
+        public bool Gpu, Proxy, Tint, Follow, Dynamic, DiagnosticDepth, MarkersRequested, MarkerProfile, Cached;
         public int Generation, Width, Diagnostic;
         public float Zoom;
         public bool Equals(MapGeometryPerformanceContext o) => Gpu == o.Gpu && Proxy == o.Proxy && Tint == o.Tint &&
             Follow == o.Follow && Dynamic == o.Dynamic && DiagnosticDepth == o.DiagnosticDepth && MarkersRequested == o.MarkersRequested &&
-            MarkerProfile == o.MarkerProfile && Generation == o.Generation && Width == o.Width && Diagnostic == o.Diagnostic && Zoom.Equals(o.Zoom);
+            MarkerProfile == o.MarkerProfile && Cached == o.Cached && Generation == o.Generation && Width == o.Width && Diagnostic == o.Diagnostic && Zoom.Equals(o.Zoom);
         public override string ToString() => string.Format(CultureInfo.InvariantCulture,
-            "backend={0} generation={1} variant={2} tintApplied={3} follow={4} zoom={5:R} dynamic={6} width={7} diagnostic={8} diagnosticDepth={9} markersMeshRequested={10} markerProfile={11}",
-            Gpu ? "GPU" : "CPU", Generation, Proxy ? "proxy" : "original", Tint, Follow, Zoom, Dynamic, Width, Diagnostic, DiagnosticDepth, MarkersRequested, MarkerProfile);
+            "backend={0} generation={1} variant={2} tintApplied={3} follow={4} zoom={5:R} dynamic={6} width={7} diagnostic={8} diagnosticDepth={9} markersMeshRequested={10} markerProfile={11} policy=demand cached={12}",
+            Gpu ? "GPU" : "CPU", Generation, Proxy ? "proxy" : "original", Tint, Follow, Zoom, Dynamic, Width, Diagnostic, DiagnosticDepth, MarkersRequested, MarkerProfile, Cached);
     }
 }

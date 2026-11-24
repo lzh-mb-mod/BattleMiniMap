@@ -118,12 +118,28 @@ static class Program
         var dropped=perf.Record("CPU",6,1,false);Check(dropped.Contains("long_gap_resets=1") && !dropped.Contains("dropped_samples=0"),"Long stalls retain discarded-sample evidence");
         perfRow=null;for(var n=61;n<=140;n++){var row=perf.Record("CPU",n*.1,1,false);if(row!=null && row.Contains("event=window")){perfRow=row;firstWindowAt=n*.1;break;}}
         Check(perfRow!=null && firstWindowAt>=13 && perfRow.Contains("update_cpu_mean_ms=1.0000") && perfRow.Contains("long_gap_resets=1"),"Post-stall windows restart and retain cumulative reset counters");
-        var contextA=new MapGeometryPerformanceContext{Gpu=true,Proxy=true,Tint=false,Follow=true,Dynamic=false,DiagnosticDepth=false,MarkersRequested=false,MarkerProfile=false,Generation=1,Width=790,Diagnostic=0,Zoom=.5f};var contextB=contextA;
+        var contextA=new MapGeometryPerformanceContext{Gpu=true,Proxy=true,Tint=false,Follow=true,Dynamic=false,DiagnosticDepth=false,MarkersRequested=false,MarkerProfile=false,Generation=1,Width=790,Diagnostic=0,Cached=false,Zoom=.5f};var contextB=contextA;
         Check(contextA.Equals(contextB),"Stable typed performance context compares without formatting");contextB.DiagnosticDepth=true;
         Check(!contextA.Equals(contextB),"Diagnostic depth changes performance context");
         perf=new MapGeometryPerformance();perfRow=null;
         for(var n=0;n<=72;n++){var row=perf.Record("CPU",n*.1,n%5==0?9:1,false);if(row!=null && row.Contains("event=window")){perfRow=row;break;}}
         Check(perfRow!=null && perfRow.Contains("update_cpu_p95_ms=9.0000"),"Performance P95 reflects high-cost tail, not mean");
+        backend.Reset();backend.Update(2,true,null,true);
+        Check(backend.Update(2,true,null,true),"Submitted cache is selected after minimum visible warmup");
+        var cachedStable=true;for(var n=0;n<1000;n++)cachedStable &= backend.Update(2,true,null,true);
+        Check(cachedStable && backend.Failure==null,"Intentional cached idle never trips180-update watchdog");
+        Check(!backend.Update(2,false,null,true) && backend.Failure!=null,"Cached texture invalidation still returns CPU");
+        backend.Reset();backend.Update(2,true,null,true);backend.Update(2,true,null,true);
+        Check(!backend.Update(2,true,"cache callback fault",true),"Late cached callback error still returns CPU");
+        backend.Reset();Check(!backend.Update(0,true,null,false),"Dirty generation cannot inherit old cache selection");
+        for(var n=0;n<=MapGeometryBackendState.StallUpdates;n++)backend.Update(1,true,null,false);
+        Check(backend.Failure!=null,"New generation missing second successful paint still times out");
+        var pendingContext=new MapGeometryPerformanceContext{Gpu=true,Cached=false};var cachedContext=pendingContext;cachedContext.Cached=true;
+        Check(!pendingContext.Equals(cachedContext),"Performance context separates pending and cached scheduling");
+        var flags=new OptionalFlagFixture();
+        Check(MapGeometryOptionalFlag<OptionalFlagFixture>.Resolve("Enabled")(flags),"Optional label flag resolves typed bool getter once");
+        Check(!MapGeometryOptionalFlag<OptionalFlagFixture>.Resolve("Missing")(flags),"Committed config without experimental flags still builds and labels false");
+        Check(!MapGeometryOptionalFlag<OptionalFlagFixture>.Resolve("OtherType")(flags),"Non-bool optional property is ignored safely");
         var temp = Path.Combine(Path.GetTempPath(), "BattleMiniMapGeometryTests-" + Guid.NewGuid().ToString("N"));Directory.CreateDirectory(temp);
         try
         {
@@ -143,3 +159,5 @@ static class Program
         Console.WriteLine("PASS: " + checks + " managed cache, layer, clipping and fallback checks; no engine calls");
     }
 }
+
+class OptionalFlagFixture { public bool Enabled => true; public string OtherType => "ignored"; }

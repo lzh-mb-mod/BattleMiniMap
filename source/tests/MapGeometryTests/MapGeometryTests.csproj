@@ -9,5 +9,6 @@
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryProjection.cs" Link="MapGeometryProjection.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryCleanup.cs" Link="MapGeometryCleanup.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryPerformance.cs" Link="MapGeometryPerformance.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryOptionalFlag.cs" Link="MapGeometryOptionalFlag.cs" />
   </ItemGroup>
 </Project>

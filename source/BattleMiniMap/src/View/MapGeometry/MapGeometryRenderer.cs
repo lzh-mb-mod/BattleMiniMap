@@ -33,6 +33,10 @@ namespace BattleMiniMap.View.MapGeometry
         private bool _performanceFailed, _hasProfileContext;
         private MapGeometryPerformanceContext _profileContext;
         private string _profileLabel;
+        private static readonly Func<BattleMiniMapConfig, bool> MarkerMeshRequested =
+            MapGeometryOptionalFlag<BattleMiniMapConfig>.Resolve("UseMeshMarkerBatching");
+        private static readonly Func<BattleMiniMapConfig, bool> MarkerProfileRequested =
+            MapGeometryOptionalFlag<BattleMiniMapConfig>.Resolve("ProfileMarkerRendering");
         private Material _material;
         private Texture _white;
         private readonly List<GameEntity> _entities = new List<GameEntity>();
@@ -72,10 +76,11 @@ namespace BattleMiniMap.View.MapGeometry
                 var context = new MapGeometryPerformanceContext {
                     Gpu = _selectedBackend == "GPU", Proxy = _lastProxy && _data.HasCompleteProxy,
                     Tint = _selectedBackend == "GPU" && _lastTint, Generation = _profileGeneration,
+                    Cached = _selectedBackend == "GPU" && _gpu != null && _gpu.HasSubmittedCache,
                     Follow = config.FollowMode, Zoom = config.FollowModeScale, Dynamic = config.EnableDynamicScale,
                     Width = config.WidgetWidth, Diagnostic = config.MapGpuDiagnosticMode,
                     DiagnosticDepth = config.MapGpuDiagnosticMode != 0 && config.MapGpuDiagnosticDepth,
-                    MarkersRequested = config.UseMeshMarkerBatching, MarkerProfile = config.ProfileMarkerRendering };
+                    MarkersRequested = MarkerMeshRequested(config), MarkerProfile = MarkerProfileRequested(config) };
                 if (!_hasProfileContext || !context.Equals(_profileContext))
                 {
                     _profileContext = context; _hasProfileContext = true;
@@ -85,7 +90,8 @@ namespace BattleMiniMap.View.MapGeometry
                     (end - started) * 1000.0 / System.Diagnostics.Stopwatch.Frequency,
                     dt <= 0 || TaleWorlds.MountAndBlade.MBCommon.IsPaused || TaleWorlds.MountAndBlade.MissionState.Current?.Paused == true,
                     context.Gpu ? "GPU" : "CPU");
-                if (row != null) TaleWorlds.Library.Debug.Print("BattleMiniMap map profile: " + row + " paints=" + (_gpu?.PaintCount ?? 0));
+                if (row != null) TaleWorlds.Library.Debug.Print("BattleMiniMap map profile: " + row +
+                    " paints=" + (_gpu?.PaintCount ?? 0) + " callbacks=" + (_gpu?.CallbackCount ?? 0));
             }
         }
         private void UpdateCore(IMiniMap map, bool visible)
@@ -133,10 +139,12 @@ namespace BattleMiniMap.View.MapGeometry
                     if (_gpu == null) { _lastTint = config.TintGpuMapGeometry; Build(map, proxy, ceiling); _gpuState.Reset(); }
                     _gpu.SetEnabled(true);
                     var valid = _gpu.Texture != null && _gpu.Texture.IsValid;
-                    var useGpu = _gpuState.Update(_gpu.PaintCount, valid, _gpu.Failure);
+                    var paints = _gpu.PaintCount;
+                    var cached = paints >= MapGeometryTableau.RequiredPaints;
+                    var useGpu = _gpuState.Update(paints, valid, _gpu.Failure, cached);
                     if (_gpuState.Failure != null) throw new InvalidOperationException(_gpuState.Failure);
                     if (useGpu) Texture = _gpu.Texture;
-                    SelectBackend(useGpu, useGpu ? "Tableau paint progress" : "GPU warmup");
+                    SelectBackend(useGpu, useGpu ? "cached Tableau submissions" : "GPU warmup");
                 }
                 catch (Exception ex)
                 {
