@@ -14,6 +14,8 @@ namespace BattleMiniMap.View.MapGeometry
         private readonly Material _material;
         private readonly MapLiveGeometryRules _rules;
         private readonly bool _collision;
+        private readonly bool _rawTerrain;
+        private readonly Func<IMapTerrainMemory> _rawMemory;
         private bool _collisionVerified;
         private sealed class CollisionResource
         {
@@ -39,24 +41,31 @@ namespace BattleMiniMap.View.MapGeometry
         private readonly bool _hasTerrain;
         private float _refresh;
         private int _terrainRead,_terrainInvalid;
+        private int _rawTilesTotal,_rawTilesDone,_rawSamples,_rawTriangles,_rawHoles,_rawChecks,_rawFailures,_nodeFloatBuffersMissing;
+        private int _rawAttemptedSamples;
+        private int _rawTileCellsDone,_rawTileCells;
+        private float _rawMaxError;
         public int EntityCount { get; private set; }
         public int CopiedMeshes => _copies.Count;
+        public int DisplayMeshes => _copies.Count+_terrainMeshes.Count;
         public bool IsCollision => _collision;
         public int Skipped { get; private set; }
         public int Errors { get; private set; }
         public long SourceFaces { get; private set; }
         public bool Partial { get; private set; }
         public bool InitialFinished { get; private set; }
-        public int TerrainPercent => _terrainRead*100/(_rules.GridX*_rules.GridY);
+        public int TerrainPercent => _rawTerrain ? (_rawTilesTotal==0?0:Math.Min(100,(int)(100f*(_rawTilesDone+(_rawTileCells==0?0:_rawTileCellsDone/(float)_rawTileCells))/_rawTilesTotal))) : _terrainRead*100/(_rules.GridX*_rules.GridY);
+        public string TerrainSource => _rawTerrain?"raw-physx":"sampled";
         public string Failure { get; private set; }
-        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false)
+        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null)
         {
             _source=source??throw new ArgumentNullException(nameof(source));
             _target=target; _material=material; _rules=rules;
-            _hasTerrain=hasTerrain; _terrainDone=!hasTerrain;
+            _hasTerrain=hasTerrain; _terrainDone=!hasTerrain && !rawTerrain;
             _collision=collision;
+            _rawTerrain=rawTerrain;_rawMemory=rawMemory??(()=>new MapSelfTerrainMemory());
             _steps=Extract().GetEnumerator();
-            Report("started: source="+(collision?"runtime-collision":"runtime-render")+" terrainAvailable="+hasTerrain+" terrain=runtime-height budgetMs=2 maxSteps=64 domain="+
+            Report("started: source="+(collision?"runtime-collision":"runtime-render")+" terrainAvailable="+hasTerrain+" terrain="+TerrainSource+" budgetMs=2 maxSteps=64 domain="+
                 rules.MinX+","+rules.MinY+","+rules.MaxX+","+rules.MaxY+" grid="+rules.GridX+"x"+rules.GridY);
         }
         public void Update(float dt)
@@ -91,6 +100,11 @@ namespace BattleMiniMap.View.MapGeometry
             ++_generation;
             if (_collision && !_collisionVerified)
             { MapLiveCollisionGuard.VerifyEngine(); _collisionVerified=true; yield return 0; }
+            if (!_terrainDone)
+            {
+                foreach(var step in Terrain()) yield return step;
+                _terrainDone=true;
+            }
             var all=new List<GameEntity>();
             _source.GetEntities(ref all); EntityCount=all.Count;
             yield return 0; // GetEntities is atomic: its time is included in maxStepMs.
@@ -153,11 +167,6 @@ namespace BattleMiniMap.View.MapGeometry
             foreach(var copy in _copies.Values)
             { if (copy.Seen!=_generation && copy.Entity!=null) copy.Entity.SetVisibilityExcludeParents(false); yield return 0; }
             Skipped=scanSkipped; SourceFaces=faces;
-            if (!_terrainDone)
-            {
-                foreach(var step in Terrain()) yield return step;
-                _terrainDone=true;
-            }
             InitialFinished=true;
             GC.KeepAlive(all);
         }
@@ -260,6 +269,92 @@ namespace BattleMiniMap.View.MapGeometry
         }
         private IEnumerable<int> Terrain()
         {
+            if(_rawTerrain) { foreach(var step in RawTerrain()) yield return step; }
+            else { foreach(var step in SampledTerrain()) yield return step; }
+        }
+        private MapRuntimeTerrainReader StartRawTerrain()
+        {
+            try { return new MapRuntimeTerrainReader(_rawMemory(),_source.Pointer.ToUInt64()); }
+            catch(Exception ex) { ++_rawFailures;Partial=true;Report("raw terrain unavailable: "+ex.Message);return null; }
+        }
+        private IEnumerable<int> ReadRawTileSteps(MapRuntimeTerrainReader reader,int index,Action<MapTerrainHeightfield> complete)
+        {
+            using(var steps=reader.ReadTileSteps(index,complete).GetEnumerator())
+            {
+                while(true)
+                {
+                    bool more;
+                    try { more=steps.MoveNext(); }
+                    catch(Exception ex) { ++_rawFailures;Partial=true;Report("raw terrain tile skipped: tile="+index+" reason="+ex.Message);yield break; }
+                    if(!more)yield break;
+                    yield return 0;
+                }
+            }
+        }
+        private IEnumerable<int> RawTerrain()
+        {
+            var reader=StartRawTerrain();yield return 0;
+            if(reader==null)yield break;
+            _rawTilesTotal=reader.TileCount;
+            Report("raw terrain layout: mode="+reader.Mode+" tiles="+reader.TileCount+" scalarDataSource=False");
+            for(var index=0;index<reader.TileCount;++index)
+            {
+                MapTerrainHeightfield tile=null;
+                foreach(var step in ReadRawTileSteps(reader,index,value=>tile=value))yield return step;
+                _nodeFloatBuffersMissing=reader.NodeFloatBuffersMissing;_rawAttemptedSamples=reader.AttemptedSamples;yield return 0;
+                if(tile==null){++_rawTilesDone;if(reader.BudgetExhausted)yield break;continue;}
+                if(_rawSamples+(long)tile.SampleCount>8000000){Partial=true;Report("raw terrain sample budget reached");yield break;}
+                _rawSamples+=tile.SampleCount;
+                var valid=true;
+                // Coordinates are checked using five queries; geometry is solely from raw samples.
+                var probes=new[]{0,tile.Columns-1,(tile.Rows-1)*tile.Columns,tile.SampleCount-1,(tile.Rows/2)*tile.Columns+tile.Columns/2};
+                foreach(var probe in probes)
+                {
+                    var p=tile.Vertex(probe);var actual=_source.GetTerrainHeight(new Vec2(p.X,p.Y),checkHoles:true);
+                    var error=Math.Abs(actual-p.Z);++_rawChecks;
+                    if(!MapLiveGeometryRules.Finite(actual)||!MapLiveGeometryRules.Finite(error)||error>Math.Max(.02f,tile.HeightScale*1.1f))valid=false;
+                    if(MapLiveGeometryRules.Finite(error))_rawMaxError=Math.Max(_rawMaxError,error);
+                    yield return 0;
+                }
+                if(!valid){++_rawFailures;Partial=true;++_rawTilesDone;Report("raw terrain validation rejected: tile="+index+" maxError="+_rawMaxError);continue;}
+                Report("raw terrain tile: index="+index+" rows="+tile.Rows+" columns="+tile.Columns+" step="+tile.Step+" heightScale="+tile.HeightScale);
+                _rawTileCells=(tile.Rows-1)*(tile.Columns-1);_rawTileCellsDone=0;
+                for(var by=0;by<tile.Rows-1;by+=16) for(var bx=0;bx<tile.Columns-1;bx+=16)
+                {
+                    var w=Math.Min(16,tile.Columns-1-bx);var h=Math.Min(16,tile.Rows-1-by);
+                    var corners=new int[(w+1)*(h+1)];var builder=new MeshBuilder();var count=0;var work=0;
+                    for(var y=0;y<=h;++y)for(var x=0;x<=w;++x)
+                    {
+                        var p=_rules.Normalize(tile.Vertex((by+y)*tile.Columns+bx+x));
+                        corners[y*(w+1)+x]=builder.AddFaceCorner(new Vec3(p.X,p.Y,p.Z),Vec3.Up,new Vec2(0,0),0xffb5b09bu);
+                        if(++work%32==0)yield return 0;
+                    }
+                    for(var y=0;y<h;++y)for(var x=0;x<w;++x)
+                    {
+                        for(var half=0;half<2;++half)
+                        {
+                            if(!tile.Triangle(by+y,bx+x,half,out var a,out var b,out var c)){++_rawHoles;continue;}
+                            if(_rawTriangles>=12000000){Partial=true;Report("raw terrain face budget reached");yield break;}
+                            builder.AddFace(corners[(a/tile.Columns-by)*(w+1)+a%tile.Columns-bx],
+                                corners[(b/tile.Columns-by)*(w+1)+b%tile.Columns-bx],corners[(c/tile.Columns-by)*(w+1)+c%tile.Columns-bx]);
+                            ++count;++_rawTriangles;
+                        }
+                        ++_rawTileCellsDone;
+                        if(++work%32==0)yield return 0;
+                    }
+                    if(count==0)continue;
+                    var mesh=builder.Finalize();if(mesh==null)throw new InvalidOperationException("No raw terrain map mesh");
+                    _terrainMeshes.Add(mesh);mesh.SetMaterial(_material);mesh.Color=uint.MaxValue;
+                    var entity=GameEntity.CreateEmpty(_target,createPhysics:false,callScriptCallbacks:false);
+                    if(entity==null)throw new InvalidOperationException("No raw terrain map entity");
+                    _terrainEntities.Add(entity);entity.AddMesh(mesh,recomputeBoundingBox:false);
+                    entity.SetVisibilityExcludeParents(true);entity.SetReadyToRender(true);yield return 0;
+                }
+                ++_rawTilesDone;_rawTileCells=_rawTileCellsDone=0;
+            }
+        }
+        private IEnumerable<int> SampledTerrain()
+        {
             var nx=_rules.GridX; var ny=_rules.GridY; var heights=new float[nx*ny];
             for(var y=0;y<ny;++y) for(var x=0;x<nx;++x)
             {
@@ -317,6 +412,11 @@ namespace BattleMiniMap.View.MapGeometry
             " entities="+EntityCount+" copies="+CopiedMeshes+" skipped="+Skipped+" errors="+Errors+" sourceFaces="+SourceFaces+
             " collisionResources="+_collisionResources.Count+" collisionTriangles="+_collisionTriangles+" primitiveTriangles="+_primitiveTriangles+" unsupportedShapes="+_unsupportedShapes+" primitivesMeshed="+_primitives+
             " terrain="+_terrainRead+"/"+(_rules.GridX*_rules.GridY)+" terrainInvalid="+_terrainInvalid+
+            " terrainSource="+TerrainSource+" rawTiles="+_rawTilesDone+"/"+_rawTilesTotal+" rawSamples="+_rawSamples+" rawTriangles="+_rawTriangles+
+            " rawAttemptedSamples="+_rawAttemptedSamples+
+            " rawCells="+_rawTileCellsDone+"/"+_rawTileCells+" terrainMeshes="+_terrainMeshes.Count+
+            " rawHoles="+_rawHoles+" validationQueries="+_rawChecks+" validationMaxError="+_rawMaxError.ToString("R",CultureInfo.InvariantCulture)+
+            " rawFailures="+_rawFailures+" nodeFloatBuffersMissing="+_nodeFloatBuffersMissing+
             " wallMs="+Ms(_wall.Elapsed.TotalMilliseconds)+" workMs="+Ms(_workMs)+" maxTickMs="+Ms(_maxTickMs)+" maxStepMs="+Ms(_maxStepMs);
         private static string Ms(double ms) => ms.ToString("F3",CultureInfo.InvariantCulture);
         private static void Report(string text) { TaleWorlds.Library.Debug.Print("BattleMiniMap live extraction "+text); }

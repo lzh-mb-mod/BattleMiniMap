@@ -72,10 +72,14 @@
   <string id="str_battle_mini_map_live_preview_hint" text="{=BattleMiniMap_live_preview_hint}Read the loaded scene in small steps without offline geometry files. Disable only to inspect the old bridge cache. Bridge proxy and height clipping options do not apply to runtime sources." />
   <string id="str_battle_mini_map_collision_preview" text="{=BattleMiniMap_collision_preview}Use collision geometry (off: render geometry)" />
   <string id="str_battle_mini_map_collision_preview_hint" text="{=BattleMiniMap_collision_preview_hint}Runtime source only. Collision reads prepared shape copies on the verified engine build. Spheres and capsules use display approximations; unsupported shapes are reported as partial coverage." />
-  <string id="str_battle_mini_map_live_preview_status" text="{=BattleMiniMap_live_preview_status}{SOURCE} | {STATE} | Map meshes: {MESHES}  Terrain samples: {TERRAIN}%" />
+  <string id="str_battle_mini_map_live_preview_status" text="{=BattleMiniMap_live_preview_status}{SOURCE} / {TERRAINSOURCE} | {STATE} | Map meshes: {MESHES}  Terrain samples: {TERRAIN}%" />
   <string id="str_battle_mini_map_live_preview_loading" text="{=BattleMiniMap_live_preview_loading}Extracting" />
   <string id="str_battle_mini_map_live_preview_partial" text="{=BattleMiniMap_live_preview_partial}Scan finished; coverage incomplete" />
   <string id="str_battle_mini_map_live_preview_scanned" text="{=BattleMiniMap_live_preview_scanned}Scan finished; coverage requires validation" />
   <string id="str_battle_mini_map_live_preview_collision" text="{=BattleMiniMap_live_preview_collision}Collision mesh" />
   <string id="str_battle_mini_map_live_preview_render" text="{=BattleMiniMap_live_preview_render}Render mesh" />
+  <string id="str_battle_mini_map_raw_terrain" text="{=BattleMiniMap_raw_terrain}Read original runtime terrain (off: height queries)" />
+  <string id="str_battle_mini_map_raw_terrain_hint" text="{=BattleMiniMap_raw_terrain_hint}Copy the loaded PhysX heightfield, retaining holes and diagonals. Requires the verified engine/physics build. No automatic sampled or disk-data fallback." />
+  <string id="str_battle_mini_map_raw_terrain_source" text="{=BattleMiniMap_raw_terrain_source}Raw terrain" />
+  <string id="str_battle_mini_map_sampled_terrain_source" text="{=BattleMiniMap_sampled_terrain_source}Sampled terrain" />
 </strings>

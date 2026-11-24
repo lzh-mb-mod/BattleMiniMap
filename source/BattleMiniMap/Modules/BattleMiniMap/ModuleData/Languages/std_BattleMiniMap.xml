@@ -48,7 +48,7 @@
 
     <string id="BattleMiniMap_toggle_map_usage" text="Toggle map by pressing {KeyName}." />
     <string id="BattleMiniMapHotKey_toggle_map_holding_usage" text="Toggle map by holding {KeyName}." />
-      <string id="BattleMiniMap_geometry" text="Bridge geometry overlay" />
+    <string id="BattleMiniMap_geometry" text="Bridge geometry overlay" />
     <string id="BattleMiniMap_geometry_hint" text="Show verified geometry in the matching town scene. Other scenes use the existing map." />
     <string id="BattleMiniMap_geometry_gpu" text="GPU geometry map" />
     <string id="BattleMiniMap_geometry_gpu_hint" text="Turn off to use CPU drawing. Use this if GPU geometry displays incorrectly." />
@@ -77,11 +77,15 @@
   <string id="BattleMiniMap_live_preview_hint" text="Read the loaded scene in small steps without offline geometry files. Disable only to inspect the old bridge cache. Bridge proxy and height clipping options do not apply to runtime sources." />
   <string id="BattleMiniMap_collision_preview" text="Use collision geometry (off: render geometry)" />
   <string id="BattleMiniMap_collision_preview_hint" text="Runtime source only. Collision reads prepared shape copies on the verified engine build. Spheres and capsules use display approximations; unsupported shapes are reported as partial coverage." />
-  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} | {STATE} | Map meshes: {MESHES}  Terrain samples: {TERRAIN}%" />
+  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE} | {STATE} | Map meshes: {MESHES}  Terrain samples: {TERRAIN}%" />
   <string id="BattleMiniMap_live_preview_loading" text="Extracting" />
   <string id="BattleMiniMap_live_preview_partial" text="Scan finished; coverage incomplete" />
   <string id="BattleMiniMap_live_preview_scanned" text="Scan finished; coverage requires validation" />
   <string id="BattleMiniMap_live_preview_collision" text="Collision mesh" />
   <string id="BattleMiniMap_live_preview_render" text="Render mesh" />
+  <string id="BattleMiniMap_raw_terrain" text="Read original runtime terrain (off: height queries)" />
+  <string id="BattleMiniMap_raw_terrain_hint" text="Copy the loaded PhysX heightfield, retaining holes and diagonals. Requires the verified engine/physics build. No automatic sampled or disk-data fallback." />
+  <string id="BattleMiniMap_raw_terrain_source" text="Raw terrain" />
+  <string id="BattleMiniMap_sampled_terrain_source" text="Sampled terrain" />
 </strings>
 </base>

@@ -25,7 +25,7 @@ static class LiveChecks
         var render=new MapLiveSceneGeometry(source,target,material,rules,true,false);Finish(render);
         Check(render.InitialFinished && render.Failure==null && render.CopiedMeshes==1,"Render source extracts actual scene component, selecting one LOD");
         Check(high.Copies==0 && low.Copies==1 && low.Material==null && low.Local.origin.y==1,"Only isolated copies receive map material and local-frame changes");
-        var shown=target.Entities[0];
+        var shown=target.Entities.Last();
         Check(Math.Abs(shown.Frame.origin.x+.25f)<1e-5 && Math.Abs(shown.Frame.origin.y)<1e-5 && Math.Abs(shown.Frame.origin.z-.25f)<1e-5,"Entity, component and mesh transforms compose before normalized axis mapping");
         Check(source.HeightReads==9 && render.TerrainPercent==100,"Terrain comes from runtime height calls");
         e.Frame.origin=new Vec3(7,2,1);

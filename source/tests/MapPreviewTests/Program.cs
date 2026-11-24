@@ -10,8 +10,10 @@ class Program
     static void Main(string[] args)
     {
         LiveChecks.Run(args[0]);
+        RawTerrainChecks.Run();
         var config=BattleMiniMapConfig.Get();
         config.UseLiveScenePreview=false;
+        config.UseRawRuntimeTerrain=false;
         Scene.Created=0;
         var source=new MapGeometryRenderer { Data=MapGeometryData.Load(args[0]) };
         var preview=new MapGeometryPreviewRenderer();
@@ -63,7 +65,7 @@ namespace BattleMiniMap.Config
     class BattleMiniMapConfig
     {
         static readonly BattleMiniMapConfig Value=new BattleMiniMapConfig(); public static BattleMiniMapConfig Get()=>Value;
-        public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview; public float MapGeometryCeiling;
+        public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview, UseRawRuntimeTerrain; public float MapGeometryCeiling;
     }
 }
 namespace BattleMiniMap.View.MapGeometry
@@ -98,13 +100,14 @@ namespace TaleWorlds.Engine
         public UIntPtr Pointer { get; }=Ids.Next();
         public readonly System.Collections.Generic.List<GameEntity> Entities=new System.Collections.Generic.List<GameEntity>();
         public int Reads,HeightReads;
+        public Func<Vec2,float> Height;
         public void GetEntities(ref System.Collections.Generic.List<GameEntity> result){++Reads;result.AddRange(Entities);}
         public void GetTerrainData(out Vec2i d,out float size,out int layers,out int version){d=new Vec2i();size=0;layers=0;version=0;}
-        public float GetTerrainHeight(Vec2 p,bool checkHoles){++HeightReads;return p.x+p.y;}
+        public float GetTerrainHeight(Vec2 p,bool checkHoles){++HeightReads;return Height==null?p.x+p.y:Height(p);}
 
         public static Scene CreateNewScene(bool initialize_physics,bool enable_decals){++Created;return new Scene();}
         public void DisableStaticShadows(bool value){} public void SetName(string value){} public void EnsurePostfxSystem(){} public void SetShadow(bool value){}
-        public void ClearAll(){if(ThrowOnClear)throw new Exception("fake clear failure");} public void ManualInvalidate(){++Invalidated;}
+        public void ClearAll(){if(ThrowOnClear)throw new Exception("fake clear failure");Entities.Clear();} public void ManualInvalidate(){++Invalidated;}
     }
     public class Camera { public static int Releases; public Vec3 Eye; public static Camera CreateCamera()=>new Camera(); public void LookAt(Vec3 eye,Vec3 at,Vec3 up){Eye=eye;} public void SetFovVertical(float f,float a,float n,float z){} public void ReleaseCamera(){++Releases;} }
     public class Texture
@@ -125,9 +128,9 @@ namespace TaleWorlds.Engine
     }
     public class MeshBuilder
     {
-        public static int Builds,Faces; int _faces;
-        public int AddFaceCorner(Vec3 p,Vec3 n,Vec2 uv,uint color)=>0; public void AddFace(int a,int b,int c){++_faces;}
-        public Mesh Finalize(){++Builds;Faces=_faces;return new Mesh();}
+        public static int Builds,Faces,Corners; int _faces,_corners;
+        public int AddFaceCorner(Vec3 p,Vec3 n,Vec2 uv,uint color)=>_corners++; public void AddFace(int a,int b,int c){++_faces;}
+        public Mesh Finalize(){++Builds;Faces=_faces;Corners=_corners;return new Mesh();}
     }
     public class Mesh {
         public UIntPtr Pointer {get;}=Ids.Next(); public bool IsValid=true; public uint Color;

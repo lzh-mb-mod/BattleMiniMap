@@ -48,7 +48,7 @@
 
     <string id="BattleMiniMap_toggle_map_usage" text="按下{KeyName}切换地图。" />
     <string id="BattleMiniMapHotKey_toggle_map_holding_usage" text="长按{KeyName}切换地图。" />
-      <string id="BattleMiniMap_geometry" text="桥体几何叠加" />
+    <string id="BattleMiniMap_geometry" text="桥体几何叠加" />
     <string id="BattleMiniMap_geometry_hint" text="在已验证的对应城镇场景显示桥体；其他场景使用现有地图。" />
     <string id="BattleMiniMap_geometry_gpu" text="GPU几何地图" />
     <string id="BattleMiniMap_geometry_gpu_hint" text="关闭后使用CPU绘制；GPU显示异常时可关闭此项。" />
@@ -77,11 +77,15 @@
   <string id="BattleMiniMap_live_preview_hint" text="分帧读取当前已加载场景，不读取离线几何。关闭后仅检查旧桥缓存。旧桥代理与高度裁切不作用于动态来源。" />
   <string id="BattleMiniMap_collision_preview" text="使用碰撞网格（关闭：渲染网格）" />
   <string id="BattleMiniMap_collision_preview_hint" text="仅作用于动态来源。在已验证的引擎版本读取准备后的碰撞副本。球和胶囊使用显示近似，不支持的形状记为部分覆盖。" />
-  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} | {STATE} | 网格：{MESHES}  地形读取：{TERRAIN}%" />
+  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE} | {STATE} | 网格：{MESHES}  地形读取：{TERRAIN}%" />
   <string id="BattleMiniMap_live_preview_loading" text="正在提取" />
   <string id="BattleMiniMap_live_preview_partial" text="本轮扫描结束，覆盖尚不完整" />
   <string id="BattleMiniMap_live_preview_scanned" text="本轮扫描结束，覆盖待验证" />
   <string id="BattleMiniMap_live_preview_collision" text="碰撞网格" />
   <string id="BattleMiniMap_live_preview_render" text="渲染网格" />
+  <string id="BattleMiniMap_raw_terrain" text="直接读取原始地形（关闭：逐点高度）" />
+  <string id="BattleMiniMap_raw_terrain_hint" text="读取已加载的PhysX原始高度场，保留洞和对角线。需要已验证的引擎/物理库版本，不自动转采样或磁盘数据。" />
+  <string id="BattleMiniMap_raw_terrain_source" text="原始地形" />
+  <string id="BattleMiniMap_sampled_terrain_source" text="采样地形" />
 </strings>
 </base>

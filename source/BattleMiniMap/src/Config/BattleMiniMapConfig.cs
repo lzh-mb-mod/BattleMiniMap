@@ -60,6 +60,8 @@ namespace BattleMiniMap.Config
         public bool UseLiveScenePreview { get; set; } = true;
         [System.Xml.Serialization.XmlIgnore]
         public bool UseCollisionScenePreview { get; set; } = true;
+        [System.Xml.Serialization.XmlIgnore]
+        public bool UseRawRuntimeTerrain { get; set; } = true;
         public bool MapGpuDiagnosticDepth { get; set; } = false;
 
         public bool TintGpuMapGeometry { get; set; } = false;
@@ -128,6 +130,7 @@ namespace BattleMiniMap.Config
             ShowGeometryPreview = other.ShowGeometryPreview;
             UseLiveScenePreview = other.UseLiveScenePreview;
             UseCollisionScenePreview = other.UseCollisionScenePreview;
+            UseRawRuntimeTerrain = other.UseRawRuntimeTerrain;
             MapGpuDiagnosticDepth = other.MapGpuDiagnosticDepth;
             UseGpuMapGeometry = other.UseGpuMapGeometry;
             TintGpuMapGeometry = other.TintGpuMapGeometry;

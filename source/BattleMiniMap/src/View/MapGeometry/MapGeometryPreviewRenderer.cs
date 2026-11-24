@@ -34,6 +34,7 @@ namespace BattleMiniMap.View.MapGeometry
         private MapLiveSceneGeometry _live;
         private bool _liveMode;
         private bool _collisionMode;
+        private bool _rawTerrainMode;
         public UiTexture Texture { get; private set; }
         public bool Available => Texture != null && !_failed;
         public MapGeometryPreviewRenderer(Scene runtimeSource=null,float minX=0,float minY=0,float maxX=1,float maxY=1)
@@ -60,9 +61,9 @@ namespace BattleMiniMap.View.MapGeometry
                 if (live && _runtimeSource==null) return;
                 if (!live && data==null) return;
                 var ceiling=MapGeometryHeight.Ceiling(config.CutMapGeometryByHeight,config.MapGeometryCeiling);
-                if (_view==null || live!=_liveMode || (live && _collisionMode!=config.UseCollisionScenePreview) || (!live && (_proxy!=config.UseMapGeometryProxy || _ceiling!=ceiling)))
+                if (_view==null || live!=_liveMode || (live && (_collisionMode!=config.UseCollisionScenePreview || _rawTerrainMode!=config.UseRawRuntimeTerrain)) || (!live && (_proxy!=config.UseMapGeometryProxy || _ceiling!=ceiling)))
                 {
-                    Clear(true); _liveMode=live; _collisionMode=config.UseCollisionScenePreview; _proxy=config.UseMapGeometryProxy; _ceiling=ceiling; Build(data);
+                    Clear(true); _liveMode=live; _collisionMode=config.UseCollisionScenePreview; _rawTerrainMode=config.UseRawRuntimeTerrain; _proxy=config.UseMapGeometryProxy; _ceiling=ceiling; Build(data);
                 }
                 _live?.Update(dt);
                 if (_live?.Failure!=null) throw new InvalidOperationException(_live.Failure);
@@ -99,7 +100,7 @@ namespace BattleMiniMap.View.MapGeometry
                 var hasTerrain=dimensions.X>0 && dimensions.Y>0 && nodeSize>0 && MapLiveGeometryRules.Finite(nodeSize);
                 var rules=hasTerrain ? new MapLiveGeometryRules(0,0,dimensions.X*nodeSize,dimensions.Y*nodeSize)
                     : new MapLiveGeometryRules(_minX,_minY,_maxX,_maxY);
-                _live=new MapLiveSceneGeometry(_runtimeSource,_scene,_material,rules,hasTerrain,_collisionMode);
+                _live=new MapLiveSceneGeometry(_runtimeSource,_scene,_material,rules,hasTerrain,_collisionMode,_rawTerrainMode);
                 BuildTarget();
                 Report("build: target="+_binding.Name+" source="+(_collisionMode?"runtime-collision":"runtime-render")+" staticFiles=False policy=interactive");
                 return;
