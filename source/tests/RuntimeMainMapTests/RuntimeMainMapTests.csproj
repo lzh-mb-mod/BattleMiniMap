@@ -1,0 +1,37 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net9.0</TargetFramework><DefineConstants>$(DefineConstants);PREVIEW_UI_TESTS;RUNTIME_MAIN_TESTS</DefineConstants></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapPreviewLayout.cs" Link="Layout.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapPreviewStatus.cs" Link="PreviewStatus.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLiveGeometryRules.cs" Link="LiveRules.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLivePrimitiveGeometry.cs" Link="Primitives.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapObjectExtractionProfiler.cs" Link="ObjectProfiler.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapExtractionDiagnostics.cs" Link="ExtractionDiagnostics.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapLiveSceneGeometry.cs" Link="LiveGeometry.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainModuleLease.cs" Link="TerrainModuleLease.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainVerification.cs" Link="TerrainVerification.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainPatch.cs" Link="TerrainPatch.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapTerrainHeightfield.cs" Link="Heightfield.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapRuntimeTerrainReader.cs" Link="TerrainReader.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapSelfTerrainMemory.cs" Link="SelfMemory.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryHeight.cs" Link="Height.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryPreviewRenderer.cs" Link="Renderer.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryPreviewCamera.cs" Link="Camera.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryData.cs" Link="Data.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGpuDiagnosticGeometry.cs" Link="Normalization.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryCleanup.cs" Link="Cleanup.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryRenderer.cs" Link="MapGeometryRenderer.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryProjection.cs" Link="MapGeometryProjection.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapRuntimeMainProjection.cs" Link="MapRuntimeMainProjection.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapRuntimeMainMap.cs" Link="MapRuntimeMainMap.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryTableau.cs" Link="MapGeometryTableau.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryBackendState.cs" Link="MapGeometryBackendState.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryPerformance.cs" Link="MapGeometryPerformance.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryRasterizer.cs" Link="MapGeometryRasterizer.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryManifest.cs" Link="MapGeometryManifest.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryOptionalFlag.cs" Link="MapGeometryOptionalFlag.cs" />
+    <Compile Include="../MapPreviewTests/Program.cs" Link="Boundary/Program.cs" />
+    <Compile Include="../MapPreviewTests/RawTerrainChecks.cs" Link="Boundary/RawTerrainChecks.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryRetirementQueue.cs" Link="MapGeometryRetirementQueue.cs" />
+  </ItemGroup>
+</Project>

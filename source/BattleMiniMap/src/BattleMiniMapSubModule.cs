@@ -35,6 +35,7 @@ namespace BattleMiniMap
         {
             base.OnApplicationTick(dt);
 
+            View.MapGeometry.MapGeometryRetirementQueue.OnApplicationTick();
             Initializer.OnApplicationTick(dt);
         }
 

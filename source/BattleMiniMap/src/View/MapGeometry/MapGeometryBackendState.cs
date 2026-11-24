@@ -13,7 +13,9 @@ namespace BattleMiniMap.View.MapGeometry
             if (Failure != null) return false;
             ++_age;
             if (error != null) { Failure = error; return false; }
-            _unchanged = paintCount > _lastPaintCount ? 0 : _unchanged + 1;
+            // Parked, valid targets do not owe callbacks. A new draw request gets
+            // its own visible progress window rather than inheriting idle age.
+            _unchanged = (valid && reuseCached && paintCount >= 2) || paintCount > _lastPaintCount ? 0 : _unchanged + 1;
             _lastPaintCount = paintCount;
             if (_selected && !valid) Failure = "GPU target became invalid";
             else if (!(reuseCached && paintCount >= 2) && _unchanged >= StallUpdates) Failure = "No GPU paint progress during visible updates";

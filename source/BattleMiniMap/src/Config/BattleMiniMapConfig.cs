@@ -68,6 +68,7 @@ namespace BattleMiniMap.Config
 
         public bool TintGpuMapGeometry { get; set; } = false;
         public bool ProfileMapGeometry { get; set; } = false;
+        public bool UseRuntimeMainMap { get; set; } = true;
         public bool UseGpuMapGeometry { get; set; } = true;
         public bool EnableMapGeometry { get; set; } = true;
         public bool UseMapGeometryProxy { get; set; } = true;
@@ -136,6 +137,7 @@ namespace BattleMiniMap.Config
             SimplifyRuntimeTerrain = other.SimplifyRuntimeTerrain;
             MapGpuDiagnosticDepth = other.MapGpuDiagnosticDepth;
             UseGpuMapGeometry = other.UseGpuMapGeometry;
+            UseRuntimeMainMap = other.UseRuntimeMainMap;
             TintGpuMapGeometry = other.TintGpuMapGeometry;
             ProfileMapGeometry = other.ProfileMapGeometry;
             EnableMapGeometry = other.EnableMapGeometry;

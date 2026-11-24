@@ -44,11 +44,11 @@
   <string id="str_battle_mini_map_toggle_map_usage" text="{=BattleMiniMap_toggle_map_usage}Toggle map by pressing {KeyName}." />
   <string id="str_battle_mini_map_toggle_map_holding_usage" text="{=BattleMiniMapHotKey_toggle_map_holding_usage}Toggle map by holding {KeyName}." />
   <string id="str_battle_mini_map_geometry" text="{=BattleMiniMap_geometry}Bridge geometry overlay" />
-  <string id="str_battle_mini_map_geometry_hint" text="{=BattleMiniMap_geometry_hint}Show verified geometry in the matching town scene. Other scenes use the existing map." />
+  <string id="str_battle_mini_map_geometry_hint" text="{=BattleMiniMap_geometry_hint}Enable the geometry overlay; runtime scene main map is the default. The terrain base and markers remain available." />
   <string id="str_battle_mini_map_geometry_gpu" text="{=BattleMiniMap_geometry_gpu}GPU geometry map" />
-  <string id="str_battle_mini_map_geometry_gpu_hint" text="{=BattleMiniMap_geometry_gpu_hint}Turn off to use CPU drawing. Use this if GPU geometry displays incorrectly." />
+  <string id="str_battle_mini_map_geometry_gpu_hint" text="{=BattleMiniMap_geometry_gpu_hint}Off retains the GDI terrain base and markers. The old bridge CPU cache diagnostic is available only with runtime main map off." />
   <string id="str_battle_mini_map_geometry_tint" text="{=BattleMiniMap_geometry_tint}GPU verification colors" />
-  <string id="str_battle_mini_map_geometry_tint_hint" text="{=BattleMiniMap_geometry_tint_hint}GPU uses cyan/magenta; CPU keeps normal colors. Turn off to restore normal GPU colors." />
+  <string id="str_battle_mini_map_geometry_tint_hint" text="{=BattleMiniMap_geometry_tint_hint}Runtime main map: cyan terrain and magenta objects for validation; off uses two neutral category colors. No material, walkability or floor semantics. Old bridge GPU retains its validation colors." />
   <string id="str_battle_mini_map_geometry_profile" text="{=BattleMiniMap_geometry_profile}Record map rendering performance" />
   <string id="str_battle_mini_map_geometry_profile_hint" text="{=BattleMiniMap_geometry_profile_hint}Log CPU update cost and mission tick intervals, not GPU execution time. Pause and state changes reset the window." />
   <string id="str_battle_mini_map_geometry_proxy" text="{=BattleMiniMap_geometry_proxy}Use simplified map geometry" />
@@ -71,7 +71,7 @@
   <string id="str_battle_mini_map_live_preview" text="{=BattleMiniMap_live_preview}Extract the current scene at runtime" />
   <string id="str_battle_mini_map_live_preview_hint" text="{=BattleMiniMap_live_preview_hint}Read the loaded scene in small steps without offline geometry files. Disable only to inspect the old bridge cache. Bridge proxy and height clipping options do not apply to runtime sources." />
   <string id="str_battle_mini_map_collision_preview" text="{=BattleMiniMap_collision_preview}Use collision geometry (off: render geometry)" />
-  <string id="str_battle_mini_map_collision_preview_hint" text="{=BattleMiniMap_collision_preview_hint}Runtime source only. Collision reads prepared shape copies on the verified engine build. Spheres and capsules use display approximations; unsupported shapes are reported as partial coverage." />
+  <string id="str_battle_mini_map_collision_preview_hint" text="{=BattleMiniMap_collision_preview_hint}Shared source setting for runtime main map and preview; each rebuilds independently. Collision reads copied shapes on the verified engine build. Sphere/capsule display approximations and unsupported shapes retain partial coverage reporting." />
   <string id="str_battle_mini_map_live_preview_status" text="{=BattleMiniMap_live_preview_status}{SOURCE} / {TERRAINSOURCE}: {TERRAINSTATE} ({TERRAIN}%) | {OBJECTSTATE} | Meshes {MESHES}&#xA;{COVERAGE} | Rejected items {REJECTED}; skipped items {SKIPPED}; unsupported shapes {UNSUPPORTED}; terrain failures {TERRAINFAILURES}" />
   <string id="str_battle_mini_map_live_preview_summary" text="{=BattleMiniMap_live_preview_summary}{SOURCE} / {TERRAINSOURCE}: {TERRAINSTATE} ({TERRAIN}%) | {OBJECTSTATE} | Meshes {MESHES}" />
   <string id="str_battle_mini_map_live_preview_details" text="{=BattleMiniMap_live_preview_details}{COVERAGE} | Rejected items {REJECTED}; skipped items {SKIPPED}; unsupported shapes {UNSUPPORTED}; terrain failures {TERRAINFAILURES}" />
@@ -96,10 +96,12 @@
   <string id="str_battle_mini_map_live_preview_cache_diagnostic" text="{=BattleMiniMap_live_preview_cache_diagnostic}Old bridge cache: manual diagnostic only; no runtime scene coverage." />
   <string id="str_battle_mini_map_live_preview_collision" text="{=BattleMiniMap_live_preview_collision}Collision mesh" />
   <string id="str_battle_mini_map_live_preview_render" text="{=BattleMiniMap_live_preview_render}Render mesh" />
-  <string id="str_battle_mini_map_raw_terrain" text="{=BattleMiniMap_raw_terrain}Read original runtime terrain (off: height queries)" />
-  <string id="str_battle_mini_map_raw_terrain_hint" text="{=BattleMiniMap_raw_terrain_hint}Copy the loaded PhysX heightfield, retaining holes and diagonals. Requires the verified engine/physics build. No automatic sampled or disk-data fallback." />
+  <string id="str_battle_mini_map_raw_terrain" text="{=BattleMiniMap_raw_terrain}Read original runtime terrain" />
+  <string id="str_battle_mini_map_raw_terrain_hint" text="{=BattleMiniMap_raw_terrain_hint}Shared by main map and preview. Copy loaded PhysX heightfields with holes and diagonals on the verified engine. Off: main map draws objects over GDI terrain; only the large preview uses height queries. No automatic disk or sampled fallback." />
   <string id="str_battle_mini_map_raw_terrain_source" text="{=BattleMiniMap_raw_terrain_source}Raw terrain" />
   <string id="str_battle_mini_map_sampled_terrain_source" text="{=BattleMiniMap_sampled_terrain_source}Sampled terrain" />
   <string id="str_battle_mini_map_simplify_terrain" text="{=BattleMiniMap_simplify_terrain}Simplify runtime terrain (off: full topology)" />
-  <string id="str_battle_mini_map_simplify_terrain_hint" text="{=BattleMiniMap_simplify_terrain_hint}Raw runtime terrain only. Keep borders and holes; accept patches within 0.10 m vertical error, otherwise retain original triangles." />
-</strings>
+  <string id="str_battle_mini_map_simplify_terrain_hint" text="{=BattleMiniMap_simplify_terrain_hint}Shared by main map and preview, for raw runtime terrain only. Preserve borders and holes; accept patches within 0.10 m vertical error, otherwise retain original triangles." />
+  <string id="str_battle_mini_map_runtime_main" text="{=BattleMiniMap_runtime_main}Runtime scene main map" />
+    <string id="str_battle_mini_map_runtime_main_hint" text="{=BattleMiniMap_runtime_main_hint}Extract the current mission scene independently of the large preview. Off selects the old bridge cache diagnostic. Loading, failure or manual CPU retains the GDI terrain base and markers; no runtime building CPU rasterization or automatic bridge cache fallback." />
+  </strings>

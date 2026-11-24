@@ -38,7 +38,7 @@ namespace BattleMiniMap.View.Background.Map
         {
             base.OnMissionScreenInitialize();
 
-            _mapGeometry = new BattleMiniMap.View.MapGeometry.MapGeometryRenderer(Mission.SceneName);
+            _mapGeometry = new BattleMiniMap.View.MapGeometry.MapGeometryRenderer(Mission.SceneName, Mission.Scene);
             _gpuDiagnostic = new BattleMiniMap.View.MapGeometry.MapGpuDiagnosticRenderer();
             BattleMiniMapConfig.Get().ShowGeometryPreview = false;
             var mapBounds=MiniMap.Instance;

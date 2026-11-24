@@ -14,6 +14,7 @@ namespace BattleMiniMap.View.MapGeometry
         private readonly Material _material;
         private readonly MapLiveGeometryRules _rules;
         private readonly bool _collision;
+        private readonly uint _terrainColor, _objectColor, _renderColor;
         private readonly bool _rawTerrain;
         private readonly bool _simplifyTerrain;
         private readonly Dictionary<string,int> _errorReasons=new Dictionary<string,int>();
@@ -78,6 +79,9 @@ namespace BattleMiniMap.View.MapGeometry
         public long SourceFaces { get; private set; }
         public bool Partial { get; private set; }
         public bool InitialFinished { get; private set; }
+        // Owners redraw through the final mutating step, including refresh scans.
+        public bool IsActive => !_disposed && !_stopped && Failure == null && _steps != null;
+        public long ContentVersion { get; private set; }
         public int TerrainPercent => _rawTerrain ? (_rawTilesTotal==0?0:Math.Min(100,(int)(100f*(_rawTilesDone+(_rawTileCells==0?0:_rawTileCellsDone/(float)_rawTileCells))/_rawTilesTotal))) : _terrainRead*100/(_rules.GridX*_rules.GridY);
         public string TerrainSource => _rawTerrain?"raw-physx":"sampled";
         public string Failure { get; private set; }
@@ -87,8 +91,9 @@ namespace BattleMiniMap.View.MapGeometry
             TerrainPercent=TerrainPercent, InitialFinished=InitialFinished, Partial=Partial,
             Rejected=Errors, Skipped=Skipped, Unsupported=_unsupportedShapes, TerrainFailures=_rawFailures+_terrainInvalid
         };
-        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null,bool simplifyTerrain=false,Func<Action<IMapTerrainMemory>,IEnumerable<int>> rawInitialization=null,bool profile=false)
+        public MapLiveSceneGeometry(Scene source,Scene target,Material material,MapLiveGeometryRules rules,bool hasTerrain=true,bool collision=false,bool rawTerrain=false,Func<IMapTerrainMemory> rawMemory=null,bool simplifyTerrain=false,Func<Action<IMapTerrainMemory>,IEnumerable<int>> rawInitialization=null,bool profile=false,uint terrainColor=0xffb5b09bu,uint objectColor=0xffb5b09bu,uint renderColor=uint.MaxValue)
         {
+            _terrainColor=terrainColor; _objectColor=objectColor; _renderColor=renderColor;
             _diagnostics=profile?new MapExtractionDiagnostics():null;
             _objectProfile=profile?new MapObjectExtractionProfiler():null;
             _source=source??throw new ArgumentNullException(nameof(source));
@@ -109,6 +114,8 @@ namespace BattleMiniMap.View.MapGeometry
                 if (_refresh<2) return;
                 _refresh=0; _steps=Extract().GetEnumerator();
             }
+            // Conservative change marker also covers a complete refresh within one tick.
+            ++ContentVersion;
             var terrainTick=_rawTerrain&&!_terrainDone;var waiting=false;var stepLimit=terrainTick?2048:64;
             var tick=Stopwatch.StartNew(); var count=0; _activeWorkMs=_workMs; _activeTick=tick;
             _diagnostics?.BeginTick();
@@ -210,7 +217,9 @@ namespace BattleMiniMap.View.MapGeometry
                         var key=entity.Pointer.ToUInt64().ToString("X")+":"+meta.Pointer.ToUInt64().ToString("X")+":"+mesh.Pointer.ToUInt64().ToString("X")+":"+i;
                         var frame=global*metaFrame*mesh.GetLocalFrame();
                         if (!Valid(frame)) { ++Skipped; Partial=true; continue; }
-                        frame=Normalize(frame); faces+=mesh.GetFaceCount(); yield return 0;
+                        frame=Normalize(frame);
+                        if (!Valid(frame)) { RejectCollision("render_normalized_frame_nonfinite",entity,0,-1,-1,""); continue; }
+                        faces+=mesh.GetFaceCount(); yield return 0;
                         _objectProfile?.Mark(MapObjectStage.InstanceLookup,entity.Pointer.ToUInt64(),mesh:m,item:i);
                         if (!_copies.TryGetValue(key,out var copy))
                         {
@@ -220,7 +229,7 @@ namespace BattleMiniMap.View.MapGeometry
                             if (owned==null || !owned.IsValid) { RejectCollision("render_copy_invalid",entity,0,-1,-1,""); continue; }
                             // Register ownership before native setters can fail.
                             copy=new Copy { Mesh=owned }; _copies.Add(key,copy);
-                            owned.SetMaterial(_material); owned.Color=uint.MaxValue; owned.SetLocalFrame(MatrixFrame.Identity);
+                            owned.SetMaterial(_material); owned.Color=_renderColor; owned.SetLocalFrame(MatrixFrame.Identity);
                             _objectProfile?.Mark(MapObjectStage.InstanceCreate,entity.Pointer.ToUInt64(),mesh:m,item:i);
                             copy.Entity=GameEntity.CreateEmpty(_target,createPhysics:false,callScriptCallbacks:false);
                             if (copy.Entity==null) throw new InvalidOperationException("No runtime map entity");
@@ -283,7 +292,7 @@ namespace BattleMiniMap.View.MapGeometry
                         var builder=new MeshBuilder();var n=0;
                         foreach(var face in MapLivePrimitiveGeometry.Capsule(new GeometryPoint(a.x,a.y,a.z),new GeometryPoint(b.x,b.y,b.z),radius))
                         {
-                            Add(builder,new Vec3(face[0].X,face[0].Y,face[0].Z),new Vec3(face[1].X,face[1].Y,face[1].Z),new Vec3(face[2].X,face[2].Y,face[2].Z));
+                            Add(builder,new Vec3(face[0].X,face[0].Y,face[0].Z),new Vec3(face[1].X,face[1].Y,face[1].Z),new Vec3(face[2].X,face[2].Y,face[2].Z),_objectColor);
                             ++n;yield return 0;
                             _objectProfile?.Mark(MapObjectStage.PrimitiveBuild,entity.Pointer.ToUInt64(),id,item:p);
                         }
@@ -320,7 +329,7 @@ namespace BattleMiniMap.View.MapGeometry
                                 if (!MapLiveCollisionGuard.StorageReady(shape)) throw new InvalidOperationException("Prepared collision storage disappeared");
                                 shape.GetTriangle(triangle,m,t);
                                 if (ValidTriangle(triangle[0],triangle[1],triangle[2]))
-                                { Add(builder,triangle[0],triangle[1],triangle[2]); ++valid; }
+                                { Add(builder,triangle[0],triangle[1],triangle[2],_objectColor); ++valid; }
                                 else { RejectCollision(!Valid(triangle[0])||!Valid(triangle[1])||!Valid(triangle[2])?"triangle_nonfinite":"triangle_degenerate",entity,id,m,t,"a="+Point(triangle[0])+" b="+Point(triangle[1])+" c="+Point(triangle[2])); }
                                 ++_collisionTriangles; yield return 0;
                             }
@@ -342,7 +351,9 @@ namespace BattleMiniMap.View.MapGeometry
             _objectProfile?.Mark(MapObjectStage.BodyFrame,entity.Pointer.ToUInt64(),id);
             var frame=entity.GetBodyWorldTransform();
             if(!Valid(frame)) { RejectCollision(!Valid(frame.origin)?"body_origin_nonfinite":"body_axes_nonfinite",entity,id,-1,-1,"origin="+Point(frame.origin)+" s="+Point(frame.rotation.s)+" f="+Point(frame.rotation.f)+" u="+Point(frame.rotation.u));yield break; }
-            frame=Normalize(frame); yield return 0;
+            frame=Normalize(frame);
+            if(!Valid(frame)) { RejectCollision("body_normalized_frame_nonfinite",entity,id,-1,-1,"");yield break; }
+            yield return 0;
             for(var m=0;m<resource.Meshes.Count;++m)
             {
                 _objectProfile?.Mark(MapObjectStage.InstanceLookup,entity.Pointer.ToUInt64(),id,m);
@@ -466,6 +477,20 @@ namespace BattleMiniMap.View.MapGeometry
                             foreach(var face in patch.Faces())
                             {
                                 if(_rawTriangles>=12000000){_terrainHasGaps=true;Partial=true;Report("raw terrain face budget reached");yield break;}
+                                // Validate all normalized corners before uploading any
+                                // part of this face, including finite / tiny-scale overflow.
+                                var finiteFace=true;
+                                for(var k=0;k<3;++k)
+                                {
+                                    var p=_rules.Normalize(tile.Vertex(face[k]));
+                                    if(!Valid(new Vec3(p.X,p.Y,p.Z))) finiteFace=false;
+                                }
+                                if(!finiteFace)
+                                {
+                                    ++Errors; ++_rawFailures; Partial=true; _terrainHasGaps=true;
+                                    if(_rawFailures==1)Report("raw terrain face rejected: normalized_nonfinite");
+                                    continue;
+                                }
                                 for(var k=0;k<3;++k)
                                 {
                                     var sampleIndex=face[k];
@@ -474,7 +499,7 @@ namespace BattleMiniMap.View.MapGeometry
                                     if(corner<0)
                                     {
                                         var p=_rules.Normalize(tile.Vertex(sampleIndex));
-                                        corner=builder.AddFaceCorner(new Vec3(p.X,p.Y,p.Z),Vec3.Up,new Vec2(0,0),0xffb5b09bu);
+                                        corner=builder.AddFaceCorner(new Vec3(p.X,p.Y,p.Z),Vec3.Up,new Vec2(0,0),_terrainColor);
                                         if(corner<0)throw new InvalidOperationException("No raw terrain vertex");
                                         corners[local]=corner+1;
                                     }
@@ -520,8 +545,9 @@ namespace BattleMiniMap.View.MapGeometry
                 {
                     var a=Point(x,y,heights[y*nx+x]); var b=Point(x+1,y,heights[y*nx+x+1]);
                     var c=Point(x,y+1,heights[(y+1)*nx+x]); var d=Point(x+1,y+1,heights[(y+1)*nx+x+1]);
-                    if (MapLiveGeometryRules.Finite(a.z)&&MapLiveGeometryRules.Finite(b.z)&&MapLiveGeometryRules.Finite(c.z)&&MapLiveGeometryRules.Finite(d.z))
-                    { Add(builder,a,b,c); Add(builder,b,d,c); count+=2; }
+                    if (Valid(a)&&Valid(b)&&Valid(c)&&Valid(d))
+                    { Add(builder,a,b,c,_terrainColor); Add(builder,b,d,c,_terrainColor); count+=2; }
+                    else { ++Errors; Partial=true; _terrainHasGaps=true; }
                     yield return 0;
                 }
                 if (count==0) continue;
@@ -536,11 +562,11 @@ namespace BattleMiniMap.View.MapGeometry
         }
         private Vec3 Point(int x,int y,float z)
         { var p=_rules.Normalize(new GeometryPoint(_rules.X(x),_rules.Y(y),z)); return new Vec3(p.X,p.Y,p.Z); }
-        private static void Add(MeshBuilder builder,Vec3 a,Vec3 b,Vec3 c)
+        private static void Add(MeshBuilder builder,Vec3 a,Vec3 b,Vec3 c,uint color)
         {
-            var i=builder.AddFaceCorner(a,Vec3.Up,new Vec2(0,0),0xffb5b09bu);
-            var j=builder.AddFaceCorner(b,Vec3.Up,new Vec2(1,0),0xffb5b09bu);
-            var k=builder.AddFaceCorner(c,Vec3.Up,new Vec2(0,1),0xffb5b09bu); builder.AddFace(i,j,k);
+            var i=builder.AddFaceCorner(a,Vec3.Up,new Vec2(0,0),color);
+            var j=builder.AddFaceCorner(b,Vec3.Up,new Vec2(1,0),color);
+            var k=builder.AddFaceCorner(c,Vec3.Up,new Vec2(0,1),color); builder.AddFace(i,j,k);
         }
         private static string Point(Vec3 p)=>p.x.ToString("R",CultureInfo.InvariantCulture)+","+p.y.ToString("R",CultureInfo.InvariantCulture)+","+p.z.ToString("R",CultureInfo.InvariantCulture);
         private void RejectCollision(string reason,GameEntity entity,ulong shape,int mesh,int item,string detail)

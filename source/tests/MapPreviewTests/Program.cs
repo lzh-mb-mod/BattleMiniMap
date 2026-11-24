@@ -3,6 +3,7 @@ using BattleMiniMap.Config;
 using BattleMiniMap.View.MapGeometry;
 using TaleWorlds.Engine;
 
+#if !RUNTIME_MAIN_TESTS
 class Program
 {
     static int checks;
@@ -76,29 +77,35 @@ class Program
     }
 }
 
+#endif
 namespace BattleMiniMap.Config
 {
     class BattleMiniMapConfig
     {
         static readonly BattleMiniMapConfig Value=new BattleMiniMapConfig(); public static BattleMiniMapConfig Get()=>Value;
+        public bool UseRuntimeMainMap=true, UseGpuMapGeometry=true, EnableMapGeometry=true, TintGpuMapGeometry, FollowMode, EnableDynamicScale, MapGpuDiagnosticDepth;
+        public int WidgetWidth=400, MapGpuDiagnosticMode; public float FollowModeScale;
         public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview, UseRawRuntimeTerrain, SimplifyRuntimeTerrain, ProfileMapGeometry; public float MapGeometryCeiling;
     }
 }
 namespace BattleMiniMap.View.MapGeometry
 {
+    #if !RUNTIME_MAIN_TESTS
     class MapGeometryRenderer { public MapGeometryData Data; public int Reads; public MapGeometryData EnsureVerifiedCache(){++Reads;return Data;} }
+    #endif
     static class MapGeometryShader { public static void Bind(TaleWorlds.Engine.Material material){} }
 }
 namespace TaleWorlds.Library
 {
     public static class Debug { public static readonly System.Collections.Generic.List<string> Messages=new System.Collections.Generic.List<string>(); public static void Print(string value){Messages.Add(value);} }
-    public struct Vec2 { public float x,y; public Vec2(float x,float y){this.x=x;this.y=y;} public static Vec2 operator -(Vec2 a,Vec2 b)=>new Vec2(a.x-b.x,a.y-b.y); public static Vec2 operator /(Vec2 a,float b)=>new Vec2(a.x/b,a.y/b); }
+    public struct Vec2 { public float x,y; public Vec2(float x,float y){this.x=x;this.y=y;} public static Vec2 Zero=>new Vec2(); public static bool operator ==(Vec2 a,Vec2 b)=>a.x==b.x&&a.y==b.y; public static bool operator !=(Vec2 a,Vec2 b)=>!(a==b); public override bool Equals(object o)=>o is Vec2 v&&this==v; public override int GetHashCode()=>HashCode.Combine(x,y); public static Vec2 operator -(Vec2 a,Vec2 b)=>new Vec2(a.x-b.x,a.y-b.y); public static Vec2 operator /(Vec2 a,float b)=>new Vec2(a.x/b,a.y/b); }
     public struct Vec2i { public int X,Y; }
     public struct Vec3
     {
         public float x,y,z; public Vec3(float x,float y,float z){this.x=x;this.y=y;this.z=z;}
-        public static Vec3 Up=>new Vec3(0,0,1); public float Length=>(float)Math.Sqrt(x*x+y*y+z*z);
+        public static Vec3 Forward=>new Vec3(0,1,0); public static Vec3 Up=>new Vec3(0,0,1); public float Length=>(float)Math.Sqrt(x*x+y*y+z*z);
         public void Normalize(){var n=Length;x/=n;y/=n;z/=n;}
+        public static Vec3 operator /(Vec3 a,float n)=>new Vec3(a.x/n,a.y/n,a.z/n);
         public static Vec3 operator -(Vec3 a,Vec3 b)=>new Vec3(a.x-b.x,a.y-b.y,a.z-b.z);
         public static Vec3 operator +(Vec3 a,Vec3 b)=>new Vec3(a.x+b.x,a.y+b.y,a.z+b.z);
         public static Vec3 operator *(Vec3 a,float n)=>new Vec3(a.x*n,a.y*n,a.z*n);
@@ -116,6 +123,10 @@ namespace TaleWorlds.Engine
         public UIntPtr Pointer { get; }=Ids.Next();
         public readonly System.Collections.Generic.List<GameEntity> Entities=new System.Collections.Generic.List<GameEntity>();
         public int Reads,HeightReads;
+        public Vec3 BoundMin=new Vec3(-100,-100,-20), BoundMax=new Vec3(100,100,80);
+        public float TerrainMin=-10,TerrainMax=10; public bool TerrainRangeAvailable=true;
+        public void GetBoundingBox(out Vec3 min,out Vec3 max){min=BoundMin;max=BoundMax;}
+        public bool GetTerrainMinMaxHeight(out float min,out float max){min=TerrainMin;max=TerrainMax;return TerrainRangeAvailable;}
         public Func<Vec2,float> Height;
         public void GetEntities(ref System.Collections.Generic.List<GameEntity> result){++Reads;result.AddRange(Entities);}
         public void GetTerrainData(out Vec2i d,out float size,out int layers,out int version){d=new Vec2i();size=0;layers=0;version=0;}
@@ -126,14 +137,20 @@ namespace TaleWorlds.Engine
         public void DisableStaticShadows(bool value){} public void SetName(string value){} public void EnsurePostfxSystem(){} public void SetShadow(bool value){}
         public void ClearAll(){if(ThrowOnClear)throw new Exception("fake clear failure");Entities.Clear();} public void ManualInvalidate(){++Invalidated;}
     }
-    public class Camera { public static int Releases; public Vec3 Eye; public float Aspect; public static Camera CreateCamera()=>new Camera(); public void LookAt(Vec3 eye,Vec3 at,Vec3 up){Eye=eye;} public void SetFovVertical(float f,float a,float n,float z){Aspect=a;} public void ReleaseCamera(){++Releases;} }
+    public class Camera { public static int Releases; public Vec3 Eye; public MatrixFrame Frame; public float Right,Bottom,Near,Far; public float Aspect; public void SetViewVolume(bool perspective,float left,float right,float bottom,float top,float near,float far){Right=right;Bottom=bottom;Near=near;Far=far;} public Vec3 WorldPointToViewPortPoint(ref Vec3 p)=>new Vec3((p.x-Eye.x)/Right,(p.y-Eye.y)/Bottom,0); public static Camera CreateCamera()=>new Camera(); public void LookAt(Vec3 eye,Vec3 at,Vec3 up){Eye=eye;} public void SetFovVertical(float f,float a,float n,float z){Aspect=a;} public void ReleaseCamera(){++Releases;} }
     public class Texture
     {
-        public static bool FailWhite; public bool IsValid=true,IsReleased; public object UserData; public int ViewGets;
+        public static bool FailWhite;
+        private bool _valid=true, _released; private object _userData;
+        public int ValidGets, ReleasedGets, UserGets, Releases;
+        public bool IsValid { get { ++ValidGets; return _valid; } set { _valid=value; } }
+        public bool IsReleased { get { ++ReleasedGets; return _released; } set { _released=value; } }
+        public object UserData { get { ++UserGets; return _userData; } set { _userData=value; } }
+        public int ViewGets;
         public TableauView NativeView; public Action<Texture,EventArgs> Callback;
         public TableauView TableauView { get { ++ViewGets; return NativeView; } }
         public static Texture CreateFromByteArray(byte[] bytes,int w,int h)=>FailWhite?null:new Texture();
-        public void Release(){IsReleased=true;} public void Paint()=>Callback(this,EventArgs.Empty);
+        public void Release(){++Releases;IsReleased=true;} public void Paint()=>Callback(this,EventArgs.Empty);
         public void Pump(){if(NativeView.Enabled&&NativeView.Continuous&&!NativeView.Skip)Paint();}
     }
     [Flags] public enum MaterialFlags { TwoSided=1,DontCastShadow=2,RequiresForwardRendering=4 }
@@ -146,10 +163,11 @@ namespace TaleWorlds.Engine
     public static class NativeProbe { public static Action<string> Before; public static void Call(string name){Before?.Invoke(name);} }
     public class MeshBuilder
     {
+        public static bool RecordColors; public static readonly System.Collections.Generic.List<uint> UploadedColors=new System.Collections.Generic.List<uint>();
         public static int Builds,Faces,Corners; int _faces,_corners;
         private ulong _signature=14695981039346656037UL;
         private void Mix(uint value){unchecked{_signature=(_signature^value)*1099511628211UL;}}
-        public int AddFaceCorner(Vec3 p,Vec3 n,Vec2 uv,uint color){Mix(0x56455254);Mix((uint)BitConverter.SingleToInt32Bits(p.x));Mix((uint)BitConverter.SingleToInt32Bits(p.y));Mix((uint)BitConverter.SingleToInt32Bits(p.z));Mix(color);return _corners++;}
+        public int AddFaceCorner(Vec3 p,Vec3 n,Vec2 uv,uint color){if(!float.IsFinite(p.x)||!float.IsFinite(p.y)||!float.IsFinite(p.z))throw new Exception("nonfinite native corner");if(RecordColors)UploadedColors.Add(color);Mix(0x56455254);Mix((uint)BitConverter.SingleToInt32Bits(p.x));Mix((uint)BitConverter.SingleToInt32Bits(p.y));Mix((uint)BitConverter.SingleToInt32Bits(p.z));Mix(color);return _corners++;}
         public void AddFace(int a,int b,int c){Mix(0x46414345);Mix((uint)a);Mix((uint)b);Mix((uint)c);++_faces;}
         public Mesh Finalize(){NativeProbe.Call("Upload");++Builds;Faces=_faces;Corners=_corners;return new Mesh{UploadSignature=_signature,UploadFaces=_faces,UploadVertices=_corners};}
     }
@@ -171,7 +189,7 @@ namespace TaleWorlds.Engine
         public UIntPtr GetScenePointer()=>Scene.Pointer; public bool IsVisibleIncludeParents()=>Visible;
         public MatrixFrame GetGlobalFrame()=>Frame; public MatrixFrame GetBodyWorldTransform(){NativeProbe.Call("BodyFrame");return Frame;}
         public int MultiMeshComponentCount=>Metas.Count; public MetaMesh GetMetaMesh(int i)=>Metas[i]; public PhysicsShape GetBodyShape()=>Shape;
-        public void SetFrame(ref MatrixFrame f){NativeProbe.Call("UpdateInstance");Frame=f;} public void AddMesh(Mesh m,bool recomputeBoundingBox){Added=m;}
+        public void SetFrame(ref MatrixFrame f){if(!float.IsFinite(f.origin.x)||!float.IsFinite(f.origin.y)||!float.IsFinite(f.origin.z)||!float.IsFinite(f.rotation.s.x)||!float.IsFinite(f.rotation.s.y)||!float.IsFinite(f.rotation.s.z)||!float.IsFinite(f.rotation.f.x)||!float.IsFinite(f.rotation.f.y)||!float.IsFinite(f.rotation.f.z)||!float.IsFinite(f.rotation.u.x)||!float.IsFinite(f.rotation.u.y)||!float.IsFinite(f.rotation.u.z))throw new Exception("nonfinite native frame");NativeProbe.Call("UpdateInstance");Frame=f;} public void AddMesh(Mesh m,bool recomputeBoundingBox){Added=m;}
         public void SetVisibilityExcludeParents(bool v){Visible=v;} public void SetReadyToRender(bool v){}
     }
     public static class Ids {static ulong id;public static UIntPtr Next()=>new UIntPtr(++id);}
@@ -197,9 +215,9 @@ namespace TaleWorlds.Engine
     public class View { public enum ViewRenderOptions { ClearColor,ClearDepth } }
     public class TableauView
     {
-        public static Texture Last; public bool Skip,Enabled,Continuous,Throw; public Camera Camera;
+        public static Texture Last; public bool Skip,Enabled,Continuous,Throw; public Camera Camera; public Scene Scene;
         public static Texture AddTableau(string name,Action<Texture,EventArgs> paint,object data,int w,int h)=>Last=new Texture{UserData=data,NativeView=new TableauView(),Callback=paint};
-        public void SetScene(Scene s){if(Throw)throw new Exception("fake callback failure");} public void SetCamera(Camera v){Camera=v;}
+        public Action BeforeSetScene; public void SetScene(Scene s){BeforeSetScene?.Invoke();Scene=s;if(Throw)throw new Exception("fake callback failure");} public void SetCamera(Camera v){Camera=v;}
         public void SetClearColor(uint v){} public void SetRenderOption(View.ViewRenderOptions o,bool v){}
         public void SetCleanScreenUntilLoadingDone(bool v){} public void SetClearAndDisableAfterSucessfullRender(bool v){}
         public void SetRenderWithPostfx(bool v){} public void SetSceneUsesSkybox(bool v){} public void SetSceneUsesShadows(bool v){} public void SetSceneUsesContour(bool v){}

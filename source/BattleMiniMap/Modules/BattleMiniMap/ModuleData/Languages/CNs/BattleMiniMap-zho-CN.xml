@@ -49,11 +49,11 @@
     <string id="BattleMiniMap_toggle_map_usage" text="按下{KeyName}切换地图。" />
     <string id="BattleMiniMapHotKey_toggle_map_holding_usage" text="长按{KeyName}切换地图。" />
     <string id="BattleMiniMap_geometry" text="桥体几何叠加" />
-    <string id="BattleMiniMap_geometry_hint" text="在已验证的对应城镇场景显示桥体；其他场景使用现有地图。" />
+  <string id="BattleMiniMap_geometry_hint" text="启用几何覆盖层；默认使用运行时全场景主图。原有地形底图和标记保留。" />
     <string id="BattleMiniMap_geometry_gpu" text="GPU几何地图" />
-    <string id="BattleMiniMap_geometry_gpu_hint" text="关闭后使用CPU绘制；GPU显示异常时可关闭此项。" />
+  <string id="BattleMiniMap_geometry_gpu_hint" text="关闭保留GDI地形底图与标记。仅关闭运行时主图后才使用旧桥CPU缓存诊断。" />
     <string id="BattleMiniMap_geometry_tint" text="GPU验证着色" />
-    <string id="BattleMiniMap_geometry_tint_hint" text="GPU使用青色/紫色，CPU保留原色；关闭恢复正常配色。" />
+  <string id="BattleMiniMap_geometry_tint_hint" text="运行时主图：地形青色、对象洋红色验证；关闭为两类中性色。不推断材质、可走性或楼层。旧桥GPU保留原验证配色。" />
     <string id="BattleMiniMap_geometry_profile" text="记录地图渲染性能" />
     <string id="BattleMiniMap_geometry_profile_hint" text="记录CPU更新及任务画面更新间隔，不是GPU执行时间；暂停或切换会重置窗口。" />
     <string id="BattleMiniMap_geometry_proxy" text="使用简化地图几何" />
@@ -76,7 +76,7 @@
   <string id="BattleMiniMap_live_preview" text="动态提取当前场景" />
   <string id="BattleMiniMap_live_preview_hint" text="分帧读取当前已加载场景，不读取离线几何。关闭后仅检查旧桥缓存。旧桥代理与高度裁切不作用于动态来源。" />
   <string id="BattleMiniMap_collision_preview" text="使用碰撞网格（关闭：渲染网格）" />
-  <string id="BattleMiniMap_collision_preview_hint" text="仅作用于动态来源。在已验证的引擎版本读取准备后的碰撞副本。球和胶囊使用显示近似，不支持的形状记为部分覆盖。" />
+  <string id="BattleMiniMap_collision_preview_hint" text="来源设置同时影响运行时主图与大预览，各自独立重建。碰撞读取经验证引擎的形状副本；球与胶囊为显示近似，未知形状报告覆盖缺口。" />
   <string id="BattleMiniMap_live_preview_status" text="{SOURCE} / {TERRAINSOURCE}：{TERRAINSTATE}（{TERRAIN}%）| {OBJECTSTATE} | 网格 {MESHES}&#xA;{COVERAGE} | 拒绝项 {REJECTED}；跳过项 {SKIPPED}；未支持形状 {UNSUPPORTED}；地形失败项 {TERRAINFAILURES}" />
   <string id="BattleMiniMap_live_preview_summary" text="{SOURCE} / {TERRAINSOURCE}：{TERRAINSTATE}（{TERRAIN}%）| {OBJECTSTATE} | 网格 {MESHES}" />
   <string id="BattleMiniMap_live_preview_details" text="{COVERAGE} | 拒绝项 {REJECTED}；跳过项 {SKIPPED}；未支持形状 {UNSUPPORTED}；地形失败项 {TERRAINFAILURES}" />
@@ -101,11 +101,13 @@
   <string id="BattleMiniMap_live_preview_cache_diagnostic" text="旧桥缓存：仅手动诊断，不代表运行时场景覆盖。" />
   <string id="BattleMiniMap_live_preview_collision" text="碰撞网格" />
   <string id="BattleMiniMap_live_preview_render" text="渲染网格" />
-  <string id="BattleMiniMap_raw_terrain" text="直接读取原始地形（关闭：逐点高度）" />
-  <string id="BattleMiniMap_raw_terrain_hint" text="读取已加载的PhysX原始高度场，保留洞和对角线。需要已验证的引擎/物理库版本，不自动转采样或磁盘数据。" />
+  <string id="BattleMiniMap_raw_terrain" text="读取原始运行时地形" />
+  <string id="BattleMiniMap_raw_terrain_hint" text="主图与预览共用。复制已加载PhysX高度场，保留洞与对角线，需经验证引擎。关闭时主图只叠加对象并保留GDI地形；仅大预览沿用高度查询。无自动磁盘或采样回退。" />
   <string id="BattleMiniMap_raw_terrain_source" text="原始地形" />
   <string id="BattleMiniMap_sampled_terrain_source" text="采样地形" />
   <string id="BattleMiniMap_simplify_terrain" text="简化运行时地形（关闭：完整拓扑）" />
-  <string id="BattleMiniMap_simplify_terrain_hint" text="仅原始运行时高度场。保留边界与洞，最大垂直误差0.10米；不满足条件的局部保留原始三角形。" />
-</strings>
+  <string id="BattleMiniMap_simplify_terrain_hint" text="主图与预览共用，仅影响原始运行时地形。保留边界与洞，误差不超过0.10米时接受简化，否则保留原三角形。" />
+  <string id="BattleMiniMap_runtime_main" text="运行时全场景主图" />
+    <string id="BattleMiniMap_runtime_main_hint" text="默认从当前任务场景分帧提取，独立于大预览。关闭才使用旧桥缓存诊断。加载、失败或手动CPU时保留原GDI地形底图与标记，不读取旧桥缓存替代全场景。" />
+  </strings>
 </base>

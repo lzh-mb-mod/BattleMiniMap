@@ -16,6 +16,8 @@ namespace BattleMiniMap.View.MapGeometry
     {
         internal static MapGeometryRenderer Active { get; private set; }
         private readonly string _sceneName;
+        private readonly MapRuntimeMainMap _runtime;
+        private bool _runtimeRoute, _disposed;
         private MapGeometryData _data;
         private bool _attempted, _failed, _lastProxy, _gpuFailed;
         private float? _lastCeiling;
@@ -56,13 +58,14 @@ namespace BattleMiniMap.View.MapGeometry
             return _data;
         }
         public UiTexture Texture { get; private set; }
-        public MapGeometryRenderer(string sceneName) { _sceneName = sceneName; Active = this; }
+        public MapGeometryRenderer(string sceneName, Scene runtimeSource = null)
+        { _sceneName = sceneName; _runtime = new MapRuntimeMainMap(runtimeSource); Active = this; }
 
         public void Update(IMiniMap map, bool visible, float dt = 0, long tickEntryTimestamp = 0)
         {
             var config = BattleMiniMapConfig.Get();
             var started = config.ProfileMapGeometry ? System.Diagnostics.Stopwatch.GetTimestamp() : 0;
-            try { UpdateCore(map, visible); }
+            try { if (!_disposed) UpdateCore(map, visible, dt); }
             finally
             {
                 try { RecordPerformance(config, visible, dt, started, tickEntryTimestamp); }
@@ -76,7 +79,7 @@ namespace BattleMiniMap.View.MapGeometry
         }
         private void RecordPerformance(BattleMiniMapConfig config, bool visible, float dt, long started, long tickEntryTimestamp)
         {
-            if (config.ShowGeometryPreview || tickEntryTimestamp <= 0 || _performanceFailed || !config.ProfileMapGeometry || !visible || _failed || _data == null || !config.EnableMapGeometry ||
+            if (config.UseRuntimeMainMap || config.ShowGeometryPreview || tickEntryTimestamp <= 0 || _performanceFailed || !config.ProfileMapGeometry || !visible || _failed || _data == null || !config.EnableMapGeometry ||
                 _selectedBackend == null || (_selectedBackend == "CPU" && config.UseGpuMapGeometry && !_gpuFailed))
                 _performance.Reset();
             else
@@ -103,10 +106,19 @@ namespace BattleMiniMap.View.MapGeometry
                     " paints=" + (_gpu?.PaintCount ?? 0) + " callbacks=" + (_gpu?.CallbackCount ?? 0));
             }
         }
-        private void UpdateCore(IMiniMap map, bool visible)
+        private void UpdateCore(IMiniMap map, bool visible, float dt)
         {
             ++_frame; DrainRetired(false);
             var config = BattleMiniMapConfig.Get();
+            if (config.UseRuntimeMainMap)
+            {
+                if (!_runtimeRoute) { ReleaseNative(); _runtimeRoute = true; }
+                _runtime.Update(map, visible, dt);
+                Texture = _runtime.Texture;
+                return;
+            }
+            if (_runtimeRoute) { _runtime.Deactivate(); Texture = null; _runtimeRoute = false; }
+            _runtime.AdvanceRetired();
             // Apply manual CPU selection even while the map is hidden.
             if (!config.UseGpuMapGeometry)
             {
@@ -329,7 +341,9 @@ namespace BattleMiniMap.View.MapGeometry
         }
         public void Dispose()
         {
+            if (_disposed) return; _disposed = true;
             if (Active == this) Active = null;
+            _runtime.Dispose();
             try { ReleaseNative(false); }
             finally { DrainRetired(true); _data = null; }
         }
