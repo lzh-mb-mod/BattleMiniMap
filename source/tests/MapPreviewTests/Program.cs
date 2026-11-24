@@ -216,7 +216,8 @@ namespace TaleWorlds.Engine
     public class TableauView
     {
         public static Texture Last; public bool Skip,Enabled,Continuous,Throw; public Camera Camera; public Scene Scene;
-        public static Texture AddTableau(string name,Action<Texture,EventArgs> paint,object data,int w,int h)=>Last=new Texture{UserData=data,NativeView=new TableauView(),Callback=paint};
+        public int Width,Height;
+        public static Texture AddTableau(string name,Action<Texture,EventArgs> paint,object data,int w,int h)=>Last=new Texture{UserData=data,NativeView=new TableauView{Width=w,Height=h},Callback=paint};
         public Action BeforeSetScene; public void SetScene(Scene s){BeforeSetScene?.Invoke();Scene=s;if(Throw)throw new Exception("fake callback failure");} public void SetCamera(Camera v){Camera=v;}
         public void SetClearColor(uint v){} public void SetRenderOption(View.ViewRenderOptions o,bool v){}
         public void SetCleanScreenUntilLoadingDone(bool v){} public void SetClearAndDisableAfterSucessfullRender(bool v){}

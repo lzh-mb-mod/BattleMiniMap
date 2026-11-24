@@ -47,10 +47,16 @@ class MainChecks
     }
     static void Main()
     {
+        TextureSizeChecks();
         Defaults(); var c = BattleMiniMapConfig.Get(); var map = new Map(); var source = Source();
         var renderer = new MapGeometryRenderer("arbitrary_scene_without_cache", source);
         Tick(renderer, map);
         var target = TableauView.Last; var camera = target.NativeView.Camera; var mainScene = target.NativeView.Scene;
+        Check(target.NativeView.Width==2048 && target.NativeView.Height==1365 &&
+            Math.Abs(camera.Right-2)<1e-6 && Math.Abs(camera.Bottom+200f/150)<1e-6 && map.BitmapWidth==120 && map.BitmapHeight==80,
+            "Production owner allocates 2048x1365 RT while retaining original bitmap world projection and dimensions");
+        Check(Debug.Messages.Any(s=>s.Contains("runtime main build") && s.Contains("texture=2048x1365")),
+            "Main build log identifies actual GPU texture dimensions");
         Check(renderer.Texture != null && renderer.CachedData == null && NoCacheRead(renderer) && source.Reads > 0 && source.HeightReads == 0,
             "Actual renderer routes arbitrary scene without cache/preview to real owner, collector and Tableau without sampling");
         var rules = new MapLiveGeometryRules(map.MapBoundMin.x, map.MapBoundMin.y, map.MapBoundMax.x, map.MapBoundMax.y);
@@ -232,6 +238,19 @@ class MainChecks
         Defaults(); BattleMiniMapConfig.Get().UseCollisionScenePreview = true; MapLiveCollisionGuard.Reject = true;
         r = new MapGeometryRenderer("collector-failure", Source()); Tick(r, new Map()); builds = Scene.Created; Tick(r, new Map());
         Check(r.Texture == null && Scene.Created == builds && r.CachedData == null && NoCacheRead(r), "Collector guard failure latches GDI-only fallback without changing native read gates"); r.Dispose(); MapLiveCollisionGuard.Reject = false;
+    }
+    static void TextureSizeChecks()
+    {
+        MapRuntimeMainMap.GetTextureSize(17,17,out var width,out var height);
+        Check(width==2048 && height==2048,"Square GPU RT upscales independently of small CPU bitmap");
+        MapRuntimeMainMap.GetTextureSize(120,80,out width,out height);
+        Check(width==2048 && height==1365,"Landscape RT preserves aspect with rounded short edge");
+        MapRuntimeMainMap.GetTextureSize(80,120,out width,out height);
+        Check(width==1365 && height==2048,"Portrait RT preserves aspect with rounded short edge");
+        MapRuntimeMainMap.GetTextureSize(3,1,out width,out height);
+        Check(width==2048 && height==683,"Short edge rounds up rather than truncating");
+        MapRuntimeMainMap.GetTextureSize(int.MaxValue,1,out width,out height);
+        Check(width==2048 && height==1,"Extreme short edge clamps to one without integer overflow");
     }
     static void IdleResumeChecks()
     {

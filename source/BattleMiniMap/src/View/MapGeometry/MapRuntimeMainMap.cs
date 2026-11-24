@@ -28,6 +28,16 @@ namespace BattleMiniMap.View.MapGeometry
         private float _minX, _minY, _maxX, _maxY, _resolution, _lowest, _highest;
         private int _width, _height;
         private float? _ceiling;
+        // Design default, not calibrated. GPU pixel density is independent of the
+        // CPU bitmap sampling domain used by the projection and marker UVs.
+        private const int TextureLongestEdge = 2048;
+        internal static void GetTextureSize(int width, int height, out int textureWidth, out int textureHeight)
+        {
+            if (width <= 0 || height <= 0) throw new ArgumentOutOfRangeException(nameof(width));
+            var scale = TextureLongestEdge / (double)Math.Max(width, height);
+            textureWidth = Math.Max(1, Math.Min(TextureLongestEdge, (int)Math.Round(width * scale, MidpointRounding.AwayFromZero)));
+            textureHeight = Math.Max(1, Math.Min(TextureLongestEdge, (int)Math.Round(height * scale, MidpointRounding.AwayFromZero)));
+        }
         public UiTexture Texture { get; private set; }
         public MapRuntimeMainMap(Scene source) { _source = source; }
         private string Source => _collision ? "runtime-collision" : "runtime-render";
@@ -132,10 +142,12 @@ namespace BattleMiniMap.View.MapGeometry
                 objectColor: _tint ? 0xffff46e6u : 0xffded4beu,
                 renderColor: _tint ? 0xffff46e6u : 0xffded4beu);
             _tableau = new MapGeometryTableau(_scene, _camera);
-            _tableau.Initialize(Math.Max(1, Math.Min(2048, _width)), Math.Max(1, Math.Min(2048, _height)));
+            GetTextureSize(_width, _height, out var textureWidth, out var textureHeight);
+            _tableau.Initialize(textureWidth, textureHeight);
             _backend.Reset();
             _publication = 0;
             Report("build staticFiles=False terrain=" + (_raw ? "raw-physx" : "GDI-base-only") +
+                " texture=" + textureWidth + "x" + textureHeight +
                 " heights=" + _lowest + ":" + _highest + " ceiling=" + CeilingText +
                 " tint=" + _tint + " palette=terrain/object proxy=cache-only base=GDI-terrain+markers");
         }
