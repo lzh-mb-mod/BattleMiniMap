@@ -68,10 +68,20 @@
     <string id="BattleMiniMap_gpu_triangle" text="合成三角形" />
     <string id="BattleMiniMap_gpu_bridge" text="缓存桥几何" />
     <string id="BattleMiniMap_gpu_depth" text="GPU诊断深度测试/写入" />
-  <string id="BattleMiniMap_geometry_preview" text="桥体三维预览" />
-  <string id="BattleMiniMap_geometry_preview_hint" text="仅预览已有桥体。左拖旋转，右拖平移，滚轮缩放，双击复位。退出场景后关闭。" />
-  <string id="BattleMiniMap_geometry_preview_controls" text="桥体 | 左拖旋转  右拖平移  滚轮缩放  双击复位" />
-  <string id="BattleMiniMap_geometry_preview_missing" text="当前场景无可用桥体预览。" />
+  <string id="BattleMiniMap_geometry_preview" text="三维地图预览" />
+  <string id="BattleMiniMap_geometry_preview_hint" text="运行时场景预览。左拖旋转，右拖平移，滚轮缩放，双击复位。退出场景后关闭。" />
+  <string id="BattleMiniMap_geometry_preview_controls" text="地图 | 左拖旋转  右拖平移  滚轮缩放  双击复位" />
+  <string id="BattleMiniMap_geometry_preview_missing" text="地图预览不可用，请检查来源选项和提取日志。" />
   <string id="BattleMiniMap_geometry_preview_close" text="关闭" />
+  <string id="BattleMiniMap_live_preview" text="动态提取当前场景" />
+  <string id="BattleMiniMap_live_preview_hint" text="分帧读取当前已加载场景，不读取离线几何。关闭后仅检查旧桥缓存。旧桥代理与高度裁切不作用于动态来源。" />
+  <string id="BattleMiniMap_collision_preview" text="使用碰撞网格（关闭：渲染网格）" />
+  <string id="BattleMiniMap_collision_preview_hint" text="仅作用于动态来源。在已验证的引擎版本读取准备后的碰撞副本。球和胶囊使用显示近似，不支持的形状记为部分覆盖。" />
+  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} | {STATE} | 网格：{MESHES}  地形读取：{TERRAIN}%" />
+  <string id="BattleMiniMap_live_preview_loading" text="正在提取" />
+  <string id="BattleMiniMap_live_preview_partial" text="本轮扫描结束，覆盖尚不完整" />
+  <string id="BattleMiniMap_live_preview_scanned" text="本轮扫描结束，覆盖待验证" />
+  <string id="BattleMiniMap_live_preview_collision" text="碰撞网格" />
+  <string id="BattleMiniMap_live_preview_render" text="渲染网格" />
 </strings>
 </base>

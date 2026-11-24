@@ -26,6 +26,7 @@
               </Children>
             </ButtonWidget>
             <TextWidget IsVisible="@GeometryPreviewUnavailable" WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="60" VerticalAlignment="Center" Brush="DefaultBrush" Brush.FontSize="24" Text="@GeometryPreviewMissing" DoNotAcceptEvents="true" />
+            <TextWidget WidthSizePolicy="StretchToParent" HeightSizePolicy="Fixed" SuggestedHeight="28" VerticalAlignment="Bottom" MarginLeft="8" MarginBottom="6" Brush="DefaultBrush" Brush.FontSize="18" Text="@GeometryPreviewStatus" DoNotAcceptEvents="true" />
           </Children>
         </BattleMiniMap_GeometryPreviewWidget>
       </Children>

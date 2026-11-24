@@ -41,7 +41,9 @@ namespace BattleMiniMap.View.Background.Map
             _mapGeometry = new BattleMiniMap.View.MapGeometry.MapGeometryRenderer(Mission.SceneName);
             _gpuDiagnostic = new BattleMiniMap.View.MapGeometry.MapGpuDiagnosticRenderer();
             BattleMiniMapConfig.Get().ShowGeometryPreview = false;
-            _geometryPreview = new BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer();
+            var mapBounds=MiniMap.Instance;
+            _geometryPreview = new BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer(Mission.Scene,
+                mapBounds.MapBoundMin.x,mapBounds.MapBoundMin.y,mapBounds.MapBoundMax.x,mapBounds.MapBoundMax.y);
             var movieName = nameof(BattleMiniMapView);
             _layer = new GauntletLayer(movieName, 12);
             _layer.LoadMovie(movieName, _dataSource);
@@ -90,7 +92,7 @@ namespace BattleMiniMap.View.Background.Map
 
             _mapGeometry?.Update(MiniMap.Instance, _dataSource.IsEnabled, dt, mapTickEntry);
             _gpuDiagnostic?.Update(_mapGeometry?.CachedData);
-            _geometryPreview?.Update(_mapGeometry);
+            _geometryPreview?.Update(_mapGeometry,dt);
             _dataSource.UpdateGeometryPreview();
             var previewOpen=BattleMiniMapConfig.Get().ShowGeometryPreview;
             if (_previewMouseVisible!=previewOpen)

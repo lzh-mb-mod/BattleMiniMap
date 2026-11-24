@@ -68,10 +68,20 @@
     <string id="BattleMiniMap_gpu_triangle" text="Synthetic triangle" />
     <string id="BattleMiniMap_gpu_bridge" text="Cached bridge geometry" />
     <string id="BattleMiniMap_gpu_depth" text="GPU diagnostic depth test/write" />
-  <string id="BattleMiniMap_geometry_preview" text="Bridge 3D preview" />
-  <string id="BattleMiniMap_geometry_preview_hint" text="Preview cached bridge only. Left drag: orbit; right drag: pan; wheel: zoom; double click: reset. Closes on mission exit." />
-  <string id="BattleMiniMap_geometry_preview_controls" text="Bridge | Left: orbit  Right: pan  Wheel: zoom  Double click: reset" />
-  <string id="BattleMiniMap_geometry_preview_missing" text="Bridge preview unavailable in this scene." />
+  <string id="BattleMiniMap_geometry_preview" text="3D map preview" />
+  <string id="BattleMiniMap_geometry_preview_hint" text="Runtime scene preview. Left drag: orbit; right drag: pan; wheel: zoom; double click: reset. Closes on mission exit." />
+  <string id="BattleMiniMap_geometry_preview_controls" text="Map | Left: orbit  Right: pan  Wheel: zoom  Double click: reset" />
+  <string id="BattleMiniMap_geometry_preview_missing" text="Map preview unavailable. Check source selection and extraction log." />
   <string id="BattleMiniMap_geometry_preview_close" text="Close" />
+  <string id="BattleMiniMap_live_preview" text="Extract the current scene at runtime" />
+  <string id="BattleMiniMap_live_preview_hint" text="Read the loaded scene in small steps without offline geometry files. Disable only to inspect the old bridge cache. Bridge proxy and height clipping options do not apply to runtime sources." />
+  <string id="BattleMiniMap_collision_preview" text="Use collision geometry (off: render geometry)" />
+  <string id="BattleMiniMap_collision_preview_hint" text="Runtime source only. Collision reads prepared shape copies on the verified engine build. Spheres and capsules use display approximations; unsupported shapes are reported as partial coverage." />
+  <string id="BattleMiniMap_live_preview_status" text="{SOURCE} | {STATE} | Map meshes: {MESHES}  Terrain samples: {TERRAIN}%" />
+  <string id="BattleMiniMap_live_preview_loading" text="Extracting" />
+  <string id="BattleMiniMap_live_preview_partial" text="Scan finished; coverage incomplete" />
+  <string id="BattleMiniMap_live_preview_scanned" text="Scan finished; coverage requires validation" />
+  <string id="BattleMiniMap_live_preview_collision" text="Collision mesh" />
+  <string id="BattleMiniMap_live_preview_render" text="Render mesh" />
 </strings>
 </base>

@@ -69,6 +69,9 @@ namespace BattleMiniMap.View.Background.Map
         public string GeometryPreviewMissing => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_geometry_preview_missing").ToString();
         [DataSourceProperty]
         public string GeometryPreviewClose => TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_geometry_preview_close").ToString();
+        private string _geometryPreviewStatus="";
+        [DataSourceProperty]
+        public string GeometryPreviewStatus => _geometryPreviewStatus;
         public void CloseGeometryPreview() { BattleMiniMapConfig.Get().ShowGeometryPreview = false; UpdateGeometryPreview(); }
         public void UpdateGeometryPreview()
         {
@@ -76,6 +79,13 @@ namespace BattleMiniMap.View.Background.Map
             var unavailable=visible && !(BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active?.Available ?? false);
             if (_geometryPreviewVisible!=visible) { _geometryPreviewVisible=visible; OnPropertyChanged(nameof(GeometryPreviewVisible)); }
             if (_geometryPreviewUnavailable!=unavailable) { _geometryPreviewUnavailable=unavailable; OnPropertyChanged(nameof(GeometryPreviewUnavailable)); }
+            var live=BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer.Active?.Live;
+            var status=visible && live!=null ? TaleWorlds.Core.GameTexts.FindText("str_battle_mini_map_live_preview_status")
+                .SetTextVariable("SOURCE",TaleWorlds.Core.GameTexts.FindText(live.IsCollision ? "str_battle_mini_map_live_preview_collision" : "str_battle_mini_map_live_preview_render"))
+                .SetTextVariable("MESHES",live.CopiedMeshes).SetTextVariable("TERRAIN",live.TerrainPercent)
+                .SetTextVariable("STATE",TaleWorlds.Core.GameTexts.FindText(live.InitialFinished ?
+                    (live.Partial ? "str_battle_mini_map_live_preview_partial" : "str_battle_mini_map_live_preview_scanned") : "str_battle_mini_map_live_preview_loading")).ToString() : "";
+            if (_geometryPreviewStatus!=status) { _geometryPreviewStatus=status; OnPropertyChanged(nameof(GeometryPreviewStatus)); }
         }
         public CameraMarkerViewModel CameraMarkerRight { get; }
 

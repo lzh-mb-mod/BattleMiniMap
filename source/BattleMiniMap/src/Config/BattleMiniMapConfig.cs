@@ -56,6 +56,10 @@ namespace BattleMiniMap.Config
         public int MapGpuDiagnosticMode { get; set; } = 0;
         [System.Xml.Serialization.XmlIgnore]
         public bool ShowGeometryPreview { get; set; } = false;
+        [System.Xml.Serialization.XmlIgnore]
+        public bool UseLiveScenePreview { get; set; } = true;
+        [System.Xml.Serialization.XmlIgnore]
+        public bool UseCollisionScenePreview { get; set; } = true;
         public bool MapGpuDiagnosticDepth { get; set; } = false;
 
         public bool TintGpuMapGeometry { get; set; } = false;
@@ -122,6 +126,8 @@ namespace BattleMiniMap.Config
             HeroMarkerScale = other.HeroMarkerScale;
             MapGpuDiagnosticMode = other.MapGpuDiagnosticMode;
             ShowGeometryPreview = other.ShowGeometryPreview;
+            UseLiveScenePreview = other.UseLiveScenePreview;
+            UseCollisionScenePreview = other.UseCollisionScenePreview;
             MapGpuDiagnosticDepth = other.MapGpuDiagnosticDepth;
             UseGpuMapGeometry = other.UseGpuMapGeometry;
             TintGpuMapGeometry = other.TintGpuMapGeometry;

@@ -47,6 +47,8 @@ You can get it at [github.com](https://github.com/lzh-mb-mod/BattleMiniMap).
 
   - lizhenhuan1019@qq.com
 
-## Experimental bridge 3D preview
+## Experimental runtime 3D map
 
-With a matching verified bridge cache installed, enable **Bridge 3D preview** in the minimap menu (`L`). Left drag orbits, right drag pans, the wheel zooms, and double click resets. Use **Close** to dismiss it. The preview closes on mission exit and does not load new scene geometry. It shows the cached bridge, not the whole town; proxy/original and height ceiling options also apply. Its interactive rendering is separate from the small map's cached GPU texture and CPU fallback. Native preview validation is pending.
+Enable **3D map preview** in the minimap menu (`L`). It incrementally extracts collision shapes and terrain heights from the loaded scene, recording time and coverage. Disable **Use collision geometry** to compare runtime render meshes. Left drag orbits, right drag pans, wheel zooms, double click resets. Closing the preview or leaving the mission cancels extraction.
+
+Runtime mode does not read prebuilt scene/model caches. The collision reader currently requires the verified local engine build. Spheres/capsules are display approximations; terrain is a bounded-resolution height field. Unknown shapes, anonymous merged physics, skeletal/cloth meshes and in-place geometry edits have coverage limits. This iteration still needs native game validation. Bridge proxy and clipping options apply only to the old cache diagnostic, selected by disabling runtime extraction. The main map retains its CPU fallback.

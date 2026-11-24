@@ -29,11 +29,18 @@ namespace BattleMiniMap.View.MapGeometry
         private int _tick; private bool _proxy, _failed, _open;
         private float? _ceiling;
         private float _aspect = 960f/608;
+        private readonly Scene _runtimeSource;
+        private readonly float _minX,_minY,_maxX,_maxY;
+        private MapLiveSceneGeometry _live;
+        private bool _liveMode;
+        private bool _collisionMode;
         public UiTexture Texture { get; private set; }
         public bool Available => Texture != null && !_failed;
-        public MapGeometryPreviewRenderer() { Active = this; }
+        public MapGeometryPreviewRenderer(Scene runtimeSource=null,float minX=0,float minY=0,float maxX=1,float maxY=1)
+        { _runtimeSource=runtimeSource; _minX=minX; _minY=minY; _maxX=maxX; _maxY=maxY; Active = this; }
+        public MapLiveSceneGeometry Live => _live;
         public void SetAspect(float aspect) { if (aspect > .1f && aspect < 10) _aspect = aspect; }
-        public void Update(MapGeometryRenderer source)
+        public void Update(MapGeometryRenderer source,float dt=0)
         {
             ++_tick;
             for (var i=_retired.Count-1;i>=0;--i) if (_retired[i].Item1<=_tick)
@@ -48,13 +55,17 @@ namespace BattleMiniMap.View.MapGeometry
             if (_failed) return;
             try
             {
-                var data=source?.EnsureVerifiedCache();
-                if (data==null) return;
+                var live=config.UseLiveScenePreview;
+                var data=live ? null : source?.EnsureVerifiedCache();
+                if (live && _runtimeSource==null) return;
+                if (!live && data==null) return;
                 var ceiling=MapGeometryHeight.Ceiling(config.CutMapGeometryByHeight,config.MapGeometryCeiling);
-                if (_view==null || _proxy!=config.UseMapGeometryProxy || _ceiling!=ceiling)
+                if (_view==null || live!=_liveMode || (live && _collisionMode!=config.UseCollisionScenePreview) || (!live && (_proxy!=config.UseMapGeometryProxy || _ceiling!=ceiling)))
                 {
-                    Clear(true); _proxy=config.UseMapGeometryProxy; _ceiling=ceiling; Build(data);
+                    Clear(true); _liveMode=live; _collisionMode=config.UseCollisionScenePreview; _proxy=config.UseMapGeometryProxy; _ceiling=ceiling; Build(data);
                 }
+                _live?.Update(dt);
+                if (_live?.Failure!=null) throw new InvalidOperationException(_live.Failure);
                 if (_binding.Failure!=null) throw new InvalidOperationException(_binding.Failure);
                 var eye=Orbit.Eye; var at=Orbit.Target;
                 _camera.LookAt(ToVec(eye),ToVec(at),Vec3.Up);
@@ -82,6 +93,17 @@ namespace BattleMiniMap.View.MapGeometry
             _material.Flags=MaterialFlags.TwoSided|MaterialFlags.DontCastShadow|MaterialFlags.RequiresForwardRendering;
             _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend); _material.SetAlphaTestValue(0);
             _scene.SetShadow(false);
+            if (_liveMode)
+            {
+                _runtimeSource.GetTerrainData(out var dimensions,out var nodeSize,out var layers,out var version);
+                var hasTerrain=dimensions.X>0 && dimensions.Y>0 && nodeSize>0 && MapLiveGeometryRules.Finite(nodeSize);
+                var rules=hasTerrain ? new MapLiveGeometryRules(0,0,dimensions.X*nodeSize,dimensions.Y*nodeSize)
+                    : new MapLiveGeometryRules(_minX,_minY,_maxX,_maxY);
+                _live=new MapLiveSceneGeometry(_runtimeSource,_scene,_material,rules,hasTerrain,_collisionMode);
+                BuildTarget();
+                Report("build: target="+_binding.Name+" source="+(_collisionMode?"runtime-collision":"runtime-render")+" staticFiles=False policy=interactive");
+                return;
+            }
             var normalization=new MapGpuDiagnosticGeometry(data); var builder=new MeshBuilder(); var count=0;
             foreach (var layer in data.Layers)
                 foreach (var triangle in MapGeometryData.Triangles(data.Select(layer,_proxy),_ceiling))
@@ -107,6 +129,11 @@ namespace BattleMiniMap.View.MapGeometry
                 _entities.Add(entity); entity.AddMesh(mesh,recomputeBoundingBox:true);
                 entity.SetVisibilityExcludeParents(true); entity.SetReadyToRender(true);
             }
+            BuildTarget();
+            Report("build: target="+_binding.Name+" triangles="+count+" proxy="+_proxy+" ceiling="+(_ceiling?.ToString(System.Globalization.CultureInfo.InvariantCulture)??"none")+" policy=interactive");
+        }
+        private void BuildTarget()
+        {
             _binding=new Binding { Scene=_scene,Camera=_camera,Name="BattleMiniMap.GeometryPreview."+Interlocked.Increment(ref _nextId) };
             _target=TableauView.AddTableau(_binding.Name,Paint,_binding,960,608);
             if (_target==null || !_target.IsValid) throw new InvalidOperationException("No preview target");
@@ -114,7 +141,6 @@ namespace BattleMiniMap.View.MapGeometry
             if (_view==null) throw new InvalidOperationException("No preview view");
             Configure(_view,_binding); _view.SetDoNotRenderThisFrame(false);
             Texture=new UiTexture(new EngineTexture(_target));
-            Report("build: target="+_binding.Name+" triangles="+count+" proxy="+_proxy+" ceiling="+(_ceiling?.ToString(System.Globalization.CultureInfo.InvariantCulture)??"none")+" policy=interactive");
         }
         private static void Configure(TableauView view,Binding binding)
         {
@@ -150,7 +176,8 @@ namespace BattleMiniMap.View.MapGeometry
             }
             Texture=null;
             var view=_view; var scene=_scene; var camera=_camera; var material=_material;
-            var white=_white; var target=_target; var meshes=_meshes.ToArray(); var entities=_entities.ToArray();
+            var white=_white; var target=_target; var meshes=_meshes.ToArray(); var entities=_entities.ToArray(); var live=_live;
+            _live=null;
             _view=null; _scene=null; _camera=null; _material=null; _white=null; _target=null; _meshes.Clear(); _entities.Clear();
             Action<Exception> report=ex=>Report("cleanup: "+ex.Message);
             if (view!=null) MapGeometryCleanup.Run(report,()=>view.SetDoNotRenderThisFrame(true),()=>view.SetContinuousRendering(false),
@@ -158,6 +185,7 @@ namespace BattleMiniMap.View.MapGeometry
             Action release=()=>
             {
                 MapGeometryCleanup.Run(report,()=>scene?.ClearAll(),()=>scene?.ManualInvalidate());
+                MapGeometryCleanup.Run(report,()=>live?.Dispose());
                 foreach(var mesh in meshes) MapGeometryCleanup.Run(report,()=>mesh.ManualInvalidate());
                 MapGeometryCleanup.Run(report,()=>material?.ManualInvalidate(),()=>white?.Release(),()=>target?.Release(),()=>camera?.ReleaseCamera());
                 GC.KeepAlive(entities); GC.KeepAlive(view);

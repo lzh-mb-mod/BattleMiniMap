@@ -38,6 +38,10 @@ namespace BattleMiniMap.Config
                     null, () => BattleMiniMapConfig.Get().MapGpuDiagnosticDepth, b => BattleMiniMapConfig.Get().MapGpuDiagnosticDepth = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_preview"),
                     GameTexts.FindText("str_battle_mini_map_geometry_preview_hint"), () => BattleMiniMapConfig.Get().ShowGeometryPreview, b => BattleMiniMapConfig.Get().ShowGeometryPreview = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_live_preview"),
+                    GameTexts.FindText("str_battle_mini_map_live_preview_hint"), () => BattleMiniMapConfig.Get().UseLiveScenePreview, b => BattleMiniMapConfig.Get().UseLiveScenePreview = b));
+                optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_collision_preview"),
+                    GameTexts.FindText("str_battle_mini_map_collision_preview_hint"), () => BattleMiniMapConfig.Get().UseCollisionScenePreview, b => BattleMiniMapConfig.Get().UseCollisionScenePreview = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry"),
                     GameTexts.FindText("str_battle_mini_map_geometry_hint"), () => BattleMiniMapConfig.Get().EnableMapGeometry, b => BattleMiniMapConfig.Get().EnableMapGeometry = b));
                 optionCategory.AddOption(new BoolOptionViewModel(GameTexts.FindText("str_battle_mini_map_geometry_gpu"),
