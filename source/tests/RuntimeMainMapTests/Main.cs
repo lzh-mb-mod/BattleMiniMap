@@ -138,6 +138,7 @@ class MainChecks
         preview.Dispose();
         FailureChecks(); ProjectionChecks(); PaletteChecks(); StaticTableau();
         IdleResumeChecks(); CallbackOrderingChecks(); RetirementChecks(); NormalizationChecks();
+        DepthDiagnosticChecks();
         Check(Debug.Messages.Any(s => s.Contains("runtime main ready") && s.Contains("target=BattleMiniMap.MainGeometry.") && s.Contains("source=runtime-")) &&
             Debug.Messages.Any(s => s.Contains("runtime main status")) && Debug.Messages.Any(s => s.Contains("runtime main fallback")),
             "Main build/ready/status/fallback evidence carries its own target and source identity");
@@ -251,6 +252,77 @@ class MainChecks
         Check(width==2048 && height==683,"Short edge rounds up rather than truncating");
         MapRuntimeMainMap.GetTextureSize(int.MaxValue,1,out width,out height);
         Check(width==2048 && height==1,"Extreme short edge clamps to one without integer overflow");
+    }
+    static void DepthDiagnosticChecks()
+    {
+        Defaults();var c=BattleMiniMapConfig.Get();var map=new Map();var source=Source();
+        c.MapGpuDiagnosticMode=4;c.CutMapGeometryByHeight=true;c.MapGeometryCeiling=-50;
+        c.UseRawRuntimeTerrain=true;c.UseCollisionScenePreview=true;c.TintGpuMapGeometry=true;c.FollowMode=true;
+        MapLiveCollisionGuard.Reject=true; // An accidental collector start would fail here.
+        var r=new MapGeometryRenderer("arbitrary-depth-probe",source);
+        r.Update(map,true);var first=TableauView.Last;var scene=first.NativeView.Scene;var camera=first.NativeView.Camera;
+        var runtime=typeof(MapGeometryRenderer).GetField("_runtime",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic).GetValue(r);
+        var collectorField=typeof(MapRuntimeMainMap).GetField("_collector",System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic);
+        Check(collectorField.GetValue(runtime)==null && source.Reads==0 && source.HeightReads==0 &&
+            source.BoundsReads==1 && source.TerrainRangeReads==1 && NoCacheRead(r),
+            "Depth probe production route reads only public bounds, creates no collector and never reads cache/raw/source geometry");
+        Check(scene.Entities.Count==3 && scene.Entities.All(e=>e.Added.UploadFaces==2 && e.Added.UploadVertices==4) &&
+            first.NativeView.Width==2048 && first.NativeView.Height==1365,
+            "Depth probe uses main owner scene/Tableau/2048 RT with exactly three separate opaque quads");
+        Check(r.Texture==null && !r.SuppressGdiSelfRender,"Depth target warmup keeps GDI self rendering");
+        Tick(r,map,5);
+        Check(r.Texture!=null && r.SuppressGdiSelfRender && collectorField.GetValue(runtime)==null,
+            "Submitted diagnostic target alone activates managed GDI self-render suppression without collector");
+        Check(c.MapGeometryCeiling==-50 && c.CutMapGeometryByHeight && c.FollowMode && Math.Abs(camera.Near-.1f/150)<1e-6,
+            "Depth probe locally ignores clipping while preserving ceiling and follow configuration");
+        var rules=new MapLiveGeometryRules(30,-70,230,230);
+        var forward=MapMainDepthDiagnosticGeometry.Create(30,-70,2.5f,120,80,-20,80,false);
+        var reverse=MapMainDepthDiagnosticGeometry.Create(30,-70,2.5f,120,80,-20,80,true);
+        var narrow=MapMainDepthDiagnosticGeometry.Create(30,-70,2.5f,120,80,0,.04f,false);
+        Check(narrow[2].Corners[0].Z<narrow[0].Corners[0].Z && narrow[0].Corners[0].Z<narrow[1].Corners[0].Z,
+            "Representable narrow height range is accepted without an arbitrary minimum span");
+        Check(forward.Select(p=>p.Name).SequenceEqual(reverse.Reverse().Select(p=>p.Name)) &&
+            forward.Zip(reverse.Reverse(),(a,b)=>a.Color==b.Color && a.Corners.Zip(b.Corners,(x,y)=>x.X==y.X && x.Y==y.Y && x.Z==y.Z).All(v=>v)).All(v=>v),
+            "Forward/reverse helper preserves exact world geometry and colors, changing only creation order");
+        var ground=forward[0];var high=forward[1];var low=forward[2];
+        Check(ground.Color==0xff808080 && high.Color==0xffffff00 && low.Color==0xff0070ff &&
+            rules.Normalize(low.Corners[0]).Z<rules.Normalize(ground.Corners[0]).Z && rules.Normalize(ground.Corners[0]).Z<rules.Normalize(high.Corners[0]).Z,
+            "Gray ground, yellow high and blue low have strictly ordered normalized depths");
+        Check(low.Corners.Min(p=>p.Y)<ground.Corners.Min(p=>p.Y) && low.Corners.Max(p=>p.Y)>ground.Corners.Min(p=>p.Y) &&
+            high.Corners.Max(p=>p.Y)>ground.Corners.Max(p=>p.Y) && high.Corners.Min(p=>p.Y)<ground.Corners.Max(p=>p.Y) &&
+            low.Corners.Min(p=>p.X)>=ground.Corners.Min(p=>p.X) && high.Corners.Max(p=>p.X)<=ground.Corners.Max(p=>p.X),
+            "Low crosses ground left UV edge and high crosses right edge, both partly over ground");
+        var signatures=scene.Entities.Select(e=>e.Added.UploadSignature).ToArray();
+        c.MapGpuDiagnosticMode=5;
+        Check(!r.SuppressGdiSelfRender,"Changing probe order restores GDI immediately before next update");
+        r.Update(map,true);var second=TableauView.Last;
+        Check(second!=first && !first.NativeView.Enabled && !first.IsReleased && !r.SuppressGdiSelfRender &&
+            second.NativeView.Scene.Entities.Select(e=>e.Added.UploadSignature).SequenceEqual(signatures.Reverse()),
+            "Real reverse owner uploads identical meshes in reverse order and retires old target before publication");
+        Tick(r,map,5);
+        Check(first.IsReleased && r.SuppressGdiSelfRender && source.Reads==0 && source.HeightReads==0 &&
+            second.NativeView.Camera.Right==camera.Right && second.NativeView.Camera.Bottom==camera.Bottom && second.NativeView.Camera.Near==camera.Near,
+            "Reverse diagnostic retains main projection and delayed retirement without source reads");
+        c.MapGeometryCeiling=69.15933f;r.Update(map,true);
+        Check(TableauView.Last==second && r.SuppressGdiSelfRender && second.NativeView.Camera.Near==camera.Near,
+            "Changing configured ceiling does not clip or invalidate diagnostic publication");
+        Tick(r,map,125);
+        Check(source.Reads==0 && source.HeightReads==0 && collectorField.GetValue(runtime)==null,
+            "Nullable-collector diagnostic remains stable through status updates");
+        c.MapGpuDiagnosticMode=0;
+        Check(!r.SuppressGdiSelfRender,"Leaving diagnostic restores GDI before route update");
+        c.UseRawRuntimeTerrain=false;MapLiveCollisionGuard.Reject=false;r.Update(map,true);var normal=TableauView.Last;Tick(r,map);
+        Check(normal!=second && !second.NativeView.Enabled && collectorField.GetValue(runtime)!=null && source.Reads>0 &&
+            !r.SuppressGdiSelfRender && c.MapGeometryCeiling==69.15933f,
+            "Diagnostic exit rebuilds normal collector path and retains existing GDI policy/configured ceiling");
+        Check(Debug.Messages.Any(s=>s.Contains("probe mode=4 order=ground-gray@worldZ=30,high-yellow@worldZ=42.5,low-blue@worldZ=17.5") && s.Contains("target=BattleMiniMap.MainGeometry.")) &&
+            Debug.Messages.Any(s=>s.Contains("probe mode=5 order=low-blue@worldZ=17.5,high-yellow@worldZ=42.5,ground-gray@worldZ=30")),
+            "Probe logs identify target, mode, order, world heights and UV ranges for visual acceptance");
+        r.Dispose();Defaults();c.MapGpuDiagnosticMode=4;
+        r=new MapGeometryRenderer("broken-probe",Source());r.Update(map,true);var broken=TableauView.Last;
+        broken.NativeView.Throw=true;broken.Paint();r.Update(map,true);
+        Check(r.Texture==null && !r.SuppressGdiSelfRender && NoCacheRead(r),"Failed depth probe retains GDI and never substitutes static cache");
+        r.Dispose();Defaults();c.MapGpuDiagnosticMode=0;
     }
     static void IdleResumeChecks()
     {

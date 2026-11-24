@@ -125,8 +125,9 @@ namespace TaleWorlds.Engine
         public int Reads,HeightReads;
         public Vec3 BoundMin=new Vec3(-100,-100,-20), BoundMax=new Vec3(100,100,80);
         public float TerrainMin=-10,TerrainMax=10; public bool TerrainRangeAvailable=true;
-        public void GetBoundingBox(out Vec3 min,out Vec3 max){min=BoundMin;max=BoundMax;}
-        public bool GetTerrainMinMaxHeight(out float min,out float max){min=TerrainMin;max=TerrainMax;return TerrainRangeAvailable;}
+        public int BoundsReads,TerrainRangeReads;
+        public void GetBoundingBox(out Vec3 min,out Vec3 max){++BoundsReads;min=BoundMin;max=BoundMax;}
+        public bool GetTerrainMinMaxHeight(out float min,out float max){++TerrainRangeReads;min=TerrainMin;max=TerrainMax;return TerrainRangeAvailable;}
         public Func<Vec2,float> Height;
         public void GetEntities(ref System.Collections.Generic.List<GameEntity> result){++Reads;result.AddRange(Entities);}
         public void GetTerrainData(out Vec2i d,out float size,out int layers,out int version){d=new Vec2i();size=0;layers=0;version=0;}

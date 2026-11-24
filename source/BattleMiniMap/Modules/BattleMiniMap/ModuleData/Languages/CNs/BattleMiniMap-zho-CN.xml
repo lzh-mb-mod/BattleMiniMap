@@ -62,12 +62,12 @@
     <string id="BattleMiniMap_geometry_cut_hint" text="裁去指定世界高度以上的几何以查看下层结构；不代表楼层或通行判定。" />
     <string id="BattleMiniMap_geometry_ceiling" text="几何显示高度上限（米）" />
     <string id="BattleMiniMap_gpu_diagnostic" text="GPU离屏诊断" />
-    <string id="BattleMiniMap_gpu_diagnostic_hint" text="可选右上角256像素小窗，CPU地图保持显示。不采样；依次检查清屏、三角形、缓存桥。" />
+  <string id="BattleMiniMap_gpu_diagnostic_hint" text="前三项为右上角旧诊断窗口。主图深度正序/逆序仅作用运行时GPU主图：灰地面、黄高片、蓝低片，忽略高度裁切但保留用户设置。可临时关闭跟随查看全图；两种顺序的遮挡应相同。无场景几何采集。" />
     <string id="BattleMiniMap_gpu_off" text="关闭" />
     <string id="BattleMiniMap_gpu_clear" text="仅清屏色" />
     <string id="BattleMiniMap_gpu_triangle" text="合成三角形" />
     <string id="BattleMiniMap_gpu_bridge" text="缓存桥几何" />
-    <string id="BattleMiniMap_gpu_depth" text="GPU诊断深度测试/写入" />
+  <string id="BattleMiniMap_gpu_depth" text="旧诊断窗口深度测试（主图深度诊断始终启用）" />
   <string id="BattleMiniMap_geometry_preview" text="三维地图预览" />
   <string id="BattleMiniMap_geometry_preview_hint" text="运行时场景预览。左拖旋转，右拖平移，滚轮缩放，双击复位。退出场景后关闭。" />
   <string id="BattleMiniMap_geometry_preview_controls" text="地图 | 左拖旋转  右拖平移  滚轮缩放  双击复位" />
@@ -109,5 +109,7 @@
   <string id="BattleMiniMap_simplify_terrain_hint" text="主图与预览共用，仅影响原始运行时地形。保留边界与洞，误差不超过0.10米时接受简化，否则保留原三角形。" />
   <string id="BattleMiniMap_runtime_main" text="运行时全场景主图" />
     <string id="BattleMiniMap_runtime_main_hint" text="默认从当前任务场景分帧提取，独立于大预览。关闭才使用旧桥缓存诊断。加载、失败或手动CPU时保留原GDI地形底图与标记，不读取旧桥缓存替代全场景。" />
+    <string id="BattleMiniMap_main_depth_forward" text="主图深度：正序" />
+    <string id="BattleMiniMap_main_depth_reverse" text="主图深度：逆序" />
   </strings>
 </base>

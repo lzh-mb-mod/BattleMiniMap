@@ -6,6 +6,8 @@ namespace BattleMiniMap.View.Background.Map
 {
     public class BattleMiniMap_MapWidget : MapBackgroundWidget
     {
+        // Skip only this widget's image; Gauntlet still renders/traverses children.
+        protected override bool SuppressSelfRender => MapGeometry.MapGeometryRenderer.Active?.SuppressGdiSelfRender ?? false;
         public BattleMiniMap_MapWidget(UIContext context) : base(context)
         {
             TextureProviderName = nameof(BattleMiniMap_MiniMapTextureProvider);

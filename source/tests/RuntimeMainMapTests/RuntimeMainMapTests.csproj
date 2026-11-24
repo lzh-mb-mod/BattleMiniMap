@@ -33,5 +33,6 @@
     <Compile Include="../MapPreviewTests/Program.cs" Link="Boundary/Program.cs" />
     <Compile Include="../MapPreviewTests/RawTerrainChecks.cs" Link="Boundary/RawTerrainChecks.cs" />
     <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapGeometryRetirementQueue.cs" Link="MapGeometryRetirementQueue.cs" />
+    <Compile Include="../../BattleMiniMap/src/View/MapGeometry/MapMainDepthDiagnosticGeometry.cs" Link="MapMainDepthDiagnosticGeometry.cs" />
   </ItemGroup>
 </Project>

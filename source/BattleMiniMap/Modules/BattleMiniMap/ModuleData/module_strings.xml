@@ -57,12 +57,12 @@
   <string id="str_battle_mini_map_geometry_cut_hint" text="{=BattleMiniMap_geometry_cut_hint}Clip geometry above the selected world height to inspect lower structures. This is not a floor or pathfinding classification." />
   <string id="str_battle_mini_map_geometry_ceiling" text="{=BattleMiniMap_geometry_ceiling}Geometry height ceiling (m)" />
   <string id="str_battle_mini_map_gpu_diagnostic" text="{=BattleMiniMap_gpu_diagnostic}GPU offscreen diagnostic" />
-  <string id="str_battle_mini_map_gpu_diagnostic_hint" text="{=BattleMiniMap_gpu_diagnostic_hint}Optional 256 px window at top right. CPU map stays active. No scene sampling. Test clear, triangle, then cached bridge." />
+  <string id="str_battle_mini_map_gpu_diagnostic_hint" text="{=BattleMiniMap_gpu_diagnostic_hint}Clear, triangle and cached bridge use the old top-right diagnostic window. Main depth forward/reverse uses only the runtime GPU main map: gray ground, yellow upper plane, blue lower plane. Ignores ceiling without changing settings. Temporarily turn follow off to see all planes; occlusion must match both orders. No source geometry collection." />
   <string id="str_battle_mini_map_gpu_off" text="{=BattleMiniMap_gpu_off}Off" />
   <string id="str_battle_mini_map_gpu_clear" text="{=BattleMiniMap_gpu_clear}Clear color only" />
   <string id="str_battle_mini_map_gpu_triangle" text="{=BattleMiniMap_gpu_triangle}Synthetic triangle" />
   <string id="str_battle_mini_map_gpu_bridge" text="{=BattleMiniMap_gpu_bridge}Cached bridge geometry" />
-  <string id="str_battle_mini_map_gpu_depth" text="{=BattleMiniMap_gpu_depth}GPU diagnostic depth test/write" />
+  <string id="str_battle_mini_map_gpu_depth" text="{=BattleMiniMap_gpu_depth}Old diagnostic window depth test (main depth probe always enabled)" />
   <string id="str_battle_mini_map_geometry_preview" text="{=BattleMiniMap_geometry_preview}3D map preview" />
   <string id="str_battle_mini_map_geometry_preview_hint" text="{=BattleMiniMap_geometry_preview_hint}Runtime scene preview. Left drag: orbit; right drag: pan; wheel: zoom; double click: reset. Closes on mission exit." />
   <string id="str_battle_mini_map_geometry_preview_controls" text="{=BattleMiniMap_geometry_preview_controls}Map | Left: orbit  Right: pan  Wheel: zoom  Double click: reset" />
@@ -104,4 +104,6 @@
   <string id="str_battle_mini_map_simplify_terrain_hint" text="{=BattleMiniMap_simplify_terrain_hint}Shared by main map and preview, for raw runtime terrain only. Preserve borders and holes; accept patches within 0.10 m vertical error, otherwise retain original triangles." />
   <string id="str_battle_mini_map_runtime_main" text="{=BattleMiniMap_runtime_main}Runtime scene main map" />
     <string id="str_battle_mini_map_runtime_main_hint" text="{=BattleMiniMap_runtime_main_hint}Extract the current mission scene independently of the large preview. Off selects the old bridge cache diagnostic. Loading, failure or manual CPU retains the GDI terrain base and markers; no runtime building CPU rasterization or automatic bridge cache fallback." />
+    <string id="str_battle_mini_map_main_depth_forward" text="{=BattleMiniMap_main_depth_forward}Main map depth: forward order" />
+    <string id="str_battle_mini_map_main_depth_reverse" text="{=BattleMiniMap_main_depth_reverse}Main map depth: reverse order" />
   </strings>

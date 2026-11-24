@@ -18,10 +18,12 @@ namespace BattleMiniMap.View.Background
         }
         // Geometry targets already exist and do not need TextureWidget's deferred provider bootstrap.
         protected virtual bool UsesDirectTexture => false;
+        protected virtual bool SuppressSelfRender => false;
         protected virtual Texture GetMapTexture(TwoDimensionContext context) => TextureProvider?.GetTextureForRender(context);
 
         protected override void OnRender(TwoDimensionContext twoDimensionContext, TwoDimensionDrawContext drawContext)
         {
+            if (SuppressSelfRender) return;
             var config = BattleMiniMapConfig.Get();
             if (!UsesDirectTexture && TextureProvider == null)
             {

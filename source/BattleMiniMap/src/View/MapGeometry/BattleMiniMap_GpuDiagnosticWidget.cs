@@ -16,7 +16,7 @@ namespace BattleMiniMap.View.MapGeometry
         {
             var renderer=MapGpuDiagnosticRenderer.Active;
             var mode=BattleMiniMap.Config.BattleMiniMapConfig.Get().MapGpuDiagnosticMode;
-            if(mode==0 || renderer==null)return;
+            if(mode<1 || mode>3 || renderer==null)return;
             var texture=renderer.Texture;var state=mode+":"+(texture!=null)+":"+(texture?.IsValid??false);
             if(_previousState!=state){_previousState=state;TaleWorlds.Library.Debug.Print("BattleMiniMap GPU diagnostic UI: mode="+mode+" target="+(texture!=null)+" valid="+(texture?.IsValid??false)+" cpuControl="+(renderer.ControlTexture?.IsValid??false));}
             if(renderer.ControlTexture?.IsValid==true)Draw(context,drawContext,renderer.ControlTexture,256,8);

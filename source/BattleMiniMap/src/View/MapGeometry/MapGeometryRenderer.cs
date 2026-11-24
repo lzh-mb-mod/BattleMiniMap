@@ -47,7 +47,11 @@ namespace BattleMiniMap.View.MapGeometry
         private int _frame;
         private Texture _displayFallback;
         private UiTexture _fallbackUi;
-        internal MapGeometryData CachedData => _data;
+        // New main-map probes must not feed the old renderer (which clamps modes to 3).
+        internal MapGeometryData CachedData => BattleMiniMapConfig.Get().MapGpuDiagnosticMode >= 4 ? null : _data;
+        internal bool SuppressGdiSelfRender => !_disposed && _runtimeRoute &&
+            BattleMiniMapConfig.Get().UseRuntimeMainMap && BattleMiniMapConfig.Get().EnableMapGeometry &&
+            BattleMiniMapConfig.Get().UseGpuMapGeometry && _runtime.SuppressGdiSelfRender;
         internal MapGeometryData EnsureVerifiedCache()
         {
             if (!_attempted)

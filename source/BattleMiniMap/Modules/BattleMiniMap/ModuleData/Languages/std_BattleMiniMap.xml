@@ -62,12 +62,12 @@
     <string id="BattleMiniMap_geometry_cut_hint" text="Clip geometry above the selected world height to inspect lower structures. This is not a floor or pathfinding classification." />
     <string id="BattleMiniMap_geometry_ceiling" text="Geometry height ceiling (m)" />
     <string id="BattleMiniMap_gpu_diagnostic" text="GPU offscreen diagnostic" />
-    <string id="BattleMiniMap_gpu_diagnostic_hint" text="Optional 256 px window at top right. CPU map stays active. No scene sampling. Test clear, triangle, then cached bridge." />
+  <string id="BattleMiniMap_gpu_diagnostic_hint" text="Clear, triangle and cached bridge use the old top-right diagnostic window. Main depth forward/reverse uses only the runtime GPU main map: gray ground, yellow upper plane, blue lower plane. Ignores ceiling without changing settings. Temporarily turn follow off to see all planes; occlusion must match both orders. No source geometry collection." />
     <string id="BattleMiniMap_gpu_off" text="Off" />
     <string id="BattleMiniMap_gpu_clear" text="Clear color only" />
     <string id="BattleMiniMap_gpu_triangle" text="Synthetic triangle" />
     <string id="BattleMiniMap_gpu_bridge" text="Cached bridge geometry" />
-    <string id="BattleMiniMap_gpu_depth" text="GPU diagnostic depth test/write" />
+  <string id="BattleMiniMap_gpu_depth" text="Old diagnostic window depth test (main depth probe always enabled)" />
   <string id="BattleMiniMap_geometry_preview" text="3D map preview" />
   <string id="BattleMiniMap_geometry_preview_hint" text="Runtime scene preview. Left drag: orbit; right drag: pan; wheel: zoom; double click: reset. Closes on mission exit." />
   <string id="BattleMiniMap_geometry_preview_controls" text="Map | Left: orbit  Right: pan  Wheel: zoom  Double click: reset" />
@@ -109,5 +109,7 @@
   <string id="BattleMiniMap_simplify_terrain_hint" text="Shared by main map and preview, for raw runtime terrain only. Preserve borders and holes; accept patches within 0.10 m vertical error, otherwise retain original triangles." />
   <string id="BattleMiniMap_runtime_main" text="Runtime scene main map" />
     <string id="BattleMiniMap_runtime_main_hint" text="Extract the current mission scene independently of the large preview. Off selects the old bridge cache diagnostic. Loading, failure or manual CPU retains the GDI terrain base and markers; no runtime building CPU rasterization or automatic bridge cache fallback." />
+    <string id="BattleMiniMap_main_depth_forward" text="Main map depth: forward order" />
+    <string id="BattleMiniMap_main_depth_reverse" text="Main map depth: reverse order" />
   </strings>
 </base>
