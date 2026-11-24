@@ -108,4 +108,6 @@
     <string id="str_battle_mini_map_main_depth_reverse" text="{=BattleMiniMap_main_depth_reverse}Main map depth: reverse order" />
     <string id="str_battle_mini_map_main_depth_vertex_forward" text="{=BattleMiniMap_main_depth_vertex_forward}Main depth (vertex color): forward order" />
     <string id="str_battle_mini_map_main_depth_vertex_reverse" text="{=BattleMiniMap_main_depth_vertex_reverse}Main depth (vertex color): reverse order" />
+    <string id="str_battle_mini_map_runtime_terrain_visible" text="{=BattleMiniMap_runtime_terrain_visible}Show GPU terrain (occlusion comparison)" />
+    <string id="str_battle_mini_map_runtime_terrain_visible_hint" text="{=BattleMiniMap_runtime_terrain_visible_hint}Affects the runtime main map and 3D preview. Off hides only extracted GPU terrain color and depth; CPU base, objects and depth between objects remain. Does not disable all depth testing. No re-extraction or camera change. May have no effect when raw terrain is disabled or terrain is not yet available." />
   </strings>

@@ -113,5 +113,7 @@
     <string id="BattleMiniMap_main_depth_reverse" text="主图深度：逆序" />
     <string id="BattleMiniMap_main_depth_vertex_forward" text="主图深度（顶点色）：正序" />
     <string id="BattleMiniMap_main_depth_vertex_reverse" text="主图深度（顶点色）：逆序" />
+    <string id="BattleMiniMap_runtime_terrain_visible" text="显示GPU地形（遮挡对照）" />
+    <string id="BattleMiniMap_runtime_terrain_visible_hint" text="同时影响运行时主图和三维预览。关闭只隐藏已提取GPU地形的颜色与深度，保留CPU底图、对象及对象之间的深度遮挡；不是停用全部深度测试。无需重提取或改变相机。未启用原始地形读取或尚未读到地形时可能没有效果。" />
   </strings>
 </base>

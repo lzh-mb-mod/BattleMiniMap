@@ -10,7 +10,8 @@ namespace BattleMiniMap.View.MapGeometry
         internal const string DepthVertexColorResourceName = "notexture";
 
         internal static void Bind(Material material) => BindResource(material, ResourceName);
-        internal static void BindRuntimeMain(Material material) => BindResource(material, DepthVertexColorResourceName);
+        internal static void BindRuntimeGeometry(Material material) => BindResource(material, DepthVertexColorResourceName);
+        internal static void BindRuntimeMain(Material material) => BindRuntimeGeometry(material);
         internal static void BindDepthProbe(Material material, bool vertexColor) =>
             BindResource(material, vertexColor ? DepthVertexColorResourceName : ResourceName);
 

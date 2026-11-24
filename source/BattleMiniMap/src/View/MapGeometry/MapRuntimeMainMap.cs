@@ -97,6 +97,11 @@ namespace BattleMiniMap.View.MapGeometry
                         Texture = null;
                     }
                 }
+                if (_collector != null && _collector.SetTerrainVisible(c.ShowRuntimeTerrain))
+                {
+                    _publication = _tableau.InvalidateContent(); Texture = null;
+                    Report("terrain visible=" + c.ShowRuntimeTerrain + " publication=" + _publication);
+                }
                 var active = _collector?.IsActive ?? false;
                 var version = _collector?.ContentVersion ?? 0;
                 _collector?.Update(dt);

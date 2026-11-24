@@ -79,6 +79,8 @@ namespace BattleMiniMap.View.MapGeometry
                     Clear(true); _liveMode=live; _collisionMode=config.UseCollisionScenePreview; _rawTerrainMode=config.UseRawRuntimeTerrain; _simplifyTerrainMode=config.SimplifyRuntimeTerrain; _proxy=config.UseMapGeometryProxy; _ceiling=ceiling; Build(data);
                 }
                 failure=MapPreviewProblem.CollectionFailed;
+                if(_live?.SetTerrainVisible(config.ShowRuntimeTerrain)==true)
+                    Report("terrain visible="+config.ShowRuntimeTerrain+" target="+_binding.Name);
                 _live?.Update(dt);
                 if (_live?.Failure!=null) throw new InvalidOperationException(_live.Failure);
                 failure=MapPreviewProblem.RenderingFailed;
@@ -104,7 +106,8 @@ namespace BattleMiniMap.View.MapGeometry
             _camera.SetFovVertical((float)Math.PI/4,_aspect,.05f,64);
             _white=TaleWorlds.Engine.Texture.CreateFromByteArray(new byte[]{255,255,255,255},1,1);
             if (_white==null || !_white.IsValid) throw new InvalidOperationException("No preview white texture");
-            _material=Material.GetDefaultMaterial().CreateCopy(); MapGeometryShader.Bind(_material);
+            _material=Material.GetDefaultMaterial().CreateCopy();
+            if(_liveMode)MapGeometryShader.BindRuntimeGeometry(_material);else MapGeometryShader.Bind(_material);
             _material.SetShaderFlags(0); _material.SetTexture(Material.MBTextureType.DiffuseMap,_white);
             _material.Flags=MaterialFlags.TwoSided|MaterialFlags.DontCastShadow|MaterialFlags.RequiresForwardRendering;
             _material.SetAlphaBlendMode(Material.MBAlphaBlendMode.NoAlphaBlend); _material.SetAlphaTestValue(0);
@@ -115,7 +118,8 @@ namespace BattleMiniMap.View.MapGeometry
                 var hasTerrain=dimensions.X>0 && dimensions.Y>0 && nodeSize>0 && MapLiveGeometryRules.Finite(nodeSize);
                 var rules=hasTerrain ? new MapLiveGeometryRules(0,0,dimensions.X*nodeSize,dimensions.Y*nodeSize)
                     : new MapLiveGeometryRules(_minX,_minY,_maxX,_maxY);
-                _live=new MapLiveSceneGeometry(_runtimeSource,_scene,_material,rules,hasTerrain,_collisionMode,_rawTerrainMode,simplifyTerrain:_simplifyTerrainMode,profile:BattleMiniMapConfig.Get().ProfileMapGeometry);
+                _live=new MapLiveSceneGeometry(_runtimeSource,_scene,_material,rules,hasTerrain,_collisionMode,_rawTerrainMode,simplifyTerrain:_simplifyTerrainMode,profile:BattleMiniMapConfig.Get().ProfileMapGeometry,
+                    terrainColor:0xff8a9184u,objectColor:0xffded4beu,renderColor:0xffded4beu);
                 BuildTarget();
                 Report("build: target="+_binding.Name+" source="+(_collisionMode?"runtime-collision":"runtime-render")+" staticFiles=False policy=interactive");
                 return;

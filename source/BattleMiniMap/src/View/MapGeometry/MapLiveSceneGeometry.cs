@@ -50,6 +50,17 @@ namespace BattleMiniMap.View.MapGeometry
         private readonly Dictionary<string,Copy> _copies=new Dictionary<string,Copy>();
         private readonly List<Mesh> _terrainMeshes=new List<Mesh>();
         private readonly List<GameEntity> _terrainEntities=new List<GameEntity>();
+        private bool _terrainVisible=true;
+        // Only owned terrain instances are affected; source/object state and
+        // extraction coverage/counts are unchanged. New chunks inherit this state.
+        public bool SetTerrainVisible(bool visible)
+        {
+            if(_disposed || _stopped || _terrainVisible==visible)return false;
+            _terrainVisible=visible;
+            foreach(var entity in _terrainEntities)entity.SetVisibilityExcludeParents(visible);
+            ++ContentVersion;
+            return true;
+        }
         private IEnumerator<int> _steps;
         private readonly Stopwatch _wall=Stopwatch.StartNew();
         private double _workMs,_maxTickMs,_maxStepMs;
@@ -524,7 +535,7 @@ namespace BattleMiniMap.View.MapGeometry
                     var entity=GameEntity.CreateEmpty(_target,createPhysics:false,callScriptCallbacks:false);
                     if(entity==null)throw new InvalidOperationException("No raw terrain map entity");
                     _terrainEntities.Add(entity);entity.AddMesh(mesh,recomputeBoundingBox:false);
-                    entity.SetVisibilityExcludeParents(true);entity.SetReadyToRender(true);yield return 0;
+                    entity.SetVisibilityExcludeParents(_terrainVisible);entity.SetReadyToRender(true);yield return 0;
                 }
                 ++_rawTilesDone;_rawTileCells=_rawTileCellsDone=0;
             }
@@ -557,7 +568,7 @@ namespace BattleMiniMap.View.MapGeometry
                 var entity=GameEntity.CreateEmpty(_target,createPhysics:false,callScriptCallbacks:false);
                 if(entity==null) throw new InvalidOperationException("No runtime terrain entity");
                 _terrainEntities.Add(entity); entity.AddMesh(mesh,recomputeBoundingBox:false);
-                entity.SetVisibilityExcludeParents(true); entity.SetReadyToRender(true); yield return 0;
+                entity.SetVisibilityExcludeParents(_terrainVisible); entity.SetReadyToRender(true); yield return 0;
             }
         }
         private Vec3 Point(int x,int y,float z)

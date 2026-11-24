@@ -34,6 +34,7 @@ class Program
         preview.Update(new MapGeometryRenderer()); Check(Scene.Created==0 && !preview.Available,"Unavailable cache leaves closeable empty panel without native allocation");
         config.ShowGeometryPreview=false;preview.Update(source);config.ShowGeometryPreview=true;
         preview.Update(source); var target=TableauView.Last; var view=target.NativeView; var camera=view.Camera;
+        Check(view.Scene.Entities[0].Added.Material.GetShader().Name=="simple_shader","Old bridge preview keeps default simple_shader route");
         Check(preview.Available && MeshBuilder.Faces==218,"Verified proxy uploaded to independent preview");
         target.Pump(); Check(view.Skip && view.Continuous,"Interactive callback stops until next update permits");
         var meshBuilds=MeshBuilder.Builds;
@@ -83,7 +84,7 @@ namespace BattleMiniMap.Config
     class BattleMiniMapConfig
     {
         static readonly BattleMiniMapConfig Value=new BattleMiniMapConfig(); public static BattleMiniMapConfig Get()=>Value;
-        public bool UseRuntimeMainMap=true, UseGpuMapGeometry=true, EnableMapGeometry=true, TintGpuMapGeometry, FollowMode, EnableDynamicScale, MapGpuDiagnosticDepth;
+        public bool ShowRuntimeTerrain=true, UseRuntimeMainMap=true, UseGpuMapGeometry=true, EnableMapGeometry=true, TintGpuMapGeometry, FollowMode, EnableDynamicScale, MapGpuDiagnosticDepth;
         public int WidgetWidth=400, MapGpuDiagnosticMode; public float FollowModeScale;
         public bool ShowGeometryPreview, CutMapGeometryByHeight, UseMapGeometryProxy=true, UseLiveScenePreview, UseCollisionScenePreview, UseRawRuntimeTerrain, SimplifyRuntimeTerrain, ProfileMapGeometry; public float MapGeometryCeiling;
     }
@@ -94,7 +95,10 @@ namespace BattleMiniMap.View.MapGeometry
     class MapGeometryRenderer { public MapGeometryData Data; public int Reads; public MapGeometryData EnsureVerifiedCache(){++Reads;return Data;} }
     #endif
     #if !RUNTIME_MAIN_TESTS
-    static class MapGeometryShader { public static void Bind(TaleWorlds.Engine.Material material){} }
+    static class MapGeometryShader {
+        public static void Bind(TaleWorlds.Engine.Material material){material.SetShader(TaleWorlds.Engine.Shader.GetFromResource("simple_shader"));}
+        public static void BindRuntimeGeometry(TaleWorlds.Engine.Material material){material.SetShader(TaleWorlds.Engine.Shader.GetFromResource("notexture"));}
+    }
     #endif
 }
 namespace TaleWorlds.Library
@@ -132,7 +136,8 @@ namespace TaleWorlds.Engine
         public bool GetTerrainMinMaxHeight(out float min,out float max){++TerrainRangeReads;min=TerrainMin;max=TerrainMax;return TerrainRangeAvailable;}
         public Func<Vec2,float> Height;
         public void GetEntities(ref System.Collections.Generic.List<GameEntity> result){++Reads;result.AddRange(Entities);}
-        public void GetTerrainData(out Vec2i d,out float size,out int layers,out int version){d=new Vec2i();size=0;layers=0;version=0;}
+        public Vec2i TerrainDimensions;public float TerrainNodeSize;
+        public void GetTerrainData(out Vec2i d,out float size,out int layers,out int version){d=TerrainDimensions;size=TerrainNodeSize;layers=0;version=0;}
         public int HoleCheckedHeightReads;
         public float GetTerrainHeight(Vec2 p,bool checkHoles){++HeightReads;if(checkHoles)++HoleCheckedHeightReads;return Height==null?p.x+p.y:Height(p);}
 

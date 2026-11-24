@@ -41,6 +41,7 @@ class MainChecks
     {
         var c = BattleMiniMapConfig.Get();
         c.EnableMapGeometry = c.UseGpuMapGeometry = c.UseRuntimeMainMap = true;
+        c.ShowRuntimeTerrain=true;
         c.UseLiveScenePreview = c.ShowGeometryPreview = c.UseCollisionScenePreview = c.UseRawRuntimeTerrain = c.SimplifyRuntimeTerrain = false;
         c.CutMapGeometryByHeight = c.TintGpuMapGeometry = false;
         Texture.FailWhite = MapLiveCollisionGuard.Reject = false;
@@ -141,6 +142,7 @@ class MainChecks
         FailureChecks(); ProjectionChecks(); PaletteChecks(); StaticTableau();
         IdleResumeChecks(); CallbackOrderingChecks(); RetirementChecks(); NormalizationChecks();
         DepthDiagnosticChecks();
+        TerrainVisibilityChecks();
         Check(Debug.Messages.Any(s => s.Contains("runtime main ready") && s.Contains("target=BattleMiniMap.MainGeometry.") && s.Contains("source=runtime-")) &&
             Debug.Messages.Any(s => s.Contains("runtime main status")) && Debug.Messages.Any(s => s.Contains("runtime main fallback")),
             "Main build/ready/status/fallback evidence carries its own target and source identity");
@@ -258,7 +260,7 @@ class MainChecks
     static void DepthDiagnosticChecks()
     {
         Defaults();var c=BattleMiniMapConfig.Get();var map=new Map();var source=Source();
-        c.MapGpuDiagnosticMode=4;c.CutMapGeometryByHeight=true;c.MapGeometryCeiling=-50;
+        c.MapGpuDiagnosticMode=4;c.CutMapGeometryByHeight=true;c.MapGeometryCeiling=-50;c.ShowRuntimeTerrain=false;
         c.UseRawRuntimeTerrain=true;c.UseCollisionScenePreview=true;c.TintGpuMapGeometry=true;c.FollowMode=true;
         MapLiveCollisionGuard.Reject=true; // An accidental collector start would fail here.
         var r=new MapGeometryRenderer("arbitrary-depth-probe",source);
@@ -268,7 +270,7 @@ class MainChecks
         Check(collectorField.GetValue(runtime)==null && source.Reads==0 && source.HeightReads==0 &&
             source.BoundsReads==1 && source.TerrainRangeReads==1 && NoCacheRead(r),
             "Depth probe production route reads only public bounds, creates no collector and never reads cache/raw/source geometry");
-        Check(scene.Entities.Count==3 && scene.Entities.All(e=>e.Added.UploadFaces==2 && e.Added.UploadVertices==4) &&
+        Check(scene.Entities.Count==3 && scene.Entities.All(e=>e.Visible && e.Added.UploadFaces==2 && e.Added.UploadVertices==4) &&
             first.NativeView.Width==2048 && first.NativeView.Height==1365,
             "Depth probe uses main owner scene/Tableau/2048 RT with exactly three separate opaque quads");
         Check(r.Texture==null && !r.SuppressGdiSelfRender,"Depth target warmup keeps GDI self rendering");
@@ -388,6 +390,71 @@ class MainChecks
         target.Pump();Tick(r,map,4);
         Check(r.Texture!=null && TableauView.Last==target && target.NativeView.Skip && NoCacheRead(r),
             "Post-Update callbacks publish clipped main target after long cache idle");r.Dispose();
+    }
+    static void TerrainVisibilityChecks()
+    {
+        Defaults();var c=BattleMiniMapConfig.Get();var map=new Map();var source=Source();source.Height=v=>v.x+10*v.y;
+        var renderer=new MapGeometryRenderer("terrain-visibility",source);Tick(renderer,map);
+        var target=TableauView.Last;var scene=target.NativeView.Scene;var camera=target.NativeView.Camera;
+        const System.Reflection.BindingFlags fields=System.Reflection.BindingFlags.Instance|System.Reflection.BindingFlags.NonPublic;
+        var owner=typeof(MapGeometryRenderer).GetField("_runtime",fields).GetValue(renderer);
+        var collectorField=typeof(MapRuntimeMainMap).GetField("_collector",fields);
+        // Inject the existing synthetic raw-memory boundary into a production
+        // collector; owner/router/Tableau remain real. No readonly state is changed.
+        var initial=(MapLiveSceneGeometry)collectorField.GetValue(owner);initial.Stop();initial.Dispose();scene.ClearAll();
+        var memory=new RawTerrainChecks.Memory(source.Pointer.ToUInt64(),false);
+        var collector=new MapLiveSceneGeometry(source,scene,new Material(),new MapLiveGeometryRules(0,0,2,2),false,false,true,()=>memory);
+        collectorField.SetValue(owner,collector);Tick(renderer,map,30,0);
+        var terrain=(System.Collections.Generic.List<GameEntity>)typeof(MapLiveSceneGeometry).GetField("_terrainEntities",fields).GetValue(collector);
+        var objects=scene.Entities.Except(terrain).ToArray();var copied=source.Entities[0].Metas[0].Meshes[0].Copies;
+        var reads=source.Reads;var heights=source.HeightReads;var builds=Scene.Created;var triangles=collector.TerrainTriangles;
+        var version=collector.ContentVersion;var tableau=(MapGeometryTableau)typeof(MapRuntimeMainMap).GetField("_tableau",fields).GetValue(owner);
+        var paints=tableau.PaintCount;
+        c.ShowRuntimeTerrain=false;renderer.Update(map,true,0);
+        Check(terrain.Count==1 && terrain.All(e=>!e.Visible) && objects.Length==1 && objects.All(e=>e.Visible) &&
+            renderer.Texture==null && collector.ContentVersion==version+1 && source.Reads==reads && source.HeightReads==heights,
+            "Idle main terrain toggle hides only owned terrain and invalidates publication without source reads");
+        Tick(renderer,map,3,0);
+        Check(ReferenceEquals(collector,collectorField.GetValue(owner)) && TableauView.Last==target && Scene.Created==builds &&
+            camera==target.NativeView.Camera && tableau.PaintCount==paints+2 && tableau.HasSubmittedCache && renderer.Texture!=null &&
+            source.Entities[0].Metas[0].Meshes[0].Copies==copied && collector.TerrainTriangles==triangles && !collector.Partial && !renderer.SuppressGdiSelfRender,
+            "Terrain visibility republishes idle cache with same collector/scene/camera, unchanged objects and coverage, retaining GDI policy");
+        c.ShowRuntimeTerrain=true;renderer.Update(map,true,0);Tick(renderer,map,3,0);
+        Check(terrain.All(e=>e.Visible) && objects.All(e=>e.Visible) && source.Reads==reads && source.HeightReads==heights && TableauView.Last==target,
+            "Showing terrain restores same entities without re-extraction or object changes");renderer.Dispose();
+
+        var rawSource=new Scene{Height=v=>v.x+10*v.y};var rawTarget=new Scene();
+        memory=new RawTerrainChecks.Memory(rawSource.Pointer.ToUInt64(),false,66);
+        var raw=new MapLiveSceneGeometry(rawSource,rawTarget,new Material(),new MapLiveGeometryRules(0,0,65,65),false,false,true,()=>memory);
+        for(var i=0;i<1000 && rawTarget.Entities.Count==0 && raw.Failure==null;++i)raw.Update(0);
+        Check(rawTarget.Entities.Count>0 && !raw.InitialFinished,"Raw visibility fixture reaches a published chunk before extraction ends");
+        raw.SetTerrainVisible(false);
+        for(var i=0;i<1000&&!raw.InitialFinished&&raw.Failure==null;++i)raw.Update(0);
+        Check(raw.InitialFinished && !raw.Partial && rawTarget.Entities.Count==4 && rawTarget.Entities.All(e=>!e.Visible),
+            "Already-published and later raw chunks inherit hidden terrain state without changing coverage");raw.Dispose();
+        var scalarTarget=new Scene();var scalar=new MapLiveSceneGeometry(new Scene(),scalarTarget,new Material(),new MapLiveGeometryRules(0,0,4,4));
+        scalar.SetTerrainVisible(false);for(var i=0;i<100&&!scalar.InitialFinished;++i)scalar.Update(0);
+        Check(scalar.InitialFinished && !scalar.Partial && scalarTarget.Entities.Count==1 && !scalarTarget.Entities[0].Visible,
+            "New scalar terrain chunk inherits visibility without adding a sampling path");scalar.Dispose();
+
+        Defaults();c.ShowGeometryPreview=c.UseLiveScenePreview=true;source=Source();source.Height=v=>v.x+10*v.y;
+        source.TerrainDimensions=new Vec2i{X=2,Y=2};source.TerrainNodeSize=4;
+        var preview=new MapGeometryPreviewRenderer(source,0,0,8,8);
+        for(var i=0;i<20;++i)preview.Update(null,0);
+        target=TableauView.Last;camera=target.NativeView.Camera;var live=preview.Live;
+        terrain=(System.Collections.Generic.List<GameEntity>)typeof(MapLiveSceneGeometry).GetField("_terrainEntities",fields).GetValue(live);
+        objects=target.NativeView.Scene.Entities.Except(terrain).ToArray();
+        preview.Orbit.Orbit(30,10);preview.Update(null,0);var eye=camera.Eye;var distance=preview.Orbit.Distance;
+        reads=source.Reads;heights=source.HeightReads;builds=Scene.Created;
+        c.ShowRuntimeTerrain=false;preview.Update(null,0);
+        Check(preview.Available && preview.Live==live && TableauView.Last==target && Scene.Created==builds && terrain.Count>0 &&
+            terrain.All(e=>!e.Visible) && objects.All(e=>e.Visible) && camera.Eye.x==eye.x && camera.Eye.y==eye.y && camera.Eye.z==eye.z && preview.Orbit.Distance==distance &&
+            source.Reads==reads && source.HeightReads==heights && objects[0].Added.Material.GetShader().Name=="notexture" && objects[0].Added.Color==0xffded4beu &&
+            Debug.Messages.Any(s=>s.Contains("geometry preview terrain visible=False target=BattleMiniMap.GeometryPreview.")),
+            "Runtime preview applies terrain visibility immediately with fixed neutral palette/notexture, preserving camera, source and collector");
+        c.ShowRuntimeTerrain=true;preview.Update(null,0);
+        Check(terrain.All(e=>e.Visible) && preview.Live==live && TableauView.Last==target && source.Reads==reads && source.HeightReads==heights,
+            "Preview terrain restoration retains scene and orbit without source reread");preview.Dispose();Defaults();
     }
     static void CallbackOrderingChecks()
     {
