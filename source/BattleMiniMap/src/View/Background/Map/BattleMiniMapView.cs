@@ -45,8 +45,11 @@ namespace BattleMiniMap.View.Background.Map
             _geometryPreview = new BattleMiniMap.View.MapGeometry.MapGeometryPreviewRenderer(Mission.Scene,
                 mapBounds.MapBoundMin.x,mapBounds.MapBoundMin.y,mapBounds.MapBoundMax.x,mapBounds.MapBoundMax.y);
             var movieName = nameof(BattleMiniMapView);
-            _layer = new GauntletLayer(movieName, 12);
-            _layer.LoadMovie(movieName, _dataSource);
+            var inputLayer = new BattleMiniMap.View.Interaction.MapInputLayer(movieName, 12);
+            _layer = inputLayer;
+            var movie = _layer.LoadMovie(movieName, _dataSource);
+            var previewWidget = BattleMiniMap.View.MapGeometry.BattleMiniMap_GeometryPreviewWidget.Find(movie.Movie.RootWidget);
+            inputLayer.PreviewHitTest = position => previewWidget?.IsInteractiveAt(position) == true;
             _layer.InputRestrictions.SetInputRestrictions(false, InputUsageMask.Mouse);
             MissionScreen.AddLayer(_layer);
             _timer = new MissionTimer(0.05f);
@@ -94,6 +97,10 @@ namespace BattleMiniMap.View.Background.Map
             _gpuDiagnostic?.Update(_mapGeometry?.CachedData);
             _geometryPreview?.Update(_mapGeometry,dt);
             _dataSource.UpdateGeometryPreview();
+            (_layer as BattleMiniMap.View.Interaction.MapInputLayer)?.TraceSceneInput(
+                MissionScreen.SceneLayer.Input.IsKeyDown(TaleWorlds.InputSystem.InputKey.RightMouseButton),
+                MissionScreen.SceneLayer.Input.IsKeyReleased(TaleWorlds.InputSystem.InputKey.RightMouseButton),
+                Mission.IsOrderMenuOpen, BattleMiniMapConfig.Get().WidgetWidth);
             var previewOpen=BattleMiniMapConfig.Get().ShowGeometryPreview;
             if (_previewMouseVisible!=previewOpen)
             {
@@ -158,6 +165,8 @@ namespace BattleMiniMap.View.Background.Map
         {
             base.OnMissionScreenFinalize();
 
+            (_layer as BattleMiniMap.View.Interaction.MapInputLayer)?.ResetRouting();
+            _layer.InputRestrictions.ResetInputRestrictions();
             MissionScreen.RemoveLayer(_layer);
             _geometryPreview?.Dispose();
             _geometryPreview = null;

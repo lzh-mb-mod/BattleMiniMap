@@ -56,3 +56,5 @@ Runtime mode does not read prebuilt scene/model caches. The collision reader cur
 Raw runtime terrain defaults to map simplification: complete patch borders and holes are retained; patches exceeding 0.10 m vertical error keep their original topology. Disable **Simplify runtime terrain** to compare full topology. Upload batches cover 64 by 64 cells. Logs separate source/display faces, accepted error, terrain completion time and collision rejection reasons. Actual reduction and performance still require scene validation.
 
 Raw terrain file verification runs in a cancellable background task on each open, followed by loaded-module identity checks before memory access. Closing the preview retires pending initialization. Logs distinguish background verification, waiting and main-thread work durations.
+
+The minimap layer passes right-button gestures through, including release after RTS camera cursor recentering. Right drags begun inside the visible 3D preview remain owned by preview panning. Map display size is unchanged.

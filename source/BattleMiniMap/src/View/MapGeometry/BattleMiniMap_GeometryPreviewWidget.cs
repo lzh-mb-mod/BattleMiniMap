@@ -1,3 +1,5 @@
+extern alias GameVectors;
+using UiVector2=GameVectors::System.Numerics.Vector2;
 using System;
 using BattleMiniMap.Config;
 using TaleWorlds.GauntletUI;
@@ -12,6 +14,15 @@ namespace BattleMiniMap.View.MapGeometry
         private int _drag;
         private float _dragDistance;
         private TaleWorlds.Library.Vec2 _previous;
+        internal bool IsInteractiveAt(UiVector2 position) =>
+            BattleMiniMapConfig.Get().ShowGeometryPreview && IsEnabled && IsRecursivelyVisible() && IsPointInsideMeasuredArea(position);
+        internal static BattleMiniMap_GeometryPreviewWidget Find(Widget root)
+        {
+            if(root==null)return null;
+            if(root is BattleMiniMap_GeometryPreviewWidget preview)return preview;
+            for(var i=0;i<root.ChildCount;++i){var found=Find(root.GetChild(i));if(found!=null)return found;}
+            return null;
+        }
         public BattleMiniMap_GeometryPreviewWidget(UIContext context) : base(context)
         {
             WidthSizePolicy=HeightSizePolicy=SizePolicy.Fixed;
